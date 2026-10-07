@@ -7,6 +7,7 @@ import {
   SHOW_RECIPES,
 } from '@/app/config';
 import { ABSOLUTE_PATH_HOME_IMAGE } from '@/app/path';
+import { cameraFromPhoto, formatCameraText } from '@/camera';
 import { formatDate, formatDateFromPostgresString } from '@/utility/date';
 import {
   formatAperture,
@@ -22,6 +23,7 @@ import { FujifilmRecipe } from '@/platforms/fujifilm/recipe';
 import { PhotoUpdateStatus, generatePhotoUpdateStatus } from './update';
 import { AppTextState } from '@/i18n/state';
 import { PhotoColorData } from './color/client';
+import { Place } from '@/place';
 
 // INFINITE SCROLL: FULL
 export const INFINITE_SCROLL_FULL_INITIAL =
@@ -50,6 +52,8 @@ export const MAX_PHOTO_UPLOAD_SIZE_IN_BYTES = 50_000_000;
 
 // Core EXIF data
 export interface PhotoExif {
+  width?: number
+  height?: number
   aspectRatio: number
   make?: string
   model?: string
@@ -84,6 +88,7 @@ export interface PhotoDbInsert extends PhotoExif {
   tags?: string[]
   recipeTitle?: string
   locationName?: string
+  location?: Place
   colorData?: string
   colorSort?: number
   priorityOrder?: number
@@ -374,10 +379,24 @@ export const shouldShowFilmDataForPhoto = (photo: Photo) =>
 export const shouldShowExifDataForPhoto = (photo: Photo) =>
   SHOW_EXIF_DATA && photoHasExifData(photo);
 
+/** EXIF line used by photo OG images and shared photo hovers. */
+export const ogCaptionForPhoto = (photo: Photo) =>
+  [
+    photo.model
+      ? formatCameraText(cameraFromPhoto(photo), 'short')
+      : undefined,
+    photo.focalLengthFormatted,
+    photo.fNumberFormatted,
+    photo.isoFormatted,
+  ]
+    .join(' ')
+    .trim();
+
+/** Text fields searched by SQL `ILIKE` on
+ * `title`/`caption`/`semantic_description`. */
 export const getKeywordsForPhoto = (photo: Photo) =>
-  (photo.caption ?? '').split(' ')
-    .concat((photo.semanticDescription ?? '').split(' '))
-    .filter(Boolean)
+  [photo.title, photo.caption, photo.semanticDescription]
+    .filter((keyword): keyword is string => Boolean(keyword))
     .map(keyword => keyword.toLocaleLowerCase());
 
 export const downloadFileNameForPhoto = (photo: Photo) =>

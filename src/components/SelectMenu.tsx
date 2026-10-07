@@ -19,6 +19,7 @@ export default function SelectMenu({
   tabIndex = 0,
   error,
   readOnly,
+  openOnLoad,
   children,
 }: {
   id?: string
@@ -31,11 +32,13 @@ export default function SelectMenu({
   tabIndex?: number
   error?: string
   readOnly?: boolean
+  openOnLoad?: boolean
   children?: ReactNode
 }) {
   const ARIA_ID_SELECT_OPTIONS = `select-options-${name}`;
 
   const ref = useRef<HTMLDivElement>(null);
+  const refCombobox = useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number>();
@@ -55,9 +58,19 @@ export default function SelectMenu({
     }
   }, [readOnly]);
 
+  useEffect(() => {
+    if (openOnLoad) {
+      const timeout = setTimeout(() => {
+        refCombobox.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [openOnLoad]);
+
   // Setup keyboard listener
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
+      if (readOnly) { return; }
       // Keys which always trap focus
       switch (e.key) {
         case 'ArrowDown':
@@ -123,6 +136,7 @@ export default function SelectMenu({
     options,
     selectedOptionIndex,
     onChange,
+    readOnly,
   ]);
 
   useEffect(() => {
@@ -138,6 +152,8 @@ export default function SelectMenu({
   return (
     <div ref={ref} className={className}>
       <div
+        ref={refCombobox}
+        id={id}
         tabIndex={tabIndex}
         className={clsx(
           'cursor-pointer control pl-1.5 py-2',
@@ -147,8 +163,8 @@ export default function SelectMenu({
           Boolean(error) && 'error',
           readOnly && 'disabled-select',
         )}
-        onMouseDown={() => setIsOpen(o => !o)}
-        onFocus={() => setIsOpen(true)}
+        onMouseDown={() => !readOnly && setIsOpen(o => !o)}
+        onFocus={() => !readOnly && setIsOpen(true)}
         onBlur={e => {
           if (e.relatedTarget && !ref.current?.contains(e.relatedTarget)) {
             setIsOpen(false);
@@ -158,14 +174,17 @@ export default function SelectMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={isOpen ? ARIA_ID_SELECT_OPTIONS : undefined}
+        aria-disabled={readOnly || undefined}
         role="combobox"
       >
-        {children ?? <div className="flex items-center w-full">
+        {children ?? <div className="flex items-center w-full min-w-0">
           <div className="grow min-w-0">
             <SelectMenuOption
-              className="text-lg"
+              className={clsx(selectedOption
+                ? 'text-lg'
+                : 'text-[14px] text-dim')}
               value={value}
-              label={selectedOption?.label}
+              label={selectedOption?.label ?? defaultOptionLabel}
               accessoryStart={selectedOption?.accessoryStart}
             />
           </div>
@@ -176,7 +195,7 @@ export default function SelectMenu({
             )}
           />
         </div>}
-        <input id={id} type="hidden" name={name} value={value} />
+        <input type="hidden" name={name} value={value} />
       </div>
       <div className="relative">
         {isOpen &&
@@ -196,8 +215,6 @@ export default function SelectMenu({
               className="flex flex-col gap-1"
               fadeSize={16}
             >
-              {defaultOptionLabel &&
-                <SelectMenuOption value="" label={defaultOptionLabel} />}
               {options.map((option, index) =>
                 <SelectMenuOption
                   key={option.value}

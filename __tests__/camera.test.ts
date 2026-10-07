@@ -1,5 +1,21 @@
-import { Camera, formatCameraText } from '@/camera';
+import {
+  Camera,
+  CameraWithMeta,
+  convertCameraMakesForForm,
+  convertCameraModelsForForm,
+  createCameraKey,
+  formatCameraText,
+} from '@/camera';
+import { getCameraBrand } from '@/camera/brand';
 import { MAKE_SONY } from '@/platforms/sony';
+import { parameterize } from '@/utility/string';
+
+const cameraWithMeta = (camera: Camera, count: number): CameraWithMeta => ({
+  cameraKey: createCameraKey(camera),
+  camera,
+  count,
+  lastModified: new Date(),
+});
 
 const APPLE     : Camera = { make: 'Apple', model: 'iPhone 11 Pro' };
 const APPLE_01  : Camera = { make: 'Apple', model: 'iPhone 11' };
@@ -74,11 +90,84 @@ describe('Camera', () => {
     expect(formatCameraText(RICOH, 'short')).toBe('GR III');
     expect(formatCameraText(NIKON, 'short')).toBe('D7000');
   });
+  it('recognizes camera brands from make', () => {
+    expect(getCameraBrand('FUJIFILM')).toBe('fujifilm');
+    expect(getCameraBrand('Fujifilm')).toBe('fujifilm');
+    expect(getCameraBrand('NIKON CORPORATION')).toBe('nikon');
+    expect(getCameraBrand('Nikon Corporation')).toBe('nikon');
+    expect(getCameraBrand('Canon')).toBe('canon');
+    expect(getCameraBrand('Canon Inc.')).toBe('canon');
+    expect(getCameraBrand('LEICA CAMERA AG')).toBe('leica');
+    expect(getCameraBrand('Leica Camera AG')).toBe('leica');
+    expect(getCameraBrand('HASSELBLAD')).toBe('hasselblad');
+    expect(getCameraBrand('Hasselblad')).toBe('hasselblad');
+    expect(getCameraBrand('Panasonic')).toBe('panasonic');
+    expect(getCameraBrand('LUMIX')).toBe('panasonic');
+    expect(getCameraBrand('SONY')).toBe('sony');
+    expect(getCameraBrand('Sony')).toBe('sony');
+    expect(getCameraBrand('RICOH IMAGING COMPANY, LTD.'))
+      .toBeUndefined();
+    expect(getCameraBrand('Apple')).toBeUndefined();
+    expect(getCameraBrand(undefined)).toBeUndefined();
+  });
   it('formats Sony cameras', () => {
     Object.entries(SONY_MODELS).forEach(([model, expected]) => {
       const camera = { make: MAKE_SONY, model };
       expect(formatCameraText(camera, 'medium'))
         .toBe(`${MAKE_SONY} ${expected}`.toLocaleUpperCase());
     });
+  });
+  it('normalizes camera identity regardless of casing', () => {
+    const majority: Camera = { make: 'Canon', model: 'Canon EOS R6 Mk II' };
+    const variant: Camera = { make: 'Canon', model: 'Canon EOS R6 MK II' };
+    expect(parameterize(variant.model))
+      .toBe(parameterize(majority.model));
+    expect(createCameraKey(variant))
+      .toBe(createCameraKey(majority));
+  });
+});
+
+describe('Camera form options', () => {
+  it('offers no options when no cameras exist', () => {
+    expect(convertCameraMakesForForm()).toStrictEqual([]);
+    expect(convertCameraModelsForForm([])).toStrictEqual([]);
+  });
+  it('dedupes makes across models, summing photo counts', () => {
+    const cameras = [
+      cameraWithMeta(APPLE, 3),
+      cameraWithMeta(APPLE_02, 2),
+      cameraWithMeta(FUJIFILM, 1),
+    ];
+    expect(convertCameraMakesForForm(cameras)).toStrictEqual([
+      {
+        value: 'Apple',
+        annotation: '× 5',
+        annotationAria: 'found in 5 photos',
+      },
+      {
+        value: 'Fujifilm',
+        annotation: '× 1',
+        annotationAria: 'found in 1 photo',
+      },
+    ]);
+  });
+  it('sorts unique models', () => {
+    const cameras = [
+      cameraWithMeta(FUJIFILM, 1),
+      cameraWithMeta(APPLE_02, 2),
+      cameraWithMeta(APPLE, 3),
+    ];
+    expect(convertCameraModelsForForm(cameras).map(({ value }) => value))
+      .toStrictEqual(['iPhone 11 Pro', 'iPhone 15 Pro Max', 'X-T5']);
+  });
+  it('ignores cameras missing a make or model', () => {
+    const cameras = [
+      cameraWithMeta({ make: '', model: 'Untitled' }, 2),
+      cameraWithMeta({ make: 'Canon', model: '' }, 1),
+    ];
+    expect(convertCameraMakesForForm(cameras).map(({ value }) => value))
+      .toStrictEqual(['Canon']);
+    expect(convertCameraModelsForForm(cameras).map(({ value }) => value))
+      .toStrictEqual(['Untitled']);
   });
 });

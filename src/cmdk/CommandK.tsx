@@ -3,8 +3,11 @@ import { getPhotosMetaCached } from '@/photo/cache';
 import { photoQuantityText } from '@/photo';
 import { getDataForCategoriesCached } from '@/category/cache';
 import { getAppText } from '@/i18n/state/server';
+import { HAS_DATABASE } from '@/app/config';
 
 export default async function CommandK() {
+  if (!HAS_DATABASE) { return null; }
+
   const [
     count,
     categories,
@@ -20,6 +23,7 @@ export default async function CommandK() {
   return (
     <CommandKClient
       {...categories}
+      isInEmptyState={!count}
       footer={photoQuantityText(count, appText, false)}
     />
   );

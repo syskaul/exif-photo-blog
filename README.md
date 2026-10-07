@@ -1,5 +1,20 @@
 # 📷 `EXIF` Photo Blog
 
+https://github.com/sambecker/exif-photo-blog/assets/169298/4253ea54-558a-4358-8834-89943cfbafb4
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/sambecker-pro/clone?demo-description=Store%20photos%20with%20original%20camera%20data&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F39rys245Px3FVBGRJNYEON%2Fbf68d5c052bda9e9e5bec21878764bc3%2Fimage.png&demo-title=Photo%20Blog&demo-url=https%3A%2F%2Fphotos.sambecker.com&from=templates&project-name=Photo%20Blog&repository-name=exif-photo-blog&repository-url=https%3A%2F%2Fgithub.com%2Fsambecker%2Fexif-photo-blog&skippable-integrations=1&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D&teamCreateStatus=hidden)
+
+🎬&nbsp;&nbsp;Example sites
+-
+- [photos.sambecker.com](https://photos.sambecker.com)
+- [birdnerd.photo](https://birdnerd.photo)
+- [booshie.photo](https://booshie.photo)
+- [photos.sconetto.me](https://photos.sconetto.me)
+- [photos.dteles.dev](https://photos.dteles.dev)
+- [jahidshots.com](https://jahidshots.com)
+
+_Submit your site as an example by [opening an issue](https://github.com/sambecker/exif-photo-blog/issues/new?template=example_site_submission.md)_
+
 ✨&nbsp;&nbsp;Features
 -
 - Built-in auth
@@ -15,12 +30,26 @@
 
 <img src="/readme/og-image-share.png" alt="OG Image Preview" width=600 />
 
+📋&nbsp;&nbsp;Contents
+-
+- [Installation](#installation)
+- [Receiving updates](#receiving-updates)
+- [Local development](#local-development)
+- [Customization](#customization)
+- [Analytics](#analytics)
+- [Alternate storage providers](#alternate-storage-providers)
+- [Alternate database providers (experimental)](#alternate-database-providers-experimental)
+- [I18N](#i18n)
+- [FAQ](#faq)
+
 🛠️&nbsp;&nbsp;Installation
 -
 ### 1. Deploy to Vercel
 
-1. Click [Deploy](https://vercel.com/new/clone?demo-title=Photo+Blog&demo-description=Store+photos+with+original+camera+data&demo-url=https%3A%2F%2Fphotos.eshaankaul.com&demo-image=https%3A%2F%2Fphotos.eshaankaul.com%2Ftemplate-image-tight&project-name=Photo+Blog&repository-name=photos.eshaankaul.com&repository-url=https%3A%2F%2Fgithub.com%2Fsyskaul%2Fexif-photo-blog&from=templates&skippable-integrations=1&teamCreateStatus=hidden&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D)
-2. Add required storage ([Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres/quickstart#create-a-postgres-database) + [Vercel Blob](https://vercel.com/docs/storage/vercel-blob/quickstart#create-a-blob-store)) as part of template installation
+1. Click [Deploy](https://vercel.com/new/clone?demo-title=Photo+Blog&demo-description=Store+photos+with+original+camera+data&demo-url=https%3A%2F%2Fphotos.sambecker.com&demo-image=https%3A%2F%2Fphotos.sambecker.com%2Ftemplate-image-tight&project-name=Photo+Blog&repository-name=exif-photo-blog&repository-url=https%3A%2F%2Fgithub.com%2Fsambecker%2Fexif-photo-blog&from=templates&skippable-integrations=1&teamCreateStatus=hidden&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D)
+2. Add required storage ([Vercel Postgres](https://vercel.com/docs/postgres) + [Vercel Blob](https://vercel.com/docs/vercel-blob)) as part of template installation
+   - _When creating new blob store, make sure to configure as "public"_
+   - _Preferred postgres provider: Neon, from Vercel Marketplace_
 3. Configure environment variable for production domain in project settings
    - `NEXT_PUBLIC_DOMAIN` (e.g., photos.domain.com—used in absolute urls and seen in navigation if no explicit nav title is set)
 
@@ -43,7 +72,7 @@
 
 🔄&nbsp;&nbsp;Receiving updates
 -
-If you don't plan to change the code, consider [forking](https://github.com/syskaul/exif-photo-blog/fork) this repo to easily receive future updates. If you've already set up your project on Vercel see these [migration instructions](#how-do-i-receive-template-updates).
+If you don't plan to change the code, or don't mind making your updates public, consider [forking](https://github.com/sambecker/exif-photo-blog/fork) this repo to easily receive future updates. If you've already set up your project on Vercel see these [migration instructions](#how-do-i-receive-template-updates).
 
 💻&nbsp;&nbsp;Local development
 -
@@ -52,6 +81,8 @@ If you don't plan to change the code, consider [forking](https://github.com/sysk
 3. If necessary, install [Vercel CLI](https://vercel.com/docs/cli#installing-vercel-cli) and authenticate by running `vercel login`
 4. Run `vercel link` to connect CLI to your project
 5. Run `vercel dev` to start dev server with Vercel-managed environment variables
+
+During local development, visit `/admin/configuration` to review required setup and optional integrations without signing in. This development-only access is not available in production.
 
 See FAQ for [limitations of local development](#can-i-work-locally-without-access-to-an-image-storage-provider)
 
@@ -63,8 +94,34 @@ See FAQ for [limitations of local development](#can-i-work-locally-without-acces
 - `NEXT_PUBLIC_META_DESCRIPTION` (seen in search results)
 - `NEXT_PUBLIC_NAV_TITLE` (seen in top-right navigation, defaults to domain when not configured)
 - `NEXT_PUBLIC_NAV_CAPTION` (seen in top-right navigation, beneath title)
-- `NEXT_PUBLIC_PAGE_ABOUT` (seen in grid sidebar—accepts rich formatting tags: `<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<br>`)
+- `NEXT_PUBLIC_SIDEBAR_TEXT` (seen in grid sidebar—accepts rich formatting tags: `<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<br>`)
 - `NEXT_PUBLIC_DOMAIN_SHARE` (seen in share modals where a shorter url may be desirable)
+
+### Analytics
+
+Set `NEXT_PUBLIC_MIXPANEL_TOKEN` to the project token in `.env.local` for local
+development and in the deployment environment for production. The token is a
+public project identifier used by the browser SDK; do not hardcode it in
+source files. This setup uses the same Mixpanel project in every environment,
+so development and production events will be mixed.
+
+Mixpanel remains off until a visitor accepts the analytics prompt. The footer's
+**Privacy settings** control lets visitors change their choice later. The
+implementation records:
+
+- `photo_detail_viewed`: `photo_id`, optional `photo_title`, and
+  `view_context`
+- `photo_share_action`: `photo_id`, optional `photo_title`, and `share_method`
+
+Automatic page tracking and autocapture are disabled. Events use a
+pseudonymous browser identifier; URL/referrer/UTM and browser/device/screen
+properties are excluded, and IP-based geolocation is disabled. Private-photo
+views, admin activity, and camera/exposure/location metadata are not tracked.
+
+Before accepting consent for the first time, verify the project uses the
+Simplified API and the `America/New_York` reporting timezone in Mixpanel
+Project Settings. After deploying, accept analytics and confirm both events in
+Mixpanel Live View.
 
 ### Performance
 > ⚠️ Enabling may result in increased project usage. See FAQ for static optimization [troubleshooting hints](#why-do-production-deployments-fail-when-static-optimization-is-enabled).
@@ -75,17 +132,17 @@ See FAQ for [limitations of local development](#can-i-work-locally-without-acces
 - `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORY_OG_IMAGES = 1` enables static optimization for photo category (`tag/[tag]`, `shot-on/[make]/[model]`, etc.) OG images, i.e., renders images at build time
 - `NEXT_PUBLIC_PRESERVE_ORIGINAL_UPLOADS = 1` prevents photo uploads being compressed before storing
 - `NEXT_PUBLIC_IMAGE_QUALITY = 1-100` controls the quality of large photos
-- `NEXT_PUBLIC_BLUR_DISABLED = 1` prevents image blur data being stored and displayed (potentially useful for limiting Postgres usage)
+- `NEXT_PUBLIC_DISABLE_BLUR = 1` prevents image blur data being stored and displayed (potentially useful for limiting Postgres usage)
 
-### AI text generation
+### AI content generation
 
-To auto-generate text descriptions of photo:
+To enable AI-powered color analysis and text descriptions of photos, configure a provider. Vercel AI Gateway is the recommended path; direct OpenAI (or an OpenAI-compatible endpoint) is available as an alternate. If both variables are set, `OPENAI_SECRET_KEY` takes precedence.
 
-1. Setup OpenAI
-   - Create [OpenAI](https://openai.com) account and fund it
-   - Setup usage limits to avoid unexpected charges (_recommended_)
-   - Set `OPENAI_BASE_URL` in order to use alternate OpenAI-compatible providers (experimental)
-2. Generate API key and store in environment variable `OPENAI_SECRET_KEY` (enable Responses API write access if customizing permissions)
+#### Vercel AI Gateway
+
+1. Set `AI_GATEWAY_MODEL` to a [supported model](https://vercel.com/docs/ai-gateway/models-and-providers) using the `creator/model-name` format, e.g. `openai/gpt-5.2` — the model must support image input (vision)
+2. If deployed on Vercel, no API key is required — [authentication happens automatically via OIDC](https://vercel.com/docs/ai-gateway#authentication)
+   - Outside Vercel (or for local development without `vercel env pull`), generate an API key from the [Vercel AI Gateway dashboard](https://vercel.com/docs/ai-gateway) and store it in `AI_GATEWAY_API_KEY`
 3. Add [rate limiting](#rate-limiting) (_recommended_)
 4. Configure auto-generated fields (optional)
    - Set which text fields auto-generate when uploading a photo by storing a comma-separated list, e.g., `AI_TEXT_AUTO_GENERATED_FIELDS = title,semantic`
@@ -97,16 +154,34 @@ To auto-generate text descriptions of photo:
      - `semantic` (default)
      - `none`
 
-### Location services
+#### Alternate: Direct OpenAI (or OpenAI-compatible)
 
-To add location meta to entities like albums:
+1. Setup OpenAI
+   - Create [OpenAI](https://openai.com) account and fund it ([see thread](https://github.com/sambecker/exif-photo-blog/issues/110) if you're having issues)
+   - Setup usage limits to avoid unexpected charges (_recommended_)
+2. Generate API key and store in environment variable `OPENAI_SECRET_KEY` (enable Responses API write access if customizing permissions)
+   - Setting `OPENAI_SECRET_KEY` overrides a configured `AI_GATEWAY_MODEL`
+   - Set `OPENAI_MODEL` to choose a specific model (set to 'compatible' to use gpt-4o)
+3. URL configuration (optional)
+   - Set `OPENAI_BASE_URL` to use alternate OpenAI-compatible providers
+4. Add [rate limiting](#rate-limiting) (_recommended_)
+5. Configure auto-generated fields (optional, see above for instructions)
 
-1. Setup Google Places API
+### Location
+
+To add location meta to entities like photos and albums:
+
+1. Setup Google Places/Geocoding API
    - [Create Google Cloud project](https://console.cloud.google.com/projectcreate) if necessary
+   - Enable "Places API (new)" (for finding places of interest)
+   - Enable "Geocoding API" (for reverse lookup based on lat/long coordinates)
    - Select [Create credentials](https://console.cloud.google.com/apis/credentials) and choose "API key"
-   - Choose "Restrict key" and select "Places API (new)"
-2. Store API key in `GOOGLE_PLACES_API_KEY`
+   - Choose "Restrict key" and select "Places API (new)" + "Geocoding API"
+2. Store API key in `GOOGLE_PLACES_GEOCODING_API_KEY`
 3. Add [rate limiting](#rate-limiting) (_recommended_)
+
+- `NEXT_PUBLIC_GEO_PRIVACY = 1` disables collection/display of location-based data (⚠️ re-compresses uploaded images in order to remove GPS information)
+- `DISABLE_AUTO_GENERATE_LOCATIONS = 1` to disables auto-generation of location data
 
 ### Rate limiting
 
@@ -153,47 +228,38 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 ### Display
 - `NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS = 1` hides keyboard shortcut hints in areas like the main nav, and previous/next photo links
 - `NEXT_PUBLIC_HIDE_EXIF_DATA = 1` hides EXIF data in photo details and OG images (potentially useful for portfolios, which don't focus on photography)
+- `NEXT_PUBLIC_ALWAYS_SHOW_EXPOSURE_COMP = 1` displays exposure compensation even when it's 0ev
 - `NEXT_PUBLIC_HIDE_ZOOM_CONTROLS = 1` hides fullscreen photo zoom controls
 - `NEXT_PUBLIC_HIDE_TAKEN_AT_TIME = 1` hides taken at time from photo meta
-- `NEXT_PUBLIC_HIDE_REPO_LINK = 1` removes footer link to repo
+- `NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION = 1` hides "made with exif-photo-blog" references
 
 ### Grid
 - `NEXT_PUBLIC_GRID_HOMEPAGE = 1` shows grid layout on homepage
+- `NEXT_PUBLIC_MASONRY_GRID = 1` shows photo grid homepage in masonry layout (keeping photo aspect ratios), also known as 'Pinterest style' or 'grid-lanes'
 - `NEXT_PUBLIC_GRID_ASPECT_RATIO = 1.5` sets aspect ratio for grid tiles (defaults to `1`—setting to `0` removes the constraint)
 - `NEXT_PUBLIC_SHOW_LARGE_THUMBNAILS = 1` ensures large thumbnails on photo grid views (if not configured, density is based on aspect ratio)
 
 ### Design
 - `NEXT_PUBLIC_DEFAULT_THEME = light | dark` sets preferred initial theme (defaults to `system` when not configured)
+- `NEXT_PUBLIC_DISABLE_UPPERCASE_TITLES = 1` prevents photo titles and captions displaying in uppercase
 - `NEXT_PUBLIC_MATTE_PHOTOS = 1` constrains the size of each photo, and displays a surrounding border, potentially useful for photos with tall aspect ratios (colors can be customized via `NEXT_PUBLIC_MATTE_COLOR` + `NEXT_PUBLIC_MATTE_COLOR_DARK`)
+- `NEXT_PUBLIC_TINT_FOLDERS = 1` shows tinted folders on /library page
+- `NEXT_PUBLIC_HIGH_DENSITY_PREVIEWS = 1` shows up to 6 photos in category image hovers and OG images (max defaults to 5)
+- `NEXT_PUBLIC_OG_TEXT_ALIGNMENT = BOTTOM` keeps OG image text bottom aligned (default is top)
 
 ### Settings
-- `NEXT_PUBLIC_GEO_PRIVACY = 1` disables collection/display of location-based data (⚠️ re-compresses uploaded images in order to remove GPS information)
 - `NEXT_PUBLIC_ALLOW_PUBLIC_DOWNLOADS = 1` enables public photo downloads for all visitors (⚠️ may result in increased bandwidth usage)
 - `NEXT_PUBLIC_SOCIAL_NETWORKS`
-  - Comma-separated list of social networks to show in share modal
+  - Comma-separated list of share modal options
   - Accepted values:
     - `x` (default)
     - `threads`
     - `facebook`
     - `linkedin`
+    - `qrcode`
     - `all`
     - `none`
 - `NEXT_PUBLIC_SITE_FEEDS = 1` enables feeds at `/feed.json` and `/rss.xml`
-- `NEXT_PUBLIC_OG_TEXT_ALIGNMENT = BOTTOM` keeps OG image text bottom aligned (default is top)
-
-### Scripts & Analytics
-- Web Analytics
-  1. Open project on Vercel
-  2. Click "Analytics" tab
-  3. Follow "Enable Web Analytics" instructions (`@vercel/analytics` already included)
-- Speed Insights
-  1. Open project on Vercel
-  2. Click "Speed Insights" tab
-  3. Follow "Enable Speed Insights" instructions (`@vercel/speed-insights` already included)
-- `PAGE_SCRIPT_URLS`
-  - comma-separated list of URLs to be added to the bottom of the body tag via "next/script"
-  - urls must begin with 'https'
-  - ⚠️ this will invoke arbitrary script execution on every page—use with caution
 
 ### Debugging
 - `DISABLE_DEBUG_OUTPUTS = 1`
@@ -202,7 +268,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 
 ## Alternate storage providers
 
-Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be used at a time. Ideally, this is configured before photos are uploaded. If you have multiple adapters, you can set one as preferred by storing `aws-s3`, `cloudflare-r2`, `minio`, or `vercel-blob` in `NEXT_PUBLIC_STORAGE_PREFERENCE`. See [FAQ](#will-there-be-support-for-image-storage-providers-beyond-vercel-aws-and-cloudflare) regarding unsupported providers.
+Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be used at a time. Ideally, this is configured before photos are uploaded (see [Issue #34](https://github.com/sambecker/exif-photo-blog/issues/34) for migration considerations). If you have multiple adapters, you can set one as preferred by storing `aws-s3`, `cloudflare-r2`, `minio`, or `vercel-blob` in `NEXT_PUBLIC_STORAGE_PREFERENCE`. See [FAQ](#will-there-be-support-for-image-storage-providers-beyond-vercel-aws-and-cloudflare) regarding unsupported providers.
 
 ### Cloudflare R2
 
@@ -292,7 +358,7 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
 
 MinIO is a self-hosted S3-compatible object storage server.
 
-### 1. Server/bucket setup
+#### 1. Server/bucket setup
 
 First, install and deploy the MinIO server, then create a bucket with public read access.
 
@@ -334,7 +400,7 @@ First, install and deploy the MinIO server, then create a bucket with public rea
     - `NEXT_PUBLIC_MINIO_PORT`: (optional)
     - `NEXT_PUBLIC_MINIO_DISABLE_SSL`: Set to `1` to disable SSL (defaults to HTTPS)
 
-### 2. Create user with restricted permissions
+#### 2. Create user with restricted permissions
 
 Create a dedicated user and a policy that grants permission to manage objects within your `BUCKET_NAME`.
 
@@ -392,20 +458,23 @@ Partial internationalization (for non-admin, user-facing text) provided for a ha
 - `bd-bn`
 - `en-gb`
 - `en-us`
+- `es-es`
+- `hi-in`
 - `id-id`
 - `pt-br`
 - `pt-pt`
 - `tr-tr`
+- `vi-vn`
 - `zh-cn`
 
-To add support for a new language, open a PR following the instructions in [`/src/i18n/index.ts`](https://github.com/syskaul/exif-photo-blog/blob/main/src/i18n/index.ts), using [`en-us.ts`](https://github.com/syskaul/exif-photo-blog/blob/main/src/i18n/locales/en-us.ts) as reference.
+To add support for a new language, open a PR following instructions in [/src/i18n/index.ts](https://github.com/sambecker/exif-photo-blog/blob/main/src/i18n/index.ts), using [en-us.ts](https://github.com/sambecker/exif-photo-blog/blob/main/src/i18n/locales/en-us.ts) as reference.
 
-Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`, `pt-pt`), [@brandnholl](https://github.com/brandnholl) (`id-id`), [@TongEc](https://github.com/TongEc) (`zh-cn`), [@xahidex](https://github.com/xahidex) (`bd-bn`, `hi-in`), [@mehmetabak](https://github.com/mehmetabak) (`tr-tr`), [@simondeeley](https://github.com/simondeeley) (`en-gb`)
+Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`, `pt-pt`, `es-es`), [@brandnholl](https://github.com/brandnholl) (`id-id`), [@TongEc](https://github.com/TongEc) (`zh-cn`), [@xahidex](https://github.com/xahidex) (`bd-bn`, `hi-in`), [@mehmetabak](https://github.com/mehmetabak) (`tr-tr`), [@simondeeley](https://github.com/simondeeley) (`en-gb`), [@jasonquache](https://github.com/jasonquache) (`vi-vn`)
 
 📖&nbsp;&nbsp;FAQ
 -
 #### How do I receive template updates?
-> For forked repos, click "Code," then "Update branch" from the main repo page. If you originally cloned the code, you can [create a fork](https://github.com/syskaul/exif-photo-blog/fork) from GitHub, then update your Git connection from your Vercel project settings.
+> For forked repos, click "Code," then "Update branch" from the main repo page. If you originally cloned the code, you can [create a fork](https://github.com/sambecker/exif-photo-blog/fork) from GitHub, then update your Git connection from your Vercel project settings. Once you've done this, you may need to go to your project deployments page, click •••, select "Create deployment," and choose `main`.
 
 #### How do I edit multiple photos?
 > In the admin menu, select "Batch edit ..." From there, you can perform bulk tag, favorite, and delete actions.
@@ -414,7 +483,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > This template statically optimizes core views such as `/` and `/grid` to minimize visitor load times. Consequently, when photos are added, edited, or removed, it might take several minutes for those changes to propagate. If it seems like a change is not taking effect, try navigating to `/admin/configuration` and clicking "Clear Cache."
 
 #### Why do production deployments fail when static optimization is enabled?
-> There have been reports that having large photos (over 30MB), or a CDN, e.g., Cloudflare in front of Vercel, may destabilize static optimization.
+> There have been reports ([#184](https://github.com/sambecker/exif-photo-blog/issues/184#issuecomment-2629474045) + [#185](https://github.com/sambecker/exif-photo-blog/issues/185#issuecomment-2629478570)) that having large photos (over 30MB), or a CDN, e.g., Cloudflare in front of Vercel, may destabilize static optimization.
 
 #### Why don't my older photos look right?
 > As the template has evolved, EXIF fields (such as lenses) have been added, blur data is generated through a different method, and AI/privacy features have been added. In order to bring older photos up to date, either click the 'sync' button next to a photo or go to photo updates (`/admin/photos/updates`) to sync all photos that need updates.
@@ -435,10 +504,10 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > Navigate to `/admin/configuration` and click "Clear Cache."
 
 #### I'm seeing server-side runtime errors when loading a page after updating my fork. What do I do?
-> Navigate to `/admin/configuration` and click "Clear Cache." If this doesn't help, [open an issue](https://github.com/syskaul/exif-photo-blog/issues/new).
+> Navigate to `/admin/configuration` and click "Clear Cache." If this doesn't help, [open an issue](https://github.com/sambecker/exif-photo-blog/issues/new).
 
 #### Why can’t I upload HEIC files?
-> This template relies on `sharp` to manipulate images and `next/image` to serve them, neither of which currently support HEIC (https://github.com/vercel/next.js/discussions/30043 + https://github.com/lovell/sharp/issues/3981). Fortunately, you can still upload HEIC files directly from native share controls on Apple platforms and they will automatically be converted to JPG upon upload. If you think you have a viable HEIC strategy, feel free to open a PR.
+> This template relies on `sharp` to manipulate images and `next/image` to serve them, neither of which currently support HEIC (https://github.com/vercel/next.js/discussions/30043 + https://github.com/lovell/sharp/issues/3981). Fortunately, you can still upload HEIC files directly from native share controls on Apple platforms and they will automatically be converted to JPG upon upload. If you think you have a viable HEIC strategy, feel free to open a PR. See https://github.com/sambecker/exif-photo-blog/issues/229 for discussion.
 
 #### Why are my thumbnails square?
 > Absent configuration, the default grid aspect ratio is `1`. `NEXT_PUBLIC_GRID_ASPECT_RATIO` can be set to any number (for instance, `1.5` for 3:2 images) or ignored by setting to `0`.
@@ -462,7 +531,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > The default timeout for processing multiple uploads is 60 seconds (the limit for Hobby accounts). This can be extended to 5 minutes on Pro accounts by setting `maxDuration = 300` in `src/app/admin/uploads/page.tsx`.
 
 #### I've added my OpenAI key but can't seem to make it work. Why am I seeing connection errors?
-> You may need to pre-purchase credits before accessing the OpenAI API. If you've customized key permissions, make sure write access to the Responses API is enabled.
+> You may need to pre-purchase credits before accessing the OpenAI API. See [#110](https://github.com/sambecker/exif-photo-blog/issues/110) for discussion. If you've customized key permissions, make sure write access to the Responses API is enabled.
 
 #### How do I generate AI text for preexisting photos?
 > Once AI text generation is configured, photos missing text will show up in photo updates (`/admin/photos/updates`).
@@ -474,7 +543,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > At this time, an external storage provider is necessary in order to develop locally. If you have a strategy to propose which allows files to be locally uploaded and served to `next/image` in away that mirrors an external storage provider for debugging purposes, please open a PR.
 
 #### Can this template be self-hosted?
-> Possibly. See the [repository issues](https://github.com/syskaul/exif-photo-blog/issues) for discussion around image hosting and docker usage.
+> Possibly. See [#116](https://github.com/sambecker/exif-photo-blog/issues/116) and [#132](https://github.com/sambecker/exif-photo-blog/issues/132) for discussion around image hosting and docker usage.
 
 #### Why am I seeing many merge conflicts when syncing my fork?
-> Previous versions of this template stored Next.js "App Router" files in `/src`, and app-level functionality in `/src/site`. If you've made customizations and are having difficulty merging updates, consider moving `/src/app` files to `/`, and renaming `src/site` to `/src/app`. Other structural changes include moving `tailwind.css` and `middleware.ts` to `/`.
+> Previous versions of this template stored Next.js "App Router" files in `/src`, and app-level functionality in `/src/site`. If you've made customizations and are having difficulty merging updates, consider moving `/src/app` files to `/`, and renaming `src/site` to `/src/app`. Other structural changes include moving `tailwind.css` and `middleware.ts` to `/`. Additionally, it may be helpful to review [PR #195](https://github.com/sambecker/exif-photo-blog/pull/195) for an overview of the most significant changes.

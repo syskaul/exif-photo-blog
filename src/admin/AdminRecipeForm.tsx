@@ -64,6 +64,7 @@ export default function AdminRecipeForm({
         <SubmitButtonWithStatus
           disabled={!isFormValid}
           onFormSubmit={invalidateSwr}
+          primary
         >
           Update
         </SubmitButtonWithStatus>

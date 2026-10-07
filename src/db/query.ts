@@ -1,8 +1,9 @@
-import { migrationForError } from './migration';
+import { migrateAboutTableToLibrary, migrationForError } from './migration';
 import { createPhotosTable } from '@/photo/query';
 import sleep from '@/utility/sleep';
 import { ADMIN_SQL_DEBUG_ENABLED } from '@/app/config';
 import { createAlbumPhotoTable, createAlbumsTable } from '@/album/query';
+import { createLibraryTable } from '@/library/query';
 
 // Safe wrapper intended for most queries with JIT migration/table creation
 // Catches up to 3 migrations in older installations
@@ -54,12 +55,20 @@ export const safelyQuery = async <T>(
       await createPhotosTable();
       await createAlbumsTable();
       await createAlbumPhotoTable();
+      await createLibraryTable();
       result = await callback();
     } else if (/relation "albums" does not exist/i.test(e.message)) {
       // Create albums tables if they don't exist
       console.log('Creating albums tables ...');
       await createAlbumsTable();
       await createAlbumPhotoTable();
+      result = await callback();
+    } else if (/relation "library" does not exist/i.test(e.message)) {
+      // Rename legacy `about` table if present, otherwise create `library`
+      console.log('Creating library table ...');
+      await migrateAboutTableToLibrary();
+      // Fine to call since it's idempotent
+      await createLibraryTable();
       result = await callback();
     } else if (/endpoint is in transition/i.test(e.message)) {
       console.log(
@@ -75,11 +84,20 @@ export const safelyQuery = async <T>(
         );
         throw e;
       }
+    } else if (
+      !process.env.POSTGRES_URL &&
+      isDatabaseConnectionRefused(e)
+    ) {
+      // Template installs have no database. Callers catch this
+      // and render empty states. Skip the connection stack trace.
+      throw e;
     } else {
       // Avoid re-logging common errors on initial installation
       if (/connect ECONNREFUSED/i.test(e.message)) {
         console.log('Database connection error');
-      } else if (e.message !== 'The server does not support SSL connections') {
+      } else if (
+        e.message !== 'The server does not support SSL connections'
+      ) {
         console.log(`SQL query error (${queryLabel}): ${e.message}`, {
           error: e,
         });
@@ -100,4 +118,19 @@ export const safelyQuery = async <T>(
   }
 
   return result;
+};
+
+// Node reports a refused localhost connect (IPv4 and IPv6) as an
+// AggregateError whose message is empty and whose code is ECONNREFUSED.
+const isDatabaseConnectionRefused = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as {
+    message?: string
+    code?: string
+    errors?: unknown
+  };
+  if (candidate.code === 'ECONNREFUSED') return true;
+  if (/connect ECONNREFUSED/i.test(candidate.message ?? '')) return true;
+  return Array.isArray(candidate.errors) &&
+    candidate.errors.some(isDatabaseConnectionRefused);
 };

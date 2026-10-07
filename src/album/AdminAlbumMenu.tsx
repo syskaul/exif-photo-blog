@@ -1,5 +1,5 @@
 import MoreMenu from '@/components/more/MoreMenu';
-import { pathForAdminAlbumEdit } from '@/app/path';
+import { PARAM_REDIRECT, pathForAdminAlbumEdit } from '@/app/path';
 import { usePathname } from 'next/navigation';
 import { useAppText } from '@/i18n/state/client';
 import IconEdit from '@/components/icons/IconEdit';
@@ -26,11 +26,9 @@ export default function AdminAlbumMenu({
       sections={[{
         items: [{
           label: 'Edit',
-          icon: <IconEdit
-            size={15}
-            className="translate-y-[0.5px]"
-          />,
-          href: pathForAdminAlbumEdit(album),
+          icon: <IconEdit />,
+          href: pathForAdminAlbumEdit(album) +
+            `?${PARAM_REDIRECT}=${encodeURIComponent(path)}`,
         }],
       }, {
         items: [{

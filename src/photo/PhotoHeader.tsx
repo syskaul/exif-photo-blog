@@ -18,6 +18,7 @@ import ResponsiveText from '@/components/primitives/ResponsiveText';
 import { useAppState } from '@/app/AppState';
 import { GRID_GAP_CLASSNAME } from '@/components';
 import { useAppText } from '@/i18n/state/client';
+import { UPPERCASE_TITLES } from '@/app/config';
 
 export default function PhotoHeader({
   photos,
@@ -30,7 +31,7 @@ export default function PhotoHeader({
   count,
   dateRange,
   richContent,
-  hasAiTextGeneration,
+  hasAiContentGeneration,
   includeShareButton,
   ...categories
 }: {
@@ -44,7 +45,7 @@ export default function PhotoHeader({
   count?: number
   dateRange?: PhotoDateRangePostgres
   richContent?: ReactNode
-  hasAiTextGeneration: boolean
+  hasAiContentGeneration: boolean
   includeShareButton?: boolean
 } & PhotoSetCategory) {
   const { isGridHighDensity } = useAppState();
@@ -72,15 +73,18 @@ export default function PhotoHeader({
     <PhotoPrevNextActions {...{
       photo: selectedPhoto,
       photos,
-      hasAiTextGeneration,
+      hasAiContentGeneration,
       ...categories,
     }} />;
 
   const renderDateRange =
     <span className="text-dim uppercase text-right">
-      {start === end
-        ? start
-        : <>{end}<br />&ndash; {start}</>}
+      {start || end
+        ? start === end
+          ? start
+          : <>{end}<br />&ndash; {start}</>
+        // Keep the two-line date slot when a set has no photos
+        : <>&nbsp;<br />&nbsp;</>}
     </span>;
 
   const renderContentA = entity
@@ -95,7 +99,10 @@ export default function PhotoHeader({
       selectedPhoto !== undefined &&
         <PhotoLink
           photo={selectedPhoto}
-          className="uppercase font-bold truncate"
+          className={clsx(
+            'font-bold truncate',
+            UPPERCASE_TITLES && 'uppercase',
+          )}
         >
           {titleForPhoto(selectedPhoto, true)}
         </PhotoLink>);
@@ -124,7 +131,8 @@ export default function PhotoHeader({
         {renderBlock(<>
           {/* Content A: Filter Set or Photo Title */}
           <div className={clsx(
-            'inline-flex uppercase',
+            'inline-flex',
+            (headerType !== 'photo-detail' || UPPERCASE_TITLES) && 'uppercase',
             headerType === 'photo-set'
               ? isGridHighDensity
                 ? 'col-span-2 lg:col-span-3'

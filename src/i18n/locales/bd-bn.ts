@@ -1,7 +1,7 @@
-import { I18N } from '..';
+import { I18NLocale } from '..';
 export { bn as default } from 'date-fns/locale/bn';
 
-export const TEXT: I18N = {
+export const TEXT: I18NLocale = {
   photo: {
     photo: 'ছবি',
     photoPlural: 'ছবিগুলো',
@@ -43,11 +43,14 @@ export const TEXT: I18N = {
     recentPlural: 'সাম্প্রতিক',
     recentTitle: 'সাম্প্রতিক ছবি',
     recentSubhead: '{{distance}} আগে আপলোড হয়েছে',
+    queryTitle: '“{{query}}” এর সাথে মেলে এমন ছবি',
   },
   nav: {
     home: 'হোম',
     full: 'সম্পূর্ণ',
     grid: 'গ্রিড',
+    viewOptions: 'ভিউ অপশন',
+    library: 'লাইব্রেরি',
     admin: 'অ্যাডমিন',
     search: 'সার্চ',
     prev: 'পূর্ববর্তী',
@@ -55,8 +58,18 @@ export const TEXT: I18N = {
     next: 'পরবর্তী',
     nextShort: 'পরবর্তী',
   },
-  footer: {
-    madeWith: 'তৈরি হয়েছে',
+  library: {
+    titleDefault: 'এই সাইট সম্পর্কে',
+    updated: '{{distance}} আগে আপডেট হয়েছে',
+    photoCount: 'ছবির সংখ্যা',
+    firstPhoto: 'প্রথম ছবি',
+    topCamera: 'শীর্ষ ক্যামেরা',
+    topLens: 'শীর্ষ লেন্স',
+    topRecipe: 'শীর্ষ রেসিপি',
+    topFilm: 'শীর্ষ ফিল্ম',
+    recentAlbum: 'সাম্প্রতিক অ্যালবাম',
+    popularTag: 'জনপ্রিয় ট্যাগ',
+    popularPlace: 'জনপ্রিয় স্থান',
   },
   sort: {
     sort: 'সাজান',
@@ -82,6 +95,7 @@ export const TEXT: I18N = {
     searching: 'অনুসন্ধান হচ্ছে ...',
     noResults: 'কোনো ফলাফল পাওয়া যায়নি',
     pages: 'পৃষ্ঠাসমূহ',
+    found: '{{quantity}} দেখুন',
   },
   tooltip: {
     '35mm': '৩৫মিমি সমতুল্য',
@@ -90,12 +104,14 @@ export const TEXT: I18N = {
     recipeCopy: 'রেসিপি কপি করুন',
     download: 'মূল ফাইল ডাউনলোড করুন',
     sharePhoto: 'ছবি শেয়ার করুন',
+    sharePhotos: 'ছবিগুলো শেয়ার করুন',
     shareCopy: 'লিংক কপি করুন',
     shareTo: 'শেয়ার করুন ...',
     shareX: 'X এ শেয়ার করুন',
     shareThreads: 'Threads এ শেয়ার করুন',
     shareFacebook: 'Facebook এ শেয়ার করুন',
     shareLinkedIn: 'LinkedIn এ শেয়ার করুন',
+    shareQRCode: 'QR কোড টগল করুন',
   },
   theme: {
     theme: 'থিম',
@@ -125,8 +141,15 @@ export const TEXT: I18N = {
     manageRecipes: 'রেসিপি ব্যবস্থাপনা করুন',
     selectPhotos: 'ছবি নির্বাচন করুন ...',
     selectPhotosExit: 'নির্বাচন বন্ধ করুন',
+    editTitles: 'শিরোনাম এডিট করুন ...',
+    editTitlesExit: 'শিরোনাম এডিট বন্ধ করুন',
+    app: 'অ্যাপ সেটিংস',
     appInsights: 'অ্যাপ ইনসাইট',
+    appInsightsShort: 'ইনসাইট',
     appConfig: 'অ্যাপ কনফিগারেশন',
+    appConfigShort: 'কনফিগারেশন',
+    clearCache: 'ক্যাশ সাফ করুন',
+    clearCacheSuccess: 'সাইট ক্যাশ সাফ করা হয়েছে',
     edit: 'এডিট',
     favorite: 'পছন্দ',
     unfavorite: 'পছন্দ অপসারণ',
@@ -134,15 +157,56 @@ export const TEXT: I18N = {
     public: 'সর্বজনীন করুন',
     download: 'ডাউনলোড',
     sync: 'সিঙ্ক',
+    syncAutomatic: 'স্বয়ংক্রিয়',
+    syncUpdateColor: 'রং আপডেট করুন',
+    syncUpdateColorSuccess: 'রং আপডেট হয়েছে:',
+    syncOverwrite: 'ওভাররাইট করুন',
+    // eslint-disable-next-line @stylistic/max-len
+    syncOverwriteConfirm: 'আপনি কি নিশ্চিত যে আপনি সমস্ত ফটো ফিল্ড ওভাররাইট করতে চান? কাস্টমাইজড ডেটা হারিয়ে যেতে পারে।',
+    reupload: 'পুনরায় আপলোড করুন',
     delete: 'ডিলিট',
     deleteConfirm: 'আপনি কি "{{photoTitle}}" মুছে ফেলতে চান?',
+    setVisibility: 'দৃশ্যমানতা',
+    setVisibilityPlaceholder: '{{quantity}}-এর জন্য দৃশ্যমানতা সেট করুন ...',
+    // eslint-disable-next-line @stylistic/max-len
+    setVisibilityConfirm: 'আপনি কি নিশ্চিত যে আপনি {{quantity}}-এর জন্য দৃশ্যমানতা "{{visibility}}" এ সেট করতে চান?',
+    setVisibilitySuccess: '{{quantity}}-এর জন্য দৃশ্যমানতা আপডেট হয়েছে',
+    visibilityDefault: 'ডিফল্ট',
+    visibilityDefaultNote: 'সর্বত্র দৃশ্যমান',
+    visibilityExclude: 'ফিড থেকে লুকান',
+    visibilityExcludeNote: 'হোমপেজ ভিউ, rss.xml ইত্যাদি থেকে বাদ',
+    visibilityPrivate: 'ব্যক্তিগত',
+    visibilityPrivateNote: 'শুধুমাত্র অ্যাডমিনদের কাছে দৃশ্যমান',
+    selectPhotosBelow: 'নিচে থেকে ছবি নির্বাচন করুন',
+    selectPhotosBelowShort: 'নির্বাচন করুন',
+    selecting: 'নির্বাচন করা হচ্ছে ...',
+    selectingShort: 'নির্বাচন করা হচ্ছে',
+    photosSelected: '{{quantity}} নির্বাচিত',
+    selectAll: 'সব নির্বাচন করুন',
+    apply: 'প্রয়োগ করুন',
+    tagPlaceholder: '{{quantity}}-এ ট্যাগ করুন ...',
+    // eslint-disable-next-line @stylistic/max-len
+    tagConfirm: 'আপনি কি নিশ্চিত যে আপনি {{quantity}}-এ ট্যাগ প্রয়োগ করতে চান? এই ক্রিয়াটি ফিরিয়ে নেওয়া যাবে না।',
+    tagSuccess: '{{quantity}} {{tags}} ট্যাগ করা হয়েছে',
+    albumPlaceholder: '{{quantity}} অ্যালবামে যোগ করুন ...',
+    // eslint-disable-next-line @stylistic/max-len
+    albumConfirm: 'আপনি কি নিশ্চিত যে আপনি {{quantity}} এই অ্যালবামগুলিতে যোগ করতে চান? এই ক্রিয়াটি ফিরিয়ে নেওয়া যাবে না।',
+    albumSuccess: '{{quantity}} {{albums}}-এ যোগ করা হয়েছে',
+    // eslint-disable-next-line @stylistic/max-len
+    favoriteConfirm: 'আপনি কি নিশ্চিত যে আপনি {{quantity}} পছন্দের তালিকায় যোগ করতে চান?',
+    favoriteSuccess: '{{quantity}} পছন্দের তালিকায় যোগ করা হয়েছে',
+    batchActionFailure: '{{quantity}} আপডেট করতে সমস্যা হয়েছে',
+    // eslint-disable-next-line @stylistic/max-len
+    deletePhotosConfirm: 'আপনি কি নিশ্চিত যে {{quantity}} মুছে ফেলতে চান? এই কাজটি ফেরানো যাবে না।',
+    deletePhotosSuccess: '{{quantity}} মুছে ফেলা হয়েছে',
+    deletePhotosFailure: '{{quantity}} মুছতে সমস্যা হয়েছে',
   },
   onboarding: {
     setupComplete: 'সেটআপ সম্পন্ন!',
     setupIncomplete: 'সেটআপ সম্পূর্ণ করুন',
     setupSignIn: 'ছবি আপলোড করতে সাইন ইন করুন',
     setupFirstPhoto: 'আপনার প্রথম ছবি যোগ করুন',
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     setupConfig: 'পরিবেশ ভেরিয়েবল সম্পাদনা করে সাইটের নাম এবং অন্যান্য কনফিগারেশন পরিবর্তন করুন',
   },
   utility: {
@@ -153,8 +217,10 @@ export const TEXT: I18N = {
     tryAgain: 'আবার চেষ্টা করুন',
     finishing: 'সম্পন্ন হচ্ছে ...',
     uploading: 'আপলোড হচ্ছে',
+    cancel: 'বাতিল',
     copyPhrase: '{{label}} কপি হয়েছে',
     paginate: '{{index}} / {{count}}',
     paginateAction: '{{action}} - {{index}} / {{count}}',
+    madeWith: 'তৈরি হয়েছে',
   },
 };

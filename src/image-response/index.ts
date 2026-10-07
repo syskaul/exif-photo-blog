@@ -1,8 +1,17 @@
+import { HIGH_DENSITY_PREVIEWS } from '@/app/config';
 import { NextImageSize } from '@/platforms/next-image';
 import { getDimensionsFromSize } from '@/utility/size';
 
 export const MAX_PHOTOS_TO_SHOW_OG = 12;
 export const MAX_PHOTOS_TO_SHOW_PER_CATEGORY = 6;
+export const DEFAULT_PHOTOS_TO_SHOW_PER_CATEGORY = 5;
+export const PHOTOS_TO_SHOW_PER_CATEGORY = HIGH_DENSITY_PREVIEWS
+  ? MAX_PHOTOS_TO_SHOW_PER_CATEGORY
+  : DEFAULT_PHOTOS_TO_SHOW_PER_CATEGORY;
+export const PHOTO_PREVIEW_QUERY_OPTIONS = {
+  sortBy: 'random',
+  limit: PHOTOS_TO_SHOW_PER_CATEGORY,
+} as const;
 export const MAX_PHOTOS_TO_SHOW_TEMPLATE = 16;
 export const MAX_PHOTOS_TO_SHOW_TEMPLATE_TIGHT = 12;
 

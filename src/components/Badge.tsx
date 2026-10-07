@@ -22,7 +22,7 @@ export default function Badge({
       case 'large':
         return clsx(
           'px-1.5 h-[26px]',
-          'rounded-md',
+          'rounded-lg',
           'bg-gray-100/40 dark:bg-gray-900/60',
           'border border-medium',
         );
@@ -34,12 +34,15 @@ export default function Badge({
             : 'px-2 h-6.5',
           type === 'small'
             ? 'text-[0.7rem] font-medium rounded-md'
-            : 'text-[0.9rem] rounded-lg',
+            : 'text-[0.85rem] tracking-wide rounded-lg',
           contrast === 'high'
             ? 'text-invert bg-invert'
             : contrast === 'frosted'
               ? 'text-black bg-neutral-100/30 border border-neutral-200/40'
-              : 'text-medium-dark bg-gray-300/30 dark:bg-gray-700/50',
+              : contrast === 'low'
+                ? 'text-medium bg-gray-300/30 dark:bg-gray-700/50'
+                // Base style (medium contrast)
+                : 'text-medium-dark bg-gray-300/30 dark:bg-gray-700/50',
           interactive && (contrast === 'high'
             ? 'hover:opacity-70'
             : contrast === 'frosted'

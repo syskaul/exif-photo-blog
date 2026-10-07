@@ -45,7 +45,7 @@ const getMissingAiTextFields = ({
 
 export const isPhotoMissingColorData = (photo: PhotoDb) =>
   // "== null" intentional check for undefined or null
-  COLOR_SORT_ENABLED && (
+  (AI_CONTENT_GENERATION_ENABLED || COLOR_SORT_ENABLED) && (
     photo.colorData == null ||
     photo.colorSort == null
   );

@@ -1,24 +1,26 @@
 'use client';
 
 import Modal from '@/components/Modal';
-import { TbPhotoShare } from 'react-icons/tb';
+import { TbPhotoShare, TbQrcode } from 'react-icons/tb';
 import { clsx } from 'clsx/lite';
 import { BiCopy } from 'react-icons/bi';
-import { ReactNode, useCallback, useEffect } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { shortenUrl } from '@/utility/url';
 import { toastSuccess } from '@/toast';
 import { SOCIAL_NETWORKS } from '@/app/config';
 import { useAppState } from '@/app/AppState';
 import useOnPathChange from '@/utility/useOnPathChange';
-import { IoArrowUp } from 'react-icons/io5';
+import { IoArrowUp, IoCloseSharp } from 'react-icons/io5';
 import MaskedScroll from '@/components/MaskedScroll';
 import { useAppText } from '@/i18n/state/client';
 import SocialButton from '@/social/SocialButton';
 import LoaderButton from '@/components/primitives/LoaderButton';
+import Image from 'next/image';
+import { ShareMethod } from '.';
 
 const BUTTON_COLOR_CLASSNAMES = clsx(
   'border-gray-200 bg-gray-50 active:bg-gray-100',
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   'dark:border-gray-800 dark:bg-gray-900/75 dark:hover:bg-gray-800/75 dark:active:bg-gray-900',
 );
 
@@ -29,6 +31,7 @@ export default function ShareModal({
   navigatorTitle,
   navigatorText,
   children,
+  onShareAction,
 }: {
   title?: string
   pathShare: string
@@ -36,6 +39,7 @@ export default function ShareModal({
   navigatorTitle: string
   navigatorText?: string
   children: ReactNode
+  onShareAction?: (method: ShareMethod) => void
 }) {
   const {
     setShareModalProps,
@@ -43,6 +47,7 @@ export default function ShareModal({
   } = useAppState();
 
   const appText = useAppText();
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     setShouldRespondToKeyboardCommands?.(false);
@@ -50,12 +55,14 @@ export default function ShareModal({
   }, [setShouldRespondToKeyboardCommands]);
 
   const renderButton = (
+    key: string,
     icon: ReactNode,
     action: () => void,
     embedded?: boolean,
     tooltip?: string,
   ) =>
     <LoaderButton
+      key={key}
       className={clsx(
         'flex items-center justify-center h-10',
         'px-3',
@@ -90,13 +97,31 @@ export default function ShareModal({
               {title}
             </div>
           </div>}
-        {children}
+        {!showQR ? (
+          <>{children}</>
+        ) : (
+          <div className="flex flex-col items-center gap-4 p-4">
+            <div className={clsx(
+              'p-3 bg-white rounded-2xl shadow-lg outline outline-medium',
+              'flex items-center justify-center',
+            )}>
+              <Image
+                /* eslint-disable-next-line @stylistic/max-len */
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(pathShare)}`}
+                alt="QR Code"
+                className="rounded-xl bg-white"
+                width={300}
+                height={300}
+              />
+            </div>
+          </div>
+        )}
         <div className="flex items-stretch h-10 gap-2">
           <div className={clsx(
             'rounded-md',
             'w-full overflow-hidden',
             'flex items-center justify-stretch',
-            'border-medium',
+            'border border-medium',
           )}>
             <MaskedScroll
               className="flex grow"
@@ -109,8 +134,10 @@ export default function ShareModal({
               </div>
             </MaskedScroll>
             {renderButton(
+              'copy',
               <BiCopy size={18} />,
               () => {
+                onShareAction?.('copy_link');
                 navigator.clipboard.writeText(pathShare);
                 toastSuccess(appText.photo.copied);
               },
@@ -119,25 +146,41 @@ export default function ShareModal({
             )}
           </div>
           {SOCIAL_NETWORKS.map(key =>
-            <SocialButton
-              key={key}
-              socialKey={key}
-              path={pathShare}
-              text={socialText}
-              className={clsx(
-                'h-full',
-                BUTTON_COLOR_CLASSNAMES,
-              )}
-            />)}
-          {typeof navigator !== 'undefined' && navigator.share &&
+            key === 'qrcode' ? (
+              renderButton(
+                'qrcode',
+                showQR ? <IoCloseSharp size={18} /> : <TbQrcode size={18} />,
+                () => setShowQR(q => !q),
+                false,
+                appText.tooltip.shareQRCode,
+              )
+            ) : (
+              <SocialButton
+                key={key}
+                socialKey={key}
+                path={pathShare}
+                text={socialText}
+                onClick={() => onShareAction?.(key)}
+                className={clsx(
+                  'h-full',
+                  BUTTON_COLOR_CLASSNAMES,
+                )}
+              />
+            ),
+          )}
+          {navigator.share &&
             renderButton(
+              'share',
               <IoArrowUp size={18} />,
-              () => navigator.share({
-                title: navigatorTitle,
-                text: navigatorText,
-                url: pathShare,
-              })
-                .catch(() => console.log('Share canceled')),
+              () => {
+                onShareAction?.('native');
+                navigator.share({
+                  title: navigatorTitle,
+                  text: navigatorText,
+                  url: pathShare,
+                })
+                  .catch(() => console.log('Share canceled'));
+              },
               false,
               appText.tooltip.shareTo,
             )}

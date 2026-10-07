@@ -4,7 +4,7 @@ import { clsx } from 'clsx/lite';
 import AppGrid from '../components/AppGrid';
 import ThemeSwitcher from '@/app/ThemeSwitcher';
 import Link from 'next/link';
-import { SHOW_REPO_LINK } from '@/app/config';
+import { SHOW_TEMPLATE_ATTRIBUTION } from '@/app/config';
 import RepoLink from '../components/RepoLink';
 import { usePathname } from 'next/navigation';
 import { PATH_ADMIN_PHOTOS, isPathAdmin, isPathSignIn } from './path';
@@ -14,6 +14,7 @@ import AnimateItems from '@/components/AnimateItems';
 import { useAppState } from '@/app/AppState';
 import Spinner from '@/components/Spinner';
 import { useAppText } from '@/i18n/state/client';
+import { useMixpanel } from '@/analytics/MixpanelConsentProvider';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export default function Footer() {
   } = useAppState();
 
   const appText = useAppText();
+  const { openPrivacySettings } = useMixpanel();
 
   const showFooter = !isPathSignIn(pathname);
 
@@ -39,7 +41,7 @@ export default function Footer() {
           type={!shouldAnimate ? 'none' : 'bottom'}
           distanceOffset={10}
           items={showFooter
-            ? [<div
+            ? [<footer
               key="footer"
               className={clsx(
                 'flex items-center gap-1',
@@ -53,7 +55,7 @@ export default function Footer() {
                   ? <>
                     <Link
                       href={PATH_ADMIN_PHOTOS}
-                      className="truncate max-w-full"
+                      className="truncate max-w-full max-sm:hidden"
                     >
                       {userEmail || userEmailEager}
                     </Link>
@@ -66,16 +68,23 @@ export default function Footer() {
                   </>
                   : isCheckingAuth
                     ? <Spinner size={16} className="translate-y-[2px]" />
-                    : SHOW_REPO_LINK
+                    : SHOW_TEMPLATE_ATTRIBUTION
                       ? <RepoLink />
                       : <Link href={PATH_ADMIN_PHOTOS}>
                         {appText.nav.admin}
                       </Link>}
               </div>
-              <div className="flex items-center h-10 shrink-0">
+              <div className="flex items-center h-10 shrink-0 gap-3">
+                <button
+                  type="button"
+                  className="text-sm underline underline-offset-4"
+                  onClick={openPrivacySettings}
+                >
+                  {appText.privacy.privacySettings}
+                </button>
                 <ThemeSwitcher />
               </div>
-            </div>]
+            </footer>]
             : []}
         />}
     />

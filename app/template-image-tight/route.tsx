@@ -5,9 +5,9 @@ import {
 } from '@/image-response';
 import TemplateImageResponse from
   '@/app/TemplateImageResponse';
-import { getIBMPlexMono } from '@/app/font';
+import { getPaperMono } from '@/app/font';
 import { getImageResponseCacheControlHeaders } from '@/image-response/cache';
-import { safePhotoImageResponse } from '@/platforms/safe-photo-image-response';
+import { ImageResponse } from 'next/og';
 
 export async function GET() {
   const [
@@ -19,29 +19,21 @@ export async function GET() {
       sortWithPriority: true,
       limit: MAX_PHOTOS_TO_SHOW_TEMPLATE_TIGHT,
     }).catch(() => []),
-    getIBMPlexMono(),
+    getPaperMono(),
     getImageResponseCacheControlHeaders(),
   ]);
 
   const { width, height } = IMAGE_OG_DIMENSION;
 
-  return safePhotoImageResponse(
-    photos,
-    isNextImageReady => (
-      <TemplateImageResponse {...{
-        photos: isNextImageReady ? photos : [],
-        includeHeader: false,
-        outerMargin: 0,
-        width,
-        height,
-        fontFamily,
-      }}/>
-    ),
-    {
+  return new ImageResponse(
+    <TemplateImageResponse {...{
+      photos,
+      includeHeader: false,
+      outerMargin: 0,
       width,
       height,
-      fonts,
-      headers,
-    },
+      fontFamily,
+    }}/>,
+    { width, height, fonts, headers },
   );
 }

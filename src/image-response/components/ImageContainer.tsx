@@ -13,9 +13,11 @@ export default function ImageContainer({
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: solidBackground ? 'black' : 'transparent',
+      alignItems: 'stretch',
+      justifyContent: 'flex-start',
+      position: 'relative',
+      overflow: 'hidden',
+      backgroundColor: solidBackground ? 'black' : 'white',
     }}>
       {children}
     </div>

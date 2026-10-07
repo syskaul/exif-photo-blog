@@ -9,7 +9,6 @@ import {
   shouldShowFilmDataForPhoto,
   shouldShowLensDataForPhoto,
   shouldShowRecipeDataForPhoto,
-  titleForPhoto,
 } from '.';
 import AppGrid from '@/components/AppGrid';
 import ImageLarge from '@/components/image/ImageLarge';
@@ -31,6 +30,9 @@ import {
   SHOW_TAKEN_AT_TIME,
   MATTE_COLOR,
   MATTE_COLOR_DARK,
+  ALWAYS_SHOW_EXPOSURE_COMP,
+  UPPERCASE_TITLES,
+  GEO_PRIVACY_ENABLED,
 } from '@/app/config';
 import AdminPhotoMenu from '@/admin/AdminPhotoMenu';
 import { RevalidatePhoto } from './InfinitePhotoScroll';
@@ -41,7 +43,8 @@ import { useAppState } from '@/app/AppState';
 import { LuExpand } from 'react-icons/lu';
 import LoaderButton from '@/components/primitives/LoaderButton';
 import Tooltip from '@/components/Tooltip';
-import ZoomControls, { ZoomControlsRef } from '@/components/image/ZoomControls';
+import ZoomControls, { ZoomControlsRef }
+  from '@/components/image/zoom/ZoomControls';
 import { AnimatePresence } from 'framer-motion';
 import useRecipeOverlay from '../recipe/useRecipeOverlay';
 import PhotoRecipeOverlay from '@/recipe/PhotoRecipeOverlay';
@@ -51,6 +54,11 @@ import { lensFromPhoto } from '@/lens';
 import MaskedScroll from '@/components/MaskedScroll';
 import { useAppText } from '@/i18n/state/client';
 import { Album } from '@/album';
+import AdminPhotoStorageCheck from '@/admin/storage/AdminPhotoStorageCheck';
+import { useEditTitlesState } from '@/admin/edit-titles/EditTitlesState';
+import { DATA_KEY_PHOTO_LARGE } from '@/admin/edit-titles/EditTitlesProvider';
+import FieldsetWithStatus from '@/components/FieldsetWithStatus';
+import PlaceEntity from '@/place/PlaceEntity';
 
 export default function PhotoLarge({
   photo,
@@ -60,6 +68,7 @@ export default function PhotoLarge({
   priority,
   prefetch = SHOULD_PREFETCH_ALL_LINKS,
   prefetchRelatedLinks = SHOULD_PREFETCH_ALL_LINKS,
+  query,
   recent,
   year,
   revalidatePhoto,
@@ -72,6 +81,7 @@ export default function PhotoLarge({
   showZoomControls: _showZoomControls = true,
   shouldZoomOnFKeydown = true,
   shouldShare = true,
+  shouldShareQuery,
   shouldShareRecents,
   shouldShareYear,
   shouldShareCamera,
@@ -84,6 +94,7 @@ export default function PhotoLarge({
   includeFavoriteInAdminMenu,
   onVisible,
   showAdminKeyCommands,
+  showStorageCheck,
 }: {
   photo: Photo
   className?: string
@@ -92,6 +103,7 @@ export default function PhotoLarge({
   priority?: boolean
   prefetch?: boolean
   prefetchRelatedLinks?: boolean
+  query?: string
   recent?: boolean
   year?: string
   revalidatePhoto?: RevalidatePhoto
@@ -104,6 +116,7 @@ export default function PhotoLarge({
   showZoomControls?: boolean
   shouldZoomOnFKeydown?: boolean
   shouldShare?: boolean
+  shouldShareQuery?: boolean
   shouldShareRecents?: boolean
   shouldShareYear?: boolean
   shouldShareCamera?: boolean
@@ -116,6 +129,7 @@ export default function PhotoLarge({
   includeFavoriteInAdminMenu?: boolean
   onVisible?: () => void
   showAdminKeyCommands?: boolean
+  showStorageCheck?: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const refZoomControls = useRef<ZoomControlsRef>(null);
@@ -129,7 +143,23 @@ export default function PhotoLarge({
     isUserSignedIn,
   } = useAppState();
 
+  const {
+    isEditingTitles,
+    getPhotoEdit,
+    setPhotoEdit,
+    isPerformingUpdate,
+  } = useEditTitlesState();
+
   const appText = useAppText();
+
+  const photoEditOriginal = useMemo(() => ({
+    title: photo.title ?? '',
+    caption: photo.caption ?? '',
+  }), [photo.title, photo.caption]);
+
+  const photoEdit = isEditingTitles
+    ? getPhotoEdit?.(photo.id, photoEditOriginal) ?? photoEditOriginal
+    : photoEditOriginal;
 
   const showZoomControls = _showZoomControls && areZoomControlsShown;
   const selectZoomImageElement = useCallback(
@@ -166,6 +196,9 @@ export default function PhotoLarge({
   const showTagsContent = tags.length > 0;
   const showRecipeContent = showRecipe && shouldShowRecipeDataForPhoto(photo);
   const showFilmContent = showFilm && shouldShowFilmDataForPhoto(photo);
+  const showPlaceContent =
+    Boolean(photo.location) &&
+    !GEO_PRIVACY_ENABLED;
 
   useVisibility({ ref, onVisible });
 
@@ -174,6 +207,7 @@ export default function PhotoLarge({
     Boolean(photo.title);
 
   const hasTitleContent =
+    isEditingTitles ||
     hasTitle ||
     Boolean(photo.caption);
 
@@ -183,6 +217,7 @@ export default function PhotoLarge({
     showTagsContent ||
     showRecipeContent ||
     showFilmContent ||
+    showPlaceContent ||
     showExifContent;
 
   const hasNonDateContent =
@@ -192,7 +227,10 @@ export default function PhotoLarge({
   const renderPhotoLink =
     <PhotoLink
       photo={photo}
-      className="font-bold uppercase grow"
+      className={clsx(
+        'font-bold grow',
+        UPPERCASE_TITLES && 'uppercase',
+      )}
       prefetch={prefetch}
     />;
 
@@ -227,7 +265,7 @@ export default function PhotoLarge({
           aspectRatio={photo.aspectRatio}
           blurDataURL={photo.blurData}
           blurCompatibilityMode={doesPhotoNeedBlurCompatibility(photo)}
-          priority={priority}
+          loading={priority ? 'eager' : undefined}
         />
       </ZoomControls>
       <div className={clsx(
@@ -260,7 +298,6 @@ export default function PhotoLarge({
       photo,
       revalidatePhoto,
       includeFavorite: includeFavoriteInAdminMenu,
-      ariaLabel: `Admin menu for '${titleForPhoto(photo)}' photo`,
       showKeyCommands: showAdminKeyCommands,
     }} />;
 
@@ -280,6 +317,7 @@ export default function PhotoLarge({
     <AppGrid
       containerRef={ref}
       className={className}
+      {...{ [DATA_KEY_PHOTO_LARGE]: true }}
       contentMain={showZoomControls
         ? <div className={largePhotoContainerClassName}>
           {renderLargePhoto}
@@ -303,21 +341,57 @@ export default function PhotoLarge({
             )}>
               {/* Meta */}
               <div className="pr-3 md:pr-0">
-                <div className="float-end hidden md:block">
-                  {renderAdminMenu}
-                </div>
-                {hasTitle && (showTitleAsH1
-                  ? <h1>{renderPhotoLink}</h1>
-                  : renderPhotoLink)}
+                {!isEditingTitles &&
+                  <div className="float-end hidden md:block">
+                    {renderAdminMenu}
+                  </div>}
+                {isEditingTitles
+                  ? <div className={clsx(
+                    'space-y-2 mb-2',
+                    // Keep text large for iOS forms
+                    'md:[&_input]:text-sm',
+                  )}>
+                    <FieldsetWithStatus
+                      id={`edit-title-${photo.id}`}
+                      label="Title"
+                      value={photoEdit.title}
+                      onChange={title => setPhotoEdit?.(
+                        photo.id,
+                        { title },
+                        photoEditOriginal,
+                      )}
+                      placeholder="Title"
+                      hideLabel
+                      readOnly={isPerformingUpdate}
+                      className="[&_input]:font-bold"
+                    />
+                    <FieldsetWithStatus
+                      id={`edit-caption-${photo.id}`}
+                      label="Caption"
+                      value={photoEdit.caption}
+                      onChange={caption => setPhotoEdit?.(
+                        photo.id,
+                        { caption },
+                        photoEditOriginal,
+                      )}
+                      placeholder="Caption"
+                      hideLabel
+                      readOnly={isPerformingUpdate}
+                    />
+                  </div>
+                  : hasTitle && (showTitleAsH1
+                    ? <h1>{renderPhotoLink}</h1>
+                    : renderPhotoLink)}
                 <div className="space-y-baseline">
-                  {photo.caption &&
-                    <div className="uppercase">
+                  {!isEditingTitles && photo.caption &&
+                    <div className={clsx(UPPERCASE_TITLES && 'uppercase')}>
                       {photo.caption}
                     </div>}
                   {(
                     showCameraContent ||
                     showLensContent ||
                     showRecipeContent ||
+                    showPlaceContent ||
                     showTagsContent
                   ) &&
                     <div>
@@ -359,9 +433,10 @@ export default function PhotoLarge({
                 'space-y-baseline',
                 !hasTitleContent && !hasMetaContent && 'md:-mt-baseline',
               )}>
-                <div className="float-end md:hidden">
-                  {renderAdminMenu}
-                </div>
+                {!isEditingTitles &&
+                  <div className="float-end md:hidden">
+                    {renderAdminMenu}
+                  </div>}
                 {showExifContent &&
                   <>
                     <ul className="text-medium">
@@ -375,7 +450,7 @@ export default function PhotoLarge({
                           </Link>}
                         {(
                           photo.focalLengthIn35MmFormatFormatted &&
-                          // eslint-disable-next-line max-len
+                          // eslint-disable-next-line @stylistic/max-len
                           photo.focalLengthIn35MmFormatFormatted !== photo.focalLengthFormatted
                         ) &&
                           <>
@@ -400,18 +475,29 @@ export default function PhotoLarge({
                       <li>{photo.fNumberFormatted}</li>
                       <li>{photo.exposureTimeFormatted}</li>
                       <li>{photo.isoFormatted}</li>
-                      <li>{photo.exposureCompensationFormatted ?? '0ev'}</li>
+                      {photo.exposureCompensationFormatted
+                        ? <li>{photo.exposureCompensationFormatted}</li>
+                        : ALWAYS_SHOW_EXPOSURE_COMP && <li>0ev</li>}
                     </ul>
                     {showFilmContent && photo.film &&
                       <PhotoFilm
                         ref={refPhotoFilm}
                         film={photo.film}
+                        make={photo.make}
                         prefetch={prefetchRelatedLinks}
                         {...photo.recipeData && !photo.recipeTitle && {
                           toggleRecipeOverlay,
                           isShowingRecipeOverlay,
                         }}
                       />}
+                    {showPlaceContent && photo.location &&
+                      <div>
+                        <PlaceEntity
+                          place={photo.location}
+                          contrast="low"
+                          className="-translate-x-0.5"
+                        />
+                      </div>}
                   </>}
                 <div className={clsx(
                   'flex gap-x-3 gap-y-baseline',
@@ -437,6 +523,7 @@ export default function PhotoLarge({
                     {showZoomControls &&
                       <LoaderButton
                         tooltip={appText.tooltip.zoom}
+                        aria-label={appText.tooltip.zoom}
                         icon={<LuExpand size={15} />}
                         onClick={() => refZoomControls.current?.open()}
                         styleAs="link"
@@ -447,6 +534,9 @@ export default function PhotoLarge({
                       <ShareButton
                         tooltip={appText.tooltip.sharePhoto}
                         photo={photo}
+                        query={shouldShareQuery
+                          ? query
+                          : undefined}
                         recent={shouldShareRecents
                           ? recent
                           : undefined}
@@ -482,6 +572,8 @@ export default function PhotoLarge({
                         photo={photo} 
                       />}
                   </div>
+                  {showStorageCheck &&
+                    <AdminPhotoStorageCheck photo={photo} />}
                 </div>
               </div>
             </DivDebugBaselineGrid>

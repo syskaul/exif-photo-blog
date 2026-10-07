@@ -19,6 +19,14 @@ export const safelyParseFormattedHtml = (text: string) =>
     },
   });
 
+export const htmlToPlainText = (html: string) =>
+  sanitizeHtml(html.replace(/<br\s*\/?>/gi, ' '), {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
+    .replace(/\s+/g, ' ')
+    .trim();
+
 // Matches two or more <br> or <br /> tags in a row
 export const htmlHasBrParagraphBreaks = (text: string) =>
   /(<br\s*\/?>){2}/i.test(text);

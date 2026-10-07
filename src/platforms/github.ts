@@ -14,15 +14,24 @@ interface RepoParams {
   commit?: string
 };
 
+interface CommitDetails {
+  commit: {
+    committer: {
+      date: string
+    }
+  }
+  stats: { total: number, additions: number, deletions: number },
+}
+
 const fetchGitHub = async (
   url: string,
   cacheRequest = true,
 ) => {
   const data = await fetch(
     url,
-    // Cache all results for 2 minutes to avoid rate limiting
+    // Cache all results for 5 minutes to avoid rate limiting
     // GitHub API requests limited to 60 requests per hour
-    cacheRequest ? { next: { revalidate: 120 } } : undefined,
+    cacheRequest ? { next: { revalidate: 300 } } : undefined,
   )
     .then(response => response.json());
   if ((data.message ?? '').includes(GITHUB_API_ERROR)) {
@@ -65,7 +74,7 @@ export const getGitHubUrlCompare = ({
   repo,
   branch = DEFAULT_BRANCH,
 }: RepoParams = {}) =>
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   `${getGitHubUrlRepo({ owner, repo })}/compare/${branch}...${TEMPLATE_REPO_OWNER}:${TEMPLATE_REPO_NAME}:${TEMPLATE_REPO_BRANCH}`;
 
 // API urls
@@ -75,6 +84,9 @@ const getGitHubApiRepoUrl = ({
   repo = TEMPLATE_REPO_NAME,
 }: RepoParams = {}) =>
   `https://api.github.com/repos/${owner}/${repo}`;
+
+const getGitHubApiCommitUrl = (params?: RepoParams) =>
+  `${getGitHubApiRepoUrl(params)}/commits/${params?.commit}`;
 
 const getGitHubApiCommitsUrl = (params?: RepoParams) =>
   `${getGitHubApiRepoUrl(params)}/commits/${params?.branch || DEFAULT_BRANCH}`;
@@ -87,7 +99,7 @@ const getGitHubApiCompareToRepoUrl = ({
   repo,
   branch = DEFAULT_BRANCH,
 }: RepoParams = {}) =>
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   `${getGitHubApiRepoUrl()}/compare/${TEMPLATE_REPO_BRANCH}...${owner}:${repo}:${branch}`;
 
 const getGitHubApiCompareToCommitUrl = ({ commit }: RepoParams = {}) =>
@@ -106,6 +118,16 @@ const getIsRepoForkedFromBase = async (params: RepoParams) => {
     Boolean(data.fork) &&
     data.source?.full_name === `${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`
   );
+};
+
+const getCommitDetails = async (params: RepoParams) => {
+  const data: CommitDetails = await fetchGitHub(getGitHubApiCommitUrl(params));
+  return data?.commit?.committer?.date && data.stats
+    ? {
+      date: new Date(data.commit.committer.date),
+      stats: data.stats,
+    }
+    : undefined;
 };
 
 const getGitHubCommitsBehindFromRepo = async (params?: RepoParams) => {
@@ -139,6 +161,7 @@ export const getGitHubMeta = async (params: RepoParams) => {
 
   const isBaseRepo = isRepoBaseRepo(params);
 
+  let commitDate: Date | undefined;
   let isForkedFromBase: boolean | undefined;
   let isBehind: boolean | undefined;
   let behindBy: number | undefined;
@@ -146,14 +169,16 @@ export const getGitHubMeta = async (params: RepoParams) => {
 
   try {
     const results = await Promise.all([
+      getCommitDetails(params),
       getIsRepoForkedFromBase(params),
       isBaseRepo && params.commit
         ? getGitHubCommitsBehindFromCommit(params)
         : getGitHubCommitsBehindFromRepo(params),
     ]);
 
-    isForkedFromBase = results[0];
-    behindBy = results[1];
+    commitDate = results[0]?.date;
+    isForkedFromBase = results[1];
+    behindBy = results[2];
   
     isBehind = behindBy === undefined
       ? undefined
@@ -169,6 +194,7 @@ export const getGitHubMeta = async (params: RepoParams) => {
     urlRepo,
     urlBranch,
     urlCommit,
+    commitDate,
     isForkedFromBase,
     isBaseRepo,
     behindBy,

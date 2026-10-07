@@ -33,14 +33,7 @@ export default function DeleteFormButton (
     title="Delete"
     icon={<BiTrash size={16} />}
     spinnerColor="text"
-    className={clsx(
-      className,
-      'text-red-500! dark:text-red-600!',
-      'active:bg-red-100/50! dark:active:bg-red-950/50!',
-      'disabled:bg-red-100/50! dark:disabled:bg-red-950/50!',
-      'border-red-200! hover:border-red-300!',
-      'dark:border-red-900/75! dark:hover:border-red-900!',
-    )}
+    className={clsx('error', className)}
     onFormSubmit={onFormSubmit}
   />;
 }

@@ -1,11 +1,13 @@
 import { Photo } from '@/photo';
 import { PhotoSetAttributes, PhotoSetCategory } from '@/category';
+import type { SocialKey } from '@/social';
 import {
   absolutePathForCameraImage,
   absolutePathForFilmImage,
   absolutePathForFocalLengthImage,
   absolutePathForLensImage,
   absolutePathForPhotoImage,
+  absolutePathForQueryImage,
   absolutePathForRecipeImage,
   absolutePathForTagImage,
   absolutePathForYearImage,
@@ -16,8 +18,14 @@ export type ShareModalProps = Omit<PhotoSetAttributes, 'photos'> & {
   photos?: Photo[]
 } & PhotoSetCategory;
 
+export type ShareMethod =
+  | 'copy_link'
+  | 'native'
+  | Exclude<SocialKey, 'qrcode'>;
+
 export const getSharePathFromShareModalProps = ({
   photo,
+  query,
   camera,
   lens,
   tag,
@@ -28,6 +36,8 @@ export const getSharePathFromShareModalProps = ({
 }: ShareModalProps) => {
   if (photo) {
     return absolutePathForPhotoImage(photo);
+  } else if (query) {
+    return absolutePathForQueryImage(query);
   } else if (camera) {
     return absolutePathForCameraImage(camera);
   } else if (lens) {

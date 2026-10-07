@@ -16,6 +16,7 @@ export default function PhotoSmall({
   photo,
   selected,
   className,
+  classNameImage,
   prefetch = SHOULD_PREFETCH_ALL_LINKS,
   onVisible,
   ...categories
@@ -23,6 +24,7 @@ export default function PhotoSmall({
   photo: Photo
   selected?: boolean
   className?: string
+  classNameImage?: string
   prefetch?: boolean
   onVisible?: () => void
 } & PhotoSetCategory) {
@@ -40,7 +42,7 @@ export default function PhotoSmall({
         selected && 'brightness-50',
         'min-w-[50px]',
         'rounded-[3px] overflow-hidden',
-        'border-main',
+        'border border-main',
       )}
       prefetch={prefetch}
     >
@@ -50,6 +52,7 @@ export default function PhotoSmall({
         blurDataURL={photo.blurData}
         blurCompatibilityMode={doesPhotoNeedBlurCompatibility(photo)}
         alt={altTextForPhoto(photo)}
+        classNameImage={classNameImage}
       />
     </Link>
   );

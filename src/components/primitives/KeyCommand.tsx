@@ -1,7 +1,9 @@
 import clsx from 'clsx/lite';
 import { useMemo } from 'react';
-import { HiMiniBackspace } from 'react-icons/hi2';
-import { PiCommandBold } from 'react-icons/pi';
+import { GrReturn } from 'react-icons/gr';
+import { PiBackspaceBold, PiCommandBold } from 'react-icons/pi';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa6';
+import useIsApplePlatform from '@/utility/useIsApplePlatform';
 
 export default function KeyCommand({
   children,
@@ -12,11 +14,15 @@ export default function KeyCommand({
   modifier?: '⌘' | '⌥' | '⇧' | '⌃' | '⏎'
   className?: string
 }) {
+  const isApplePlatform = useIsApplePlatform();
+
   const keys = useMemo(() => {
-    const childrenFormatted = children === 'BACKSPACE'
-      ? '⌫'
-      : children;
-    return modifier ? [modifier, ...childrenFormatted] : [...childrenFormatted];
+    const childKeys = children === 'BACKSPACE'
+      ? ['⌫']
+      : children === 'ARROWRIGHT' || children === 'ARROWLEFT'
+        ? [children]
+        : [...children];
+    return modifier ? [modifier, ...childKeys] : childKeys;
   }, [modifier, children]);
 
   return (
@@ -32,12 +38,18 @@ export default function KeyCommand({
           )}
         >
           {key === '⌘'
-            ? <PiCommandBold />
-            : key === '⌫'
-              ? <HiMiniBackspace
-                className="text-[13px] opacity-80"
-              />
-              : key}
+            ? isApplePlatform
+              ? <PiCommandBold />
+              : <span className="font-semibold text-[10px] px-0.5">^</span>
+            : key === '⏎'
+              ? <GrReturn size={14} />
+              : key === '⌫'
+                ? <PiBackspaceBold size={14} />
+                : key === 'ARROWLEFT'
+                  ? <FaArrowLeft size={10} />
+                  : key === 'ARROWRIGHT'
+                    ? <FaArrowRight size={10} />
+                    : key}
         </span>
       ))}
     </span>

@@ -47,11 +47,12 @@ export const config = {
   // - /favicon.ico + /favicons/*
   // - /grid
   // - /full
+  // - /library
   // - / (root)
   // - /home-image
   // - /template-image
   // - /template-image-tight
   // - /template-url
-  // eslint-disable-next-line max-len
-  matcher: ['/((?!api$|api/auth|_next/static|_next/image|favicon.ico$|favicons/|grid$|full$|home-image$|template-image$|template-image-tight$|template-url$|$).*)'],
+  // eslint-disable-next-line @stylistic/max-len
+  matcher: ['/((?!api$|api/auth|_next/static|_next/image|favicon.ico$|favicons/|grid$|full$|library$|home-image$|template-image$|template-image-tight$|template-url$|$).*)'],
 };

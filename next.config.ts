@@ -17,7 +17,7 @@ const HOSTNAME_CLOUDFLARE_R2 =
 const HOSTNAME_AWS_S3 =
   process.env.NEXT_PUBLIC_AWS_S3_BUCKET &&
   process.env.NEXT_PUBLIC_AWS_S3_REGION
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     ? `${process.env.NEXT_PUBLIC_AWS_S3_BUCKET}.s3.${process.env.NEXT_PUBLIC_AWS_S3_REGION}.amazonaws.com`
     : undefined;
 
@@ -39,7 +39,14 @@ const generateRemotePattern = (
   pathname: '/**',
 });
 
-const remotePatterns: RemotePattern[] = [];
+const remotePatterns: RemotePattern[] = [
+  {
+    protocol: 'https',
+    hostname: 'api.qrserver.com',
+    port: '',
+    pathname: '/v1/create-qr-code/**',
+  },
+];
 
 if (HOSTNAME_VERCEL_BLOB) {
   remotePatterns.push(generateRemotePattern(HOSTNAME_VERCEL_BLOB));
@@ -69,11 +76,12 @@ const IMAGE_QUALITY =
 
 const nextConfig: NextConfig = {
   images: {
-    imageSizes: [200],
+    imageSizes: [100, 200],
     qualities: [75, IMAGE_QUALITY],
     remotePatterns,
     minimumCacheTTL: 31536000,
   },
+  serverExternalPackages: ['exifr'],
   turbopack: {
     resolveAlias: {
       [LOCALE_ALIAS]: `@/${LOCALE_DYNAMIC}`,

@@ -20,7 +20,6 @@ import {
   deletePhotoAction,
   syncPhotoAction,
   toggleFavoritePhotoAction,
-  togglePrivatePhotoAction,
 } from './actions';
 import { isPhotoFav } from '@/tag';
 import Tooltip from '@/components/Tooltip';
@@ -41,13 +40,13 @@ export default function PhotoPrevNextActions({
   photo,
   photos = [],
   className,
-  hasAiTextGeneration,
+  hasAiContentGeneration,
   ...categories
 }: {
   photo?: Photo
   photos?: Photo[]
   className?: string
-  hasAiTextGeneration: boolean
+  hasAiContentGeneration: boolean
 } & PhotoSetCategory) {
   const { setNextPhotoAnimation, isUserSignedIn } = useAppState();
 
@@ -67,10 +66,6 @@ export default function PhotoPrevNextActions({
     if (photo?.id) { return toggleFavoritePhotoAction(photo.id); }
   }, [photo]);
 
-  const toggleHidden = useCallback(() => {
-    if (photo?.id) { return togglePrivatePhotoAction(photo.id); }
-  }, [photo]);
-
   const navigateToPhotoEdit = useNavigateOrRunActionWithToast({
     pathOrAction: photo ? pathForAdminPhotoEdit(photo) : undefined,
     toastMessage: `Editing ${photoTitle} ...`,
@@ -84,16 +79,6 @@ export default function PhotoPrevNextActions({
   const unfavoritePhoto = useNavigateOrRunActionWithToast({
     pathOrAction: toggleFavorite,
     toastMessage: `Unfavoriting ${photoTitle} ...`,
-  });
-
-  const hidePhoto = useNavigateOrRunActionWithToast({
-    pathOrAction: toggleHidden,
-    toastMessage: `Hiding ${photoTitle} ...`,
-  });
-
-  const unhidePhoto = useNavigateOrRunActionWithToast({
-    pathOrAction: toggleHidden,
-    toastMessage: `Unhiding ${photoTitle} ...`,
   });
 
   const syncPhoto = useNavigateOrRunActionWithToast({
@@ -127,7 +112,7 @@ export default function PhotoPrevNextActions({
     : undefined;
 
   const onKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.metaKey) {
+    if (e.metaKey || e.ctrlKey) {
       switch (e.key.toUpperCase()) {
         case KEY_COMMANDS.delete[1]:
           if (isUserSignedIn) {
@@ -139,14 +124,12 @@ export default function PhotoPrevNextActions({
       switch (e.key.toUpperCase()) {
       // Public commands
         case KEY_COMMANDS.prev[0]:
-        case KEY_COMMANDS.prev[1]:
           if (pathPrevious) {
             setNextPhotoAnimation?.(ANIMATION_RIGHT);
             refPrevious.current?.click();
           }
           break;
         case KEY_COMMANDS.next[0]:
-        case KEY_COMMANDS.next[1]:
           if (pathNext) {
             setNextPhotoAnimation?.(ANIMATION_LEFT);
             refNext.current?.click();
@@ -168,15 +151,6 @@ export default function PhotoPrevNextActions({
             unfavoritePhoto();
           }
           break;
-        case KEY_COMMANDS.togglePrivate:
-          if (isUserSignedIn && photo) {
-            if (photo.hidden) {
-              unhidePhoto();
-            } else {
-              hidePhoto();
-            }
-          }
-          break;
         case KEY_COMMANDS.download:
           if (
             (isUserSignedIn || ALLOW_PUBLIC_DOWNLOADS) &&
@@ -190,7 +164,7 @@ export default function PhotoPrevNextActions({
           if (
             isUserSignedIn &&
             photo &&
-            window.confirm(syncPhotoConfirmText(photo, hasAiTextGeneration))
+            window.confirm(syncPhotoConfirmText(photo, hasAiContentGeneration))
           ) {
             syncPhoto();
           }
@@ -206,13 +180,11 @@ export default function PhotoPrevNextActions({
     photo,
     favoritePhoto,
     unfavoritePhoto,
-    hidePhoto,
-    unhidePhoto,
     downloadUrl,
     downloadFileName,
     syncPhoto,
     deletePhoto,
-    hasAiTextGeneration,
+    hasAiContentGeneration,
   ]);
   useKeydownHandler({ onKeyDown });
 
@@ -228,10 +200,13 @@ export default function PhotoPrevNextActions({
         'items-center sm:items-start',
         '*:select-none',
       )}>
-        <Tooltip {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: appText.nav.prev,
-          keyCommand: KEY_COMMANDS.prev[0],
-        }}>
+        <Tooltip
+          triggerIsFocusable
+          {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+            content: appText.nav.prev,
+            keyCommand: KEY_COMMANDS.prev[0],
+          }}
+        >
           <PhotoLink
             {...categories}
             ref={refPrevious}
@@ -250,10 +225,13 @@ export default function PhotoPrevNextActions({
         <span className="text-extra-extra-dim">
           /
         </span>
-        <Tooltip {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: appText.nav.next,
-          keyCommand: KEY_COMMANDS.next[0],
-        }}>
+        <Tooltip
+          triggerIsFocusable
+          {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+            content: appText.nav.next,
+            keyCommand: KEY_COMMANDS.next[0],
+          }}
+        >
           <PhotoLink
             {...categories}
             ref={refNext}

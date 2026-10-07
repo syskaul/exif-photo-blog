@@ -1,9 +1,9 @@
 import { getPhotosCached } from '@/photo/cache';
 import {
   IMAGE_OG_DIMENSION_SMALL,
-  MAX_PHOTOS_TO_SHOW_PER_CATEGORY,
+  PHOTO_PREVIEW_QUERY_OPTIONS,
 } from '@/image-response';
-import { getIBMPlexMono } from '@/app/font';
+import { getPaperMono } from '@/app/font';
 import { ImageResponse } from 'next/og';
 import { getImageResponseCacheControlHeaders } from '@/image-response/cache';
 import FocalLengthImageResponse from '@/focal/FocalLengthImageResponse';
@@ -32,8 +32,8 @@ export async function GET(
     { fontFamily, fonts },
     headers,
   ] = await Promise.all([
-    getPhotosCached({ limit: MAX_PHOTOS_TO_SHOW_PER_CATEGORY, focal }),
-    getIBMPlexMono(),
+    getPhotosCached({ ...PHOTO_PREVIEW_QUERY_OPTIONS, focal }),
+    getPaperMono(),
     getImageResponseCacheControlHeaders(),
   ]);
 

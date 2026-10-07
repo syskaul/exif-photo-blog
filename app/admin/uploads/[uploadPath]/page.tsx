@@ -2,14 +2,18 @@ import { PARAM_UPLOAD_TITLE, PATH_ADMIN } from '@/app/path';
 import { extractImageDataFromBlobPath } from '@/photo/server';
 import { redirect } from 'next/navigation';
 import {
+  getUniqueCamerasCached,
   getUniqueFilmsCached,
+  getUniqueLensesCached,
   getUniqueRecipesCached,
   getUniqueTagsCached,
 } from '@/photo/cache';
 import UploadPageClient from '@/photo/UploadPageClient';
 import {
   AI_CONTENT_GENERATION_ENABLED,
+  AUTO_GENERATE_LOCATIONS,
   BLUR_ENABLED,
+  HAS_LOCATION_SERVICES,
 } from '@/app/config';
 import ErrorNote from '@/components/ErrorNote';
 import { getRecipeTitleForData } from '@/photo/query';
@@ -32,7 +36,9 @@ export default async function UploadPage({ params, searchParams }: Params) {
     albums,
     uniqueRecipes,
     uniqueFilms,
-    uniqueTags, {
+    uniqueTags,
+    uniqueCameras,
+    uniqueLenses, {
       blobId,
       formDataFromExif: _formDataFromExif,
       imageResizedBase64: imageThumbnailBase64,
@@ -43,10 +49,13 @@ export default async function UploadPage({ params, searchParams }: Params) {
     getUniqueRecipesCached(),
     getUniqueFilmsCached(),
     getUniqueTagsCached(),
+    getUniqueCamerasCached(true),
+    getUniqueLensesCached(true),
     extractImageDataFromBlobPath(uploadPath, {
       includeInitialPhotoFields: true,
       generateBlurData: BLUR_ENABLED,
       generateResizedImage: AI_CONTENT_GENERATION_ENABLED,
+      lookupLocation: AUTO_GENERATE_LOCATIONS,
     }),
   ]);
 
@@ -76,7 +85,7 @@ export default async function UploadPage({ params, searchParams }: Params) {
     }),
   ]);
 
-  const hasAiTextGeneration = AI_CONTENT_GENERATION_ENABLED;
+  const hasAiContentGeneration = AI_CONTENT_GENERATION_ENABLED;
 
   if (formDataFromExif) {
     if (recipeTitle) {
@@ -96,9 +105,12 @@ export default async function UploadPage({ params, searchParams }: Params) {
         uniqueTags,
         uniqueRecipes,
         uniqueFilms,
-        hasAiTextGeneration,
+        uniqueCameras,
+        uniqueLenses,
+        hasAiContentGeneration,
         imageThumbnailBase64,
         shouldStripGpsData,
+        hasLocationServices: HAS_LOCATION_SERVICES,
       }} />
       : <AppGrid contentMain={
         <ErrorNote>

@@ -12,6 +12,7 @@ import { getNavSortControlFromString, getSortByFromString } from '@/photo/sort';
 import { parseChromaCutoff, parseStartingHue } from '@/photo/color/sort';
 import { parseSocialKeysFromString } from '@/social';
 import { dependencies } from '../../package.json';
+import { normalizeRedisUrl } from '@/platforms/redis';
 
 // HARD-CODED GLOBAL CONFIGURATION
 
@@ -24,7 +25,7 @@ export const TEMPLATE_DESCRIPTION = 'Store photos with original camera data';
 
 // SOURCE CODE
 
-export const TEMPLATE_REPO_OWNER  = 'syskaul';
+export const TEMPLATE_REPO_OWNER  = 'sambecker';
 export const TEMPLATE_REPO_NAME   = 'exif-photo-blog';
 export const TEMPLATE_REPO_BRANCH = 'main';
 export const TEMPLATE_REPO_URL =
@@ -49,7 +50,7 @@ export const VERCEL_GIT_COMMIT_SHA_SHORT = VERCEL_GIT_COMMIT_SHA
   : undefined;
 export const IS_VERCEL_GIT_PROVIDER_GITHUB = VERCEL_GIT_PROVIDER === 'github';
 export const VERCEL_GIT_COMMIT_URL = IS_VERCEL_GIT_PROVIDER_GITHUB
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   ? `https://github.com/${VERCEL_GIT_REPO_OWNER}/${VERCEL_GIT_REPO_SLUG}/commit/${VERCEL_GIT_COMMIT_SHA}`
   : undefined;
 
@@ -70,6 +71,9 @@ export const IS_PRODUCTION = process.env.NODE_ENV === 'production' && (
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 export const IS_PREVIEW = VERCEL_ENV === 'preview';
 export const IS_BUILDING = process.env.NEXT_PHASE === 'phase-production-build';
+// VERCEL_ENV is only ever set by Vercel's platform (or `vercel env pull`),
+// so its presence is a reliable "are we actually running on Vercel" signal.
+export const IS_VERCEL_DEPLOYMENT = Boolean(VERCEL_ENV);
 
 export const VERCEL_BYPASS_KEY = 'x-vercel-protection-bypass';
 export const VERCEL_BYPASS_SECRET = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
@@ -146,10 +150,15 @@ export const NAV_TITLE =
   SITE_DOMAIN_SHORT ||
   META_TITLE;
 
-export const PAGE_ABOUT =
+export const SIDEBAR_TEXT =
+  process.env.NEXT_PUBLIC_SIDEBAR_TEXT ||
+  // Legacy environment variables
   process.env.NEXT_PUBLIC_PAGE_ABOUT ||
-  // Legacy environment variable
   process.env.NEXT_PUBLIC_SITE_ABOUT;
+
+export const LIBRARY_DESCRIPTION_DEFAULT =
+  process.env.NEXT_PUBLIC_META_DESCRIPTION ||
+  process.env.NEXT_PUBLIC_SIDEBAR_TEXT;
 
 // STORAGE
 
@@ -160,12 +169,20 @@ export const POSTGRES_SSL_ENABLED =
   process.env.DISABLE_POSTGRES_SSL === '1' ? false : true;
 
 // STORAGE: REDIS
+export const REDIS_URL = normalizeRedisUrl(
+  process.env.KV_URL ||
+  process.env.KV_REST_API_URL ||
+  process.env.EXIF_KV_REST_API_URL ||
+  process.env.UPSTASH_REDIS_REST_URL,
+);
+export const REDIS_TOKEN = (
+  process.env.KV_TOKEN ||
+  process.env.KV_REST_API_TOKEN ||
+  process.env.EXIF_KV_REST_API_TOKEN ||
+  process.env.UPSTASH_REDIS_REST_TOKEN
+);
 export const HAS_REDIS_STORAGE =
-  Boolean(
-    process.env.KV_URL ||
-    process.env.EXIF_KV_REST_API_URL ||
-    process.env.UPSTASH_REDIS_REST_URL,
-  );
+  Boolean(REDIS_URL && REDIS_TOKEN);
 
 // STORAGE: VERCEL BLOB
 export const HAS_VERCEL_BLOB_STORAGE =
@@ -251,20 +268,58 @@ export const IMAGE_QUALITY =
     ? parseInt(process.env.NEXT_PUBLIC_IMAGE_QUALITY)
     : 75;
 export const BLUR_ENABLED =
+  process.env.NEXT_PUBLIC_DISABLE_BLUR !== '1' &&
+  // Legacy environment variable
   process.env.NEXT_PUBLIC_BLUR_DISABLED !== '1';
 
 // AI
 
-export const OPENAI_SECRET_KEY = process.env.OPENAI_SECRET_KEY;
+// AI text generation supports two providers, selected purely by which
+// switch var is set (no separate provider-selection var):
+//   OPENAI_SECRET_KEY set     -> direct OpenAI (explicit opt-in; wins if both)
+//   else AI_GATEWAY_MODEL set -> Vercel AI Gateway
+//   else                      -> off (a fresh deploy never calls an LLM)
+// Both switch vars are trimmed so a blank/whitespace value can't accidentally
+// win precedence or (for the gateway) construct an invalid model.
+export const OPENAI_SECRET_KEY =
+  process.env.OPENAI_SECRET_KEY?.trim() || undefined;
+export const OPENAI_MODEL = process.env.OPENAI_MODEL;
 export const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL;
-export const AI_CONTENT_GENERATION_ENABLED = Boolean(OPENAI_SECRET_KEY);
+// Vercel AI Gateway: routes through https://vercel.com/docs/ai-gateway.
+// Model strings use the 'creator/model-name' format, e.g. 'openai/gpt-5.2'.
+// AI_GATEWAY_API_KEY is only required outside Vercel-hosted deployments —
+// Vercel authenticates automatically via OIDC when this app is deployed there.
+export const AI_GATEWAY_API_KEY = process.env.AI_GATEWAY_API_KEY;
+export const AI_GATEWAY_MODEL =
+  process.env.AI_GATEWAY_MODEL?.trim() || undefined;
+
+type AiContentGenerationProvider = 'openai' | 'gateway' | undefined;
+
+// Direct OpenAI is the explicit override: setting a secret key is a
+// deliberate act, so it wins over an ambient Gateway model. Gateway is the
+// recommended default when no OpenAI key is present.
+export const AI_CONTENT_GENERATION_PROVIDER: AiContentGenerationProvider =
+  OPENAI_SECRET_KEY
+    ? 'openai'
+    : AI_GATEWAY_MODEL
+      ? 'gateway'
+      : undefined;
+export const AI_CONTENT_GENERATION_ENABLED =
+  Boolean(AI_CONTENT_GENERATION_PROVIDER);
 export const AI_TEXT_AUTO_GENERATED_FIELDS = parseAiAutoGeneratedFieldsString(
   process.env.AI_TEXT_AUTO_GENERATED_FIELDS);
 
-// LOCATION SERVICES
+// LOCATION
 
-export const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-export const HAS_LOCATION_SERVICES = Boolean(GOOGLE_PLACES_API_KEY);
+export const GEO_PRIVACY_ENABLED =
+  process.env.NEXT_PUBLIC_GEO_PRIVACY === '1';
+export const GOOGLE_PLACES_GEOCODING_API_KEY =
+  process.env.GOOGLE_PLACES_GEOCODING_API_KEY ||
+  // Legacy environment variable
+  process.env.GOOGLE_PLACES_API_KEY;
+export const HAS_LOCATION_SERVICES = Boolean(GOOGLE_PLACES_GEOCODING_API_KEY);
+export const AUTO_GENERATE_LOCATIONS =
+  process.env.DISABLE_AUTO_GENERATE_LOCATIONS !== '1';
 
 // CATEGORIES
 
@@ -325,17 +380,21 @@ export const SHOW_KEYBOARD_SHORTCUT_TOOLTIPS =
   process.env.NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS !== '1';
 export const SHOW_EXIF_DATA =
   process.env.NEXT_PUBLIC_HIDE_EXIF_DATA !== '1';
+export const ALWAYS_SHOW_EXPOSURE_COMP =
+  process.env.NEXT_PUBLIC_ALWAYS_SHOW_EXPOSURE_COMP === '1';
 export const SHOW_ZOOM_CONTROLS =
   process.env.NEXT_PUBLIC_HIDE_ZOOM_CONTROLS !== '1';
 export const SHOW_TAKEN_AT_TIME =
   process.env.NEXT_PUBLIC_HIDE_TAKEN_AT_TIME !== '1';
-export const SHOW_REPO_LINK =
-  process.env.NEXT_PUBLIC_HIDE_REPO_LINK !== '1';
+export const SHOW_TEMPLATE_ATTRIBUTION =
+  process.env.NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION !== '1';
 
 // GRID
 
 export const GRID_HOMEPAGE_ENABLED =
   process.env.NEXT_PUBLIC_GRID_HOMEPAGE === '1';
+export const MASONRY_GRID_ENABLED =
+  process.env.NEXT_PUBLIC_MASONRY_GRID === '1';
 export const GRID_ASPECT_RATIO =
   process.env.NEXT_PUBLIC_GRID_ASPECT_RATIO
     ? parseFloat(process.env.NEXT_PUBLIC_GRID_ASPECT_RATIO)
@@ -354,17 +413,23 @@ export const DEFAULT_THEME =
     : process.env.NEXT_PUBLIC_DEFAULT_THEME === 'light'
       ? 'light'
       : 'system';
+export const UPPERCASE_TITLES =
+  process.env.NEXT_PUBLIC_DISABLE_UPPERCASE_TITLES !== '1';
 export const MATTE_PHOTOS =
   process.env.NEXT_PUBLIC_MATTE_PHOTOS === '1';
 export const MATTE_COLOR =
   process.env.NEXT_PUBLIC_MATTE_COLOR;
 export const MATTE_COLOR_DARK =
   process.env.NEXT_PUBLIC_MATTE_COLOR_DARK;
+export const TINT_FOLDERS =
+  process.env.NEXT_PUBLIC_TINT_FOLDERS === '1';
+export const HIGH_DENSITY_PREVIEWS =
+  process.env.NEXT_PUBLIC_HIGH_DENSITY_PREVIEWS === '1';
+export const OG_TEXT_BOTTOM_ALIGNMENT =
+  (process.env.NEXT_PUBLIC_OG_TEXT_ALIGNMENT ?? '').toUpperCase() === 'BOTTOM';
 
 // SETTINGS
 
-export const GEO_PRIVACY_ENABLED =
-  process.env.NEXT_PUBLIC_GEO_PRIVACY === '1';
 export const ALLOW_PUBLIC_DOWNLOADS =
   process.env.NEXT_PUBLIC_ALLOW_PUBLIC_DOWNLOADS === '1';
 export const SOCIAL_NETWORKS = parseSocialKeysFromString(
@@ -375,17 +440,6 @@ export const SOCIAL_NETWORKS = parseSocialKeysFromString(
 );
 export const SITE_FEEDS_ENABLED =
   process.env.NEXT_PUBLIC_SITE_FEEDS === '1';
-export const OG_TEXT_BOTTOM_ALIGNMENT =
-  (process.env.NEXT_PUBLIC_OG_TEXT_ALIGNMENT ?? '').toUpperCase() === 'BOTTOM';
-
-// SCRIPTS & ANALYTICS
-
-export const PAGE_SCRIPT_URLS = process.env.PAGE_SCRIPT_URLS
-  ? process.env.PAGE_SCRIPT_URLS
-    .split(',')
-    .map(url => url.trim().toLocaleLowerCase())
-    .filter(url => url.startsWith('https://'))
-  : [];
 
 // DEBUGGING
 
@@ -393,11 +447,19 @@ export const DEBUG_OUTPUTS_ENABLED = process.env.DISABLE_DEBUG_OUTPUTS !== '1';
 
 // INTERNAL
 
-export const ADMIN_DEBUG_TOOLS_ENABLED = process.env.ADMIN_DEBUG_TOOLS === '1';
+export const ADMIN_DEBUG_TOOLS_ENABLED =
+  process.env.ADMIN_DEBUG_TOOLS === '1';
 export const ADMIN_SQL_DEBUG_ENABLED =
   process.env.ADMIN_SQL_DEBUG === '1' &&
   !IS_BUILDING;
+export const ADMIN_STORAGE_DEBUG_ENABLED =
+  process.env.ADMIN_STORAGE_DEBUG === '1';
+export const ADMIN_AI_MODEL_DEBUG_ENABLED =
+  process.env.ADMIN_AI_MODEL_DEBUG === '1';
 
+// ⚠️ Add `APP_CONFIGURATION` keys with caution
+// Under certain debugging conditions, this object
+// is exposed to the client 
 export const APP_CONFIGURATION = {
   // Storage
   hasDatabase: HAS_DATABASE,
@@ -438,8 +500,8 @@ export const APP_CONFIGURATION = {
   hasNavTitle: Boolean(CUSTOM_NAV_TITLE),
   navCaption: NAV_CAPTION,
   hasNavCaption: Boolean(NAV_CAPTION),
-  pageAbout: PAGE_ABOUT,
-  hasPageAbout: Boolean(process.env.NEXT_PUBLIC_SITE_ABOUT),
+  sidebarText: SIDEBAR_TEXT,
+  hasSidebarText: Boolean(SIDEBAR_TEXT),
   // Performance
   isStaticallyOptimized: HAS_STATIC_OPTIMIZATION,
   arePhotosStaticallyOptimized: STATICALLY_OPTIMIZED_PHOTOS,
@@ -452,8 +514,14 @@ export const APP_CONFIGURATION = {
   imageQuality: IMAGE_QUALITY,
   isBlurEnabled: BLUR_ENABLED,
   // AI
+  isVercelDeployment: IS_VERCEL_DEPLOYMENT,
+  hasOpenaiSecretKey: Boolean(OPENAI_SECRET_KEY),
+  hasOpenaiModel: Boolean(OPENAI_MODEL),
   hasOpenaiBaseUrl: Boolean(OPENAI_BASE_URL),
-  isAiTextGenerationEnabled: AI_CONTENT_GENERATION_ENABLED,
+  hasAiGatewayModel: Boolean(AI_GATEWAY_MODEL),
+  openaiModel: OPENAI_MODEL,
+  aiContentGenerationProvider: AI_CONTENT_GENERATION_PROVIDER,
+  isAiContentGenerationEnabled: AI_CONTENT_GENERATION_ENABLED,
   aiTextAutoGeneratedFields: process.env.AI_TEXT_AUTO_GENERATED_FIELDS
     ? AI_TEXT_AUTO_GENERATED_FIELDS.length === 0
       ? ['none']
@@ -461,8 +529,10 @@ export const APP_CONFIGURATION = {
     : AI_AUTO_GENERATED_FIELDS_DEFAULT,
   hasAiTextAutoGeneratedFields:
     Boolean(process.env.AI_TEXT_AUTO_GENERATED_FIELDS),
-  // Location services
+  // Location
+  isGeoPrivacyEnabled: GEO_PRIVACY_ENABLED,
   hasLocationServices: HAS_LOCATION_SERVICES,
+  autoGenerateLocations: AUTO_GENERATE_LOCATIONS,
   // Categories
   hasCategoryVisibility:
     Boolean(process.env.NEXT_PUBLIC_CATEGORY_VISIBILITY),
@@ -486,11 +556,13 @@ export const APP_CONFIGURATION = {
   // Display
   showKeyboardShortcutTooltips: SHOW_KEYBOARD_SHORTCUT_TOOLTIPS,
   showExifInfo: SHOW_EXIF_DATA,
+  alwaysShowExposureComp: ALWAYS_SHOW_EXPOSURE_COMP,
   showZoomControls: SHOW_ZOOM_CONTROLS,
   showTakenAtTimeHidden: SHOW_TAKEN_AT_TIME,
-  showRepoLink: SHOW_REPO_LINK,
+  showRepoLink: SHOW_TEMPLATE_ATTRIBUTION,
   // Grid
   isGridHomepageEnabled: GRID_HOMEPAGE_ENABLED,
+  isMasonryGridEnabled: MASONRY_GRID_ENABLED,
   gridAspectRatio: GRID_ASPECT_RATIO,
   hasGridAspectRatio: Boolean(process.env.NEXT_PUBLIC_GRID_ASPECT_RATIO),
   hasHighGridDensity: HIGH_DENSITY_GRID,
@@ -505,27 +577,33 @@ export const APP_CONFIGURATION = {
     Boolean(MATTE_COLOR_DARK),
   matteColor: MATTE_COLOR,
   matteColorDark: MATTE_COLOR_DARK,
+  arePhotoTitlesUppercase: UPPERCASE_TITLES,
+  areFoldersTinted: TINT_FOLDERS,
+  hasHighDensityPreviews: HIGH_DENSITY_PREVIEWS,
+  isOgTextBottomAligned: OG_TEXT_BOTTOM_ALIGNMENT,
   // Settings
-  isGeoPrivacyEnabled: GEO_PRIVACY_ENABLED,
   arePublicDownloadsEnabled: ALLOW_PUBLIC_DOWNLOADS,
   hasSocialKeys: Boolean(process.env.NEXT_PUBLIC_SOCIAL_NETWORKS),
   socialKeys: SOCIAL_NETWORKS,
   areSiteFeedsEnabled: SITE_FEEDS_ENABLED,
-  isOgTextBottomAligned: OG_TEXT_BOTTOM_ALIGNMENT,
-  // Scripts & Analytics
-  hasPageScriptUrls: PAGE_SCRIPT_URLS.length > 0,
-  pageScriptUrls: PAGE_SCRIPT_URLS,
+  // Analytics
+  hasMixpanelToken: Boolean(process.env.NEXT_PUBLIC_MIXPANEL_TOKEN),
   // Debugging
   isDebuggingEnabled: DEBUG_OUTPUTS_ENABLED,
   // Internal
   areInternalToolsEnabled: (
     ADMIN_DEBUG_TOOLS_ENABLED ||
-    ADMIN_SQL_DEBUG_ENABLED
+    ADMIN_SQL_DEBUG_ENABLED ||
+    ADMIN_AI_MODEL_DEBUG_ENABLED
   ),
   areAdminDebugToolsEnabled: ADMIN_DEBUG_TOOLS_ENABLED,
   isAdminSqlDebugEnabled: ADMIN_SQL_DEBUG_ENABLED,
+  isAdminStorageDebugEnabled: ADMIN_STORAGE_DEBUG_ENABLED,
+  isAdminAiModelDebugEnabled: ADMIN_AI_MODEL_DEBUG_ENABLED,
   // Misc
   nextVersion: dependencies.next,
+  reactVersion: dependencies.react,
+  nodeVersion: (process.version || '').match(/[0-9.]+$/)?.[0],
   baseUrl: BASE_URL,
   baseUrlShare: BASE_URL_SHARE,
   commitSha: VERCEL_GIT_COMMIT_SHA_SHORT,
@@ -544,7 +622,10 @@ const ALL_DEPRECATED_ENV_VARS = [{
   replacement: 'NEXT_PUBLIC_META_TITLE',
 }, {
   old: 'NEXT_PUBLIC_SITE_ABOUT',
-  replacement: 'NEXT_PUBLIC_PAGE_ABOUT',
+  replacement: 'NEXT_PUBLIC_SIDEBAR_TEXT',
+}, {
+  old: 'NEXT_PUBLIC_PAGE_ABOUT',
+  replacement: 'NEXT_PUBLIC_SIDEBAR_TEXT',
 }, {
   old: 'NEXT_PUBLIC_STATICALLY_OPTIMIZE_PAGES',
   replacement: 'NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTOS',
@@ -557,6 +638,15 @@ const ALL_DEPRECATED_ENV_VARS = [{
 }, {
   old: 'NEXT_PUBLIC_HIDE_SOCIAL',
   replacement: 'NEXT_PUBLIC_SOCIAL_NETWORKS',
+}, {
+  old: 'NEXT_PUBLIC_BLUR_DISABLED',
+  replacement: 'NEXT_PUBLIC_DISABLE_BLUR',
+}, {
+  old: 'GOOGLE_PLACES_API_KEY',
+  replacement: 'GOOGLE_PLACES_GEOCODING_API_KEY',
+}, {
+  old: 'NEXT_PUBLIC_HIDE_REPO_LINK',
+  replacement: 'NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION',
 }];
 
 export const USED_DEPRECATED_ENV_VARS = ALL_DEPRECATED_ENV_VARS

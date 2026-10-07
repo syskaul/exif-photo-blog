@@ -19,18 +19,18 @@ import { CategoryQueryMeta, sortCategoryByCount } from '@/category';
 import { AppTextState } from '@/i18n/state';
 
 // Reserved tags
-export const TAG_FAVS   = 'favs';
-export const TAG_PRIVATE = 'private';
+export const TAG_FAVS     = 'favs';
+export const TAG_PRIVATE  = 'private';
 
 type TagWithMeta = { tag: string } & CategoryQueryMeta;
 
-export type Tags = TagWithMeta[]
+export type Tags = TagWithMeta[];
 
 export const formatTag = (tag?: string) =>
   capitalizeWords(tag?.replaceAll('-', ' '));
 
 export const getValidationMessageForTags = (tags?: string) => {
-  const reservedTags = (convertStringToArray(tags) ?? [])
+  const reservedTags = convertStringToArray(tags)
     .filter(tag => isTagFavs(tag) || isTagPrivate(tag))
     .map(tag => tag.toLocaleUpperCase());
   return reservedTags.length
@@ -137,7 +137,7 @@ export const deleteTagConfirmationText = (
   count: number,
   appText: AppTextState,
 ) =>
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   `Are you sure you want to remove "${formatTag(tag)}" from ${photoQuantityText(count, appText, false, false).toLowerCase()}?`;
 
 export const isTagFavs = (tag: string) => tag.toLocaleLowerCase() === TAG_FAVS;
@@ -147,7 +147,8 @@ export const isPhotoFav = ({ tags }: Photo) => tags.some(isTagFavs);
 export const isPathFavs = (pathname?: string) =>
   getPathComponents(pathname).tag === TAG_FAVS;
 
-export const isTagPrivate = (tag: string) => tag.toLowerCase() === TAG_PRIVATE;
+export const isTagPrivate = (tag = '') =>
+  tag.toLocaleLowerCase() === TAG_PRIVATE;
 
 export const addPrivateToTags = (
   tags: Tags,

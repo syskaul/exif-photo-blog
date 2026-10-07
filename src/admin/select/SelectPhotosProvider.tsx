@@ -2,12 +2,19 @@
 
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { SelectPhotosContext } from './SelectPhotosState';
-import { PARAM_SELECT, PATH_GRID_INFERRED } from '@/app/path';
+import {
+  getPathComponents,
+  PARAM_SELECT,
+  PATH_GRID_INFERRED,
+} from '@/app/path';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppState } from '@/app/AppState';
 import useClientSearchParams from '@/utility/useClientSearchParams';
 import { replacePathWithEvent } from '@/utility/url';
 import { isElementPartiallyInViewport } from '@/utility/dom';
+import { getPhotoOptionsCountForPathAction } from '@/photo/actions';
+import { PhotoQueryOptions } from '@/db';
+import { VisibilityValue } from '@/photo/visibility';
 
 export const DATA_KEY_PHOTO_GRID = 'data-photo-grid';
 
@@ -20,8 +27,17 @@ export default function SelectPhotosProvider({
 
   const pathname = usePathname();
 
-  const { isUserSignedIn } = useAppState();
-  
+  const shouldShowSelectAll = useMemo(() => {
+    const { photoId } = getPathComponents(pathname);
+    return photoId === undefined;
+  }, [pathname]);
+
+  const {
+    isUserSignedIn,
+    isPhotoSetFull,
+    setIsPhotoSetFull,
+  } = useAppState();
+
   const searchParamsSelect = useClientSearchParams(
     PARAM_SELECT,
     // Only scan urls when admin is signed in
@@ -32,8 +48,19 @@ export default function SelectPhotosProvider({
     useState(false);
   const [selectedPhotoIds, setSelectedPhotoIds] =
     useState<string[]>([]);
+  const [isSelectingAllPhotos, setIsSelectingAllPhotos] =
+    useState(false);
+  const [selectAllPhotoOptions, setSelectAllPhotoOptions] =
+    useState<PhotoQueryOptions>();
+  const [selectAllCount, setSelectAllCount] = useState<number>();
   const [isPerformingSelectEdit, setIsPerformingSelectEdit] =
     useState(false);
+
+  const [albumTitles, setAlbumTitles] = useState<string>();
+  const [tags, setTags] = useState<string>();
+  const [tagErrorMessage, setTagErrorMessage] = useState('');
+  const [visibility, setVisibility] =
+    useState<VisibilityValue | ''>();
 
   const getPhotoGridElements = useCallback(() =>
     document.querySelectorAll(`[${DATA_KEY_PHOTO_GRID}=true]`)
@@ -51,18 +78,54 @@ export default function SelectPhotosProvider({
     isUserSignedIn &&
     searchParamsSelect === 'true'
   , [isUserSignedIn, searchParamsSelect]);
-    
-  const startSelectingPhotos = useCallback(() =>
-    canCurrentPageSelectPhotos
+
+  const startSelectingPhotos = useCallback(() => {
+    // Photo-set "Full" is local view state and hides grid tiles
+    if (isPhotoSetFull) {
+      setIsPhotoSetFull?.(false);
+    }
+    if (canCurrentPageSelectPhotos || isPhotoSetFull) {
       // Use replacePathWithEvent because only query params change
-      ? replacePathWithEvent(`${pathname}?${PARAM_SELECT}=true`)
+      replacePathWithEvent(`${pathname}?${PARAM_SELECT}=true`);
+    } else {
       // Redirect to grid if current view does not support photo selection
-      : router.push(`${PATH_GRID_INFERRED}?${PARAM_SELECT}=true`)
-  , [router, canCurrentPageSelectPhotos, pathname]);
-  
+      router.push(`${PATH_GRID_INFERRED}?${PARAM_SELECT}=true`);
+    }
+  }, [
+    router,
+    canCurrentPageSelectPhotos,
+    pathname,
+    isPhotoSetFull,
+    setIsPhotoSetFull,
+  ]);
+
   const stopSelectingPhotos = useCallback(() =>
     replacePathWithEvent(pathname)
   , [pathname]);
+
+  const togglePhotoSelection = useCallback((photoId: string) => {
+    if (isSelectingAllPhotos) {
+      setSelectedPhotoIds([photoId]);
+      setIsSelectingAllPhotos(false);
+    } else {
+      setSelectedPhotoIds(selectedPhotoIds.includes(photoId)
+        ? (selectedPhotoIds ?? []).filter(id => id !== photoId)
+        : (selectedPhotoIds ?? []).concat(photoId));
+    }
+  }, [isSelectingAllPhotos, selectedPhotoIds]);
+
+  const toggleIsSelectingAllPhotos = useCallback(() => {
+    setIsSelectingAllPhotos(!isSelectingAllPhotos);
+    setSelectedPhotoIds([]);
+    if (!isSelectingAllPhotos) {
+      getPhotoOptionsCountForPathAction(pathname)
+        .then(({ options, count }) => {
+          setSelectAllPhotoOptions(options);
+          setSelectAllCount(count);
+        })
+        .catch(() => setIsSelectingAllPhotos(false));
+    }
+  }, [isSelectingAllPhotos, pathname]);
 
   useEffect(() => {
     if (isSelectingPhotos) {
@@ -75,6 +138,13 @@ export default function SelectPhotosProvider({
     } else {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedPhotoIds([]);
+      setIsSelectingAllPhotos(false);
+      setSelectAllPhotoOptions(undefined);
+      setSelectAllCount(undefined);
+      setAlbumTitles(undefined);
+      setTags(undefined);
+      setTagErrorMessage('');
+      setVisibility(undefined);
     }
   }, [isSelectingPhotos, getPhotoGridElements]);
 
@@ -82,12 +152,25 @@ export default function SelectPhotosProvider({
     <SelectPhotosContext.Provider value={{
       canCurrentPageSelectPhotos,
       isSelectingPhotos,
+      isSelectingAllPhotos,
+      shouldShowSelectAll,
+      toggleIsSelectingAllPhotos,
       startSelectingPhotos,
       stopSelectingPhotos,
       selectedPhotoIds,
-      setSelectedPhotoIds,
+      selectAllPhotoOptions,
+      selectAllCount,
+      togglePhotoSelection,
       isPerformingSelectEdit,
       setIsPerformingSelectEdit,
+      albumTitles,
+      setAlbumTitles,
+      tags,
+      setTags,
+      tagErrorMessage,
+      setTagErrorMessage,
+      visibility,
+      setVisibility,
     }}>
       {children}
     </SelectPhotosContext.Provider>

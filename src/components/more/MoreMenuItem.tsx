@@ -11,12 +11,27 @@ import LoaderButton from '../primitives/LoaderButton';
 import { downloadFileFromBrowser } from '@/utility/url';
 import KeyCommand from '../primitives/KeyCommand';
 import LoaderLink from '../LoaderLink';
+import IconCheck from '../icons/IconCheck';
+import { getMenuItemColorClasses } from '../primitives/surface';
+
+// Indicate the active option in a menu of mutually-exclusive choices
+export const renderMenuItemCheck = (isChecked: boolean) => isChecked
+  ? <IconCheck size={13} />
+  : <span />;
+
+export const renderMenuItemLabel = (label: string, isSelected: boolean) => ({
+  label,
+  labelComplex: <span className={clsx(!isSelected && 'text-dim')}>
+    {label}
+  </span>,
+});
 
 export default function MoreMenuItem({
   label,
   labelComplex,
   annotation,
   icon,
+  accessoryEnd,
   color = 'grey',
   href,
   hrefDownloadName,
@@ -31,7 +46,8 @@ export default function MoreMenuItem({
   labelComplex?: ReactNode
   annotation?: ReactNode
   icon?: ReactNode
-  color?: 'grey' | 'red'
+  accessoryEnd?: ReactNode
+  color?: 'grey' | 'red' | 'yellow'
   href?: string
   hrefDownloadName?: string
   className?: string
@@ -43,25 +59,17 @@ export default function MoreMenuItem({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const getColorClasses = () => {
-    switch (color) {
-      case 'grey': return clsx(
-        'hover:bg-gray-100/90 active:bg-gray-200/75',
-        'dark:hover:bg-gray-800/60 dark:active:bg-gray-900/80',
-      );
-      case 'red': return clsx(
-        'hover:bg-red-100/50 active:bg-red-100/75',
-        'dark:hover:bg-red-950/55 dark:active:bg-red-950/80',
-      );
-    }
-  };
+  // Stretch the label so a trailing annotation sits on the menu's right edge
+  const classNameContent = annotation
+    ? 'flex grow items-center'
+    : undefined;
 
   const buttonContent = <>
-    <span>
+    <span className={clsx(annotation && 'grow text-left')}>
       {labelComplex ?? label}
     </span>
     {annotation &&
-      <span className="text-dim ml-3">
+      <span className="text-dim ml-3 shrink-0">
         {annotation}
       </span>}
   </>;
@@ -71,13 +79,14 @@ export default function MoreMenuItem({
       disabled={isLoading}
       className={clsx(
         'flex items-center h-8.5 gap-4',
-        'px-2 py-2 rounded-sm',
+        'px-2 py-2 rounded-lg',
         'select-none hover:outline-hidden',
-        getColorClasses(),
+        getMenuItemColorClasses(color),
         'whitespace-nowrap',
         isLoading
-          ? 'cursor-not-allowed opacity-50'
+          ? 'cursor-not-allowed'
           : 'cursor-pointer',
+        isLoading && icon && 'text-dim',
         className,
       )}
       onSelect={async e => {
@@ -123,6 +132,8 @@ export default function MoreMenuItem({
             '-m-2 p-2',
             keyCommand && 'sm:-mr-10',
           )}
+          classNameWrapper={annotation ? 'grow' : undefined}
+          classNameContent={classNameContent}
           onLoad={() => {
             action?.();
             dismissMenu?.();
@@ -136,11 +147,16 @@ export default function MoreMenuItem({
           isLoading={isLoading}
           hideText="never"
           styleAs="link-without-hover"
-          className="translate-y-[0.5px] text-sm grow"
+          className="translate-y-[0.5px] text-sm grow text-left"
           classNameIcon="translate-y-[-0.5px]!"
+          classNameContent={classNameContent}
         >
           {buttonContent}
         </LoaderButton>}
+      {accessoryEnd &&
+        <span className="shrink-0 text-dim pointer-events-none">
+          {accessoryEnd}
+        </span>}
       {keyCommand &&
         <KeyCommand
           modifier={keyCommandModifier}

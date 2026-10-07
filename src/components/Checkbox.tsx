@@ -32,7 +32,6 @@ export default function Checkbox({
           ? 'cursor-not-allowed'
           : 'group-has-active:opacity-70',
       )}
-      onClick={() => ref?.current?.click()}
     >
       {accessory
         ? accessory
@@ -62,6 +61,7 @@ export default function Checkbox({
         type="checkbox"
         className={clsx(
           'absolute inset-0 opacity-0! size-5',
+          !props.readOnly && !props.disabled && 'cursor-pointer',
           className,
         )}
         {...props}

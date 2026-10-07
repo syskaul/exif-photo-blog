@@ -19,6 +19,7 @@ export default function ImageWithFallback({
   ref?: RefObject<HTMLImageElement | null>
   blurCompatibilityLevel?: 'none' | 'low' | 'high'
   classNameImage?: string
+  priority?: boolean
 }) {
   const ref = useRef<HTMLImageElement>(null);
 
@@ -37,7 +38,6 @@ export default function ImageWithFallback({
       !ref.current?.complete ||
       (ref.current?.naturalWidth ?? 0) === 0
     ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFadeFallbackTransition(true);
     }
   }, []);

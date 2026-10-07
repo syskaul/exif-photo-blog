@@ -8,6 +8,7 @@ import { Album } from '.';
 import useCategoryCounts from '@/category/useCategoryCounts';
 import AdminAlbumMenu from './AdminAlbumMenu';
 import { useAppState } from '@/app/AppState';
+import { htmlToPlainText } from '@/utility/html';
 
 export default function PhotoAlbum({
   album,
@@ -26,6 +27,9 @@ export default function PhotoAlbum({
       label={album.title}
       path={pathForAlbum(album)}
       hoverQueryOptions={{ album }}
+      hoverDescription={album.description
+        ? htmlToPlainText(album.description) || undefined
+        : undefined}
       icon={<IconAlbum className="translate-y-[-0.5px]" />}
       hoverCount={props.hoverCount ?? getAlbumCount(album)}
       action={showAdminMenu && isUserSignedIn &&

@@ -14,6 +14,8 @@ import { useMemo } from 'react';
 import { Recipes } from '@/recipe';
 import { Films } from '@/film';
 import { Albums } from '@/album';
+import { Cameras } from '@/camera';
+import { Lenses } from '@/lens';
 
 export default function UploadPageClient({
   blobId,
@@ -22,9 +24,12 @@ export default function UploadPageClient({
   uniqueTags,
   uniqueRecipes,
   uniqueFilms,
-  hasAiTextGeneration,
+  uniqueCameras,
+  uniqueLenses,
+  hasAiContentGeneration,
   imageThumbnailBase64,
   shouldStripGpsData,
+  hasLocationServices,
 }: {
   blobId?: string
   formDataFromExif: Partial<PhotoFormData>
@@ -32,9 +37,12 @@ export default function UploadPageClient({
   uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
-  hasAiTextGeneration?: boolean
+  uniqueCameras: Cameras
+  uniqueLenses: Lenses
+  hasAiContentGeneration?: boolean
   imageThumbnailBase64?: string
   shouldStripGpsData?: boolean
+  hasLocationServices?: boolean
 }) {
   const {
     pending,
@@ -63,7 +71,7 @@ export default function UploadPageClient({
         ? updatedTitle
         : blobId}
       breadcrumbEllipsis
-      accessory={hasAiTextGeneration &&
+      accessory={hasAiContentGeneration &&
         <AiButton {...{
           aiContent,
           shouldConfirm: shouldConfirmAiTextGeneration,
@@ -77,8 +85,11 @@ export default function UploadPageClient({
         uniqueTags={uniqueTags}
         uniqueRecipes={uniqueRecipes}
         uniqueFilms={uniqueFilms}
-        aiContent={hasAiTextGeneration ? aiContent : undefined}
+        uniqueCameras={uniqueCameras}
+        uniqueLenses={uniqueLenses}
+        aiContent={hasAiContentGeneration ? aiContent : undefined}
         shouldStripGpsData={shouldStripGpsData}
+        hasLocationServices={hasLocationServices}
         onTitleChange={setUpdatedTitle}
         onFormStatusChange={setIsPending}
         onFormDataChange={setShouldConfirmAiTextGeneration}

@@ -1,10 +1,10 @@
 import { getPhotoCached } from '@/photo/cache';
 import { IMAGE_OG_DIMENSION } from '@/image-response';
 import PhotoImageResponse from '@/photo/PhotoImageResponse';
-import { getIBMPlexMono } from '@/app/font';
+import { getPaperMono } from '@/app/font';
 import { getImageResponseCacheControlHeaders } from '@/image-response/cache';
 import { staticallyGeneratePhotosIfConfigured } from '@/app/static';
-import { safePhotoImageResponse } from '@/platforms/safe-photo-image-response';
+import { ImageResponse } from 'next/og';
 
 export const generateStaticParams = staticallyGeneratePhotosIfConfigured(
   'image',
@@ -22,7 +22,7 @@ export async function GET(
     headers,
   ] = await Promise.all([
     getPhotoCached(photoId),
-    getIBMPlexMono(),
+    getPaperMono(),
     getImageResponseCacheControlHeaders(),
   ]);
   
@@ -30,17 +30,13 @@ export async function GET(
 
   const { width, height } = IMAGE_OG_DIMENSION;
   
-  return safePhotoImageResponse(
-    [photo],
-    isNextImageReady => (
-      <PhotoImageResponse {...{
-        photo,
-        width,
-        height,
-        fontFamily,
-        isNextImageReady,
-      }} />
-    ),
+  return new ImageResponse(
+    <PhotoImageResponse {...{
+      photo,
+      width,
+      height,
+      fontFamily,
+    }} />,
     { width, height, fonts, headers },
   );
 }

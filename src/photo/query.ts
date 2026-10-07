@@ -1,9 +1,12 @@
-/* eslint-disable quotes */
+/* eslint-disable @stylistic/quotes */
 import {
   sql,
   query,
 } from '@/platforms/postgres';
-import { convertArrayToPostgresString } from '@/db';
+import {
+  convertArrayToPostgresString,
+  parameterizeForDb,
+} from '@/db';
 import {
   PhotoDb,
   PhotoDbInsert,
@@ -44,6 +47,8 @@ export const createPhotosTable = () =>
       id VARCHAR(8) PRIMARY KEY,
       url VARCHAR(255) NOT NULL,
       extension VARCHAR(255) NOT NULL,
+      width INTEGER,
+      height INTEGER,
       aspect_ratio REAL DEFAULT 1.5,
       blur_data TEXT,
       title VARCHAR(255),
@@ -57,10 +62,11 @@ export const createPhotosTable = () =>
       lens_make VARCHAR(255),
       lens_model VARCHAR(255),
       f_number REAL,
-      iso SMALLINT,
+      iso INTEGER,
       exposure_time DOUBLE PRECISION,
       exposure_compensation REAL,
       location_name VARCHAR(255),
+      location JSONB,
       latitude DOUBLE PRECISION,
       longitude DOUBLE PRECISION,
       film VARCHAR(255),
@@ -85,6 +91,8 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       id,
       url,
       extension,
+      width,
+      height,
       aspect_ratio,
       blur_data,
       title,
@@ -102,6 +110,7 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       exposure_time,
       exposure_compensation,
       location_name,
+      location,
       latitude,
       longitude,
       film,
@@ -118,6 +127,8 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       ${photo.id},
       ${photo.url},
       ${photo.extension},
+      ${photo.width},
+      ${photo.height},
       ${photo.aspectRatio},
       ${photo.blurData},
       ${photo.title},
@@ -135,6 +146,9 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       ${photo.exposureTime},
       ${photo.exposureCompensation},
       ${photo.locationName},
+      ${photo.location
+        ? JSON.stringify(photo.location)
+        : null},
       ${photo.latitude},
       ${photo.longitude},
       ${photo.film},
@@ -155,6 +169,8 @@ export const updatePhoto = (photo: PhotoDbInsert) =>
     UPDATE photos SET
       url=${photo.url},
       extension=${photo.extension},
+      width=${photo.width},
+      height=${photo.height},
       aspect_ratio=${photo.aspectRatio},
       blur_data=${photo.blurData},
       title=${photo.title},
@@ -172,6 +188,9 @@ export const updatePhoto = (photo: PhotoDbInsert) =>
       exposure_time=${photo.exposureTime},
       exposure_compensation=${photo.exposureCompensation},
       location_name=${photo.locationName},
+      location=${photo.location
+        ? JSON.stringify(photo.location)
+        : null},
       latitude=${photo.latitude},
       longitude=${photo.longitude},
       film=${photo.film},
@@ -188,6 +207,33 @@ export const updatePhoto = (photo: PhotoDbInsert) =>
     WHERE id=${photo.id}
   `, 'updatePhoto');
 
+export const updatePhotoTitleCaption = (
+  photoIds: string[],
+  titles: (string | null)[],
+  captions: (string | null)[],
+) => {
+  if (photoIds.length === 0) {
+    return Promise.resolve();
+  }
+
+  const values: (string | null)[] = [];
+  const valueRows = photoIds.map((id, index) => {
+    const base = index * 3;
+    values.push(id, titles[index] ?? null, captions[index] ?? null);
+    return `($${base + 1}::text, $${base + 2}::text, $${base + 3}::text)`;
+  });
+  values.push((new Date()).toISOString());
+
+  return safelyQuery(() => query(`
+    UPDATE photos AS p SET
+      title = v.title,
+      caption = v.caption,
+      updated_at = $${values.length}
+    FROM (VALUES ${valueRows.join(', ')}) AS v(id, title, caption)
+    WHERE p.id = v.id
+  `, values), 'updatePhotoTitleCaption');
+};
+
 export const deletePhotoTagGlobally = (tag: string) =>
   safelyQuery(() => sql`
     UPDATE photos
@@ -201,6 +247,24 @@ export const renamePhotoTagGlobally = (tag: string, updatedTag: string) =>
     SET tags=ARRAY_REPLACE(tags, ${tag}, ${updatedTag})
     WHERE ${tag}=ANY(tags)
   `, 'renamePhotoTagGlobally');
+
+export const setPhotoVisibilityForIds = (
+  photoIds: string[],
+  hidden: boolean,
+  excludeFromFeeds: boolean,
+) =>
+  safelyQuery(() => query(`
+    UPDATE photos SET
+      hidden = $1,
+      exclude_from_feeds = $2,
+      updated_at = $3
+    WHERE id = ANY($4)
+  `, [
+    hidden,
+    excludeFromFeeds,
+    (new Date()).toISOString(),
+    convertArrayToPostgresString(photoIds),
+  ]), 'setPhotoVisibilityForIds');
 
 export const addTagsToPhotos = (tags: string[], photoIds: string[]) =>
   safelyQuery(() => query(`
@@ -245,61 +309,68 @@ export const getPhotosMostRecentUpdate = async () =>
   `.then(({ rows }) => rows[0] ? rows[0].updated_at as Date : undefined)
   , 'getPhotosMostRecentUpdate');
 
-export const getUniqueCameras = async () =>
-  safelyQuery(() => sql`
-    SELECT DISTINCT make||' '||model as camera, make, model,
-      COUNT(*),
-      MAX(updated_at) as last_modified
+export const getUniqueCameras = async (includeHidden?: boolean) =>
+  safelyQuery(() => query(`
+    SELECT
+      MIN(make) AS make,
+      MIN(model) AS model,
+      COUNT(*) AS count,
+      MAX(updated_at) AS last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE
-    AND trim(make) <> ''
+    WHERE trim(make) <> ''
     AND trim(model) <> ''
-    GROUP BY make, model
-    ORDER BY camera ASC
-  `.then(({ rows }): Cameras => rows.map(({
-      make, model, count, last_modified,
-    }) => ({
-      cameraKey: createCameraKey({ make, model }),
-      camera: { make, model },
+    ${includeHidden ? '' : 'AND hidden IS NOT TRUE'}
+    GROUP BY
+      ${parameterizeForDb('make')},
+      ${parameterizeForDb('model')}
+    ORDER BY 1, 2
+  `).then(({ rows }): Cameras => rows.map(({
+    make, model, count, last_modified,
+  }) => ({
+    cameraKey: createCameraKey({ make, model }),
+    camera: { make, model },
+    count: parseInt(count, 10), 
+    lastModified: last_modified as Date,
+  })))
+  , 'getUniqueCameras');
+
+export const getUniqueLenses = async (includeHidden?: boolean) =>
+  safelyQuery(() => query(`
+    SELECT
+      MIN(lens_make) AS lens_make,
+      MIN(lens_model) AS lens_model,
+      COUNT(*) AS count,
+      MAX(updated_at) AS last_modified
+    FROM photos
+    WHERE trim(lens_model) <> ''
+    ${includeHidden ? '' : 'AND hidden IS NOT TRUE'}
+    GROUP BY
+      ${parameterizeForDb('lens_make')},
+      ${parameterizeForDb('lens_model')}
+    ORDER BY 1, 2
+  `).then(({ rows }): Lenses => rows
+    .map(({ lens_make: make, lens_model: model, count, last_modified }) => ({
+      lensKey: createLensKey({ make, model }),
+      lens: { make, model },
       count: parseInt(count, 10), 
       lastModified: last_modified as Date,
     })))
-  , 'getUniqueCameras');
-
-export const getUniqueLenses = async () =>
-  safelyQuery(() => sql`
-    SELECT DISTINCT lens_make||' '||lens_model as lens,
-      lens_make, lens_model,
-      COUNT(*),
-      MAX(updated_at) as last_modified
-    FROM photos
-    WHERE hidden IS NOT TRUE
-    AND trim(lens_model) <> ''
-    GROUP BY lens_make, lens_model
-    ORDER BY lens ASC
-  `.then(({ rows }): Lenses => rows
-      .map(({ lens_make: make, lens_model: model, count, last_modified }) => ({
-        lensKey: createLensKey({ make, model }),
-        lens: { make, model },
-        count: parseInt(count, 10), 
-        lastModified: last_modified as Date,
-      })))
   , 'getUniqueLenses');
 
-export const getUniqueTags = async () =>
-  safelyQuery(() => sql`
+export const getUniqueTags = async (includeHidden?: boolean) =>
+  safelyQuery(() => query(`
     SELECT DISTINCT unnest(tags) as tag,
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE
+    ${includeHidden ? '' : 'WHERE hidden IS NOT TRUE'}
     GROUP BY tag
     ORDER BY tag ASC
-  `.then(({ rows }): Tags => rows.map(({ tag, count, last_modified }) => ({
-      tag,
-      count: parseInt(count, 10),
-      lastModified: last_modified as Date,
-    })))
+  `).then(({ rows }): Tags => rows.map(({ tag, count, last_modified }) => ({
+    tag,
+    count: parseInt(count, 10),
+    lastModified: last_modified as Date,
+  })))
   , 'getUniqueTags');
 
 export const getUniqueRecipes = async () =>
@@ -349,6 +420,21 @@ export const getRecipeTitleForData = async (
   `
     .then(({ rows }) => rows[0]?.recipe_title as string | undefined)
   , 'getRecipeTitleForData');
+
+export const getRecipeDataForTitle = async (title: string) =>
+  safelyQuery(() => sql`
+    SELECT recipe_data FROM photos
+    WHERE hidden IS NOT TRUE
+    AND recipe_title=${title}
+    AND recipe_data IS NOT NULL
+    AND recipe_data::text <> 'null'
+    ORDER BY taken_at DESC
+    LIMIT 1
+  `
+    .then(({ rows }) => rows[0]?.recipe_data
+      ? JSON.stringify(rows[0].recipe_data)
+      : undefined)
+  , 'getRecipeDataForTitle');
 
 export const getPhotosNeedingRecipeTitleCount = async (
   data: string,
@@ -401,7 +487,9 @@ export const getUniqueFocalLengths = async () =>
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE AND focal_length IS NOT NULL
+    WHERE hidden IS NOT TRUE
+    AND focal_length IS NOT NULL
+    AND focal_length > 0
     GROUP BY focal_length
     ORDER BY focal_length ASC
   `.then(({ rows }): FocalLengths => rows
@@ -412,43 +500,108 @@ export const getUniqueFocalLengths = async () =>
       })))
   , 'getUniqueFocalLengths');
 
-export const getPhotos = async (options: PhotoQueryOptions = {}) =>
-  safelyQuery(async () => {
-    const sql = ['SELECT p.* FROM photos p'];
-    const values = [] as (string | number)[];
+const _getPhotos = async (
+  options: PhotoQueryOptions = {},
+  fields = ['*'], {
+    shouldParse = true,
+    includeOrderBy = true,
+  }: {
+    shouldParse?: boolean,
+    includeOrderBy?: boolean,
+  } = {},
+) => {
+  const sql = [
+    `SELECT ${fields.map(field => `p.${field}`).join(', ')} FROM photos p`,
+  ];
 
-    const joins = getJoinsFromOptions(options);
+  const values = [] as (string | number)[];
 
-    if (joins) { sql.push(joins); }
+  const joins = getJoinsFromOptions(options);
 
-    const {
-      wheres,
-      wheresValues,
-      lastValuesIndex,
-    } = getWheresFromOptions(options);
-    
-    if (wheres) {
-      sql.push(wheres);
-      values.push(...wheresValues);
-    }
+  if (joins) { sql.push(joins); }
 
+  const {
+    wheres,
+    wheresValues,
+    lastValuesIndex,
+  } = getWheresFromOptions(options);
+  
+  if (wheres) {
+    sql.push(wheres);
+    values.push(...wheresValues);
+  }
+
+  if (includeOrderBy) {
     sql.push(getOrderByFromOptions(options));
+  }
 
-    const {
-      limitAndOffset,
-      limitAndOffsetValues,
-    } = getLimitAndOffsetFromOptions(options, lastValuesIndex);
+  const {
+    limitAndOffset,
+    limitAndOffsetValues,
+  } = getLimitAndOffsetFromOptions(options, lastValuesIndex);
 
-    // LIMIT + OFFSET
-    sql.push(limitAndOffset);
-    values.push(...limitAndOffsetValues);
+  // LIMIT + OFFSET
+  sql.push(limitAndOffset);
+  values.push(...limitAndOffsetValues);
 
-    return query(sql.join(' '), values)
-      .then(({ rows }) => rows.map(parsePhotoFromDb));
-  },
-  'getPhotos',
-  // Seemingly necessary to pass `options` for expected cache behavior
-  options,
+  return query(sql.join(' '), values)
+    .then(({ rows, rowCount }) => ({
+      // Only parse results if there's at least one photo
+      photos: shouldParse ? rows.map(parsePhotoFromDb) : rows,
+      // Prefer explicit count before falling back to row count
+      count: rows[0]?.count !== undefined
+        ? parseInt(rows[0]?.count ?? '0', 10)
+        : rowCount ?? 0,
+    }));
+};
+
+export const getPhotos = async (options: PhotoQueryOptions = {}) =>
+  safelyQuery(
+    async () => _getPhotos(options).then(({ photos }) => photos),
+    'getPhotos',
+    // Seemingly necessary to pass `options` for expected cache behavior
+    options,
+  );
+
+export const getPhotoIds = async (options: PhotoQueryOptions = {}) =>
+  safelyQuery(
+    async () => _getPhotos(options, ['id'], { shouldParse: false })
+      .then(({ photos }) => photos.map(photo => photo.id as string)),
+    'getPhotoIds',
+    // Seemingly necessary to pass `options` for expected cache behavior
+    options,
+  );
+
+export const getPhotoUrls = async (options: PhotoQueryOptions = {}) =>
+  safelyQuery(
+    async () => _getPhotos(
+      options,
+      ['id', 'title', 'url', 'hidden'],
+      { shouldParse: false },
+    )
+      .then(({ photos }) =>
+        photos as {
+          id: string,
+          title: string,
+          url: string,
+          hidden?: boolean,
+        }[]),
+    'getPhotoUrls',
+    // Seemingly necessary to pass `options` for expected cache behavior
+    options,
+  );
+
+export const getPhotoCount = async (options: PhotoQueryOptions = {}) =>
+  safelyQuery(
+    async () => _getPhotos(
+      options,
+      ['COUNT'],
+      { shouldParse: false, includeOrderBy: false },
+    )
+      .then(({ count }) => count),
+    'getPhotoCount',
+    // Seemingly necessary to pass `options` for expected cache behavior
+    options,
   );
 
 export const getPhotosNearId = async (
@@ -497,8 +650,12 @@ export const getPhotosNearId = async (
 
 export const getPhotosMeta = (options: PhotoQueryOptions = {}) =>
   safelyQuery(async () => {
-    // eslint-disable-next-line max-len
-    let sql = 'SELECT COUNT(*), MIN(p.taken_at_naive) as start, MAX(p.taken_at_naive) as end FROM photos p';
+    let sql = `
+      SELECT COUNT(*),
+      MIN(p.taken_at_naive) as start, MAX(p.taken_at_naive) as end,
+      MIN(p.created_at) as start_created_at, MAX(p.created_at) as end_created_at
+      FROM photos p
+    `;
     const joins = getJoinsFromOptions(options);
     if (joins) { sql += ` ${joins}`; }
     const { wheres, wheresValues } = getWheresFromOptions(options);
@@ -512,17 +669,24 @@ export const getPhotosMeta = (options: PhotoQueryOptions = {}) =>
             end: rows[0].end as string,
           } as PhotoDateRangePostgres }
           : undefined,
+        // Used to calculate upload time for 'recents'
+        ...rows[0]?.start_created_at && rows[0]?.end_created_at
+          ? { dateRangeCreatedAt: {
+            start: rows[0].start_created_at as string,
+            end: rows[0].end_created_at as string,
+          } as PhotoDateRangePostgres }
+          : undefined,
       }));
   }, 'getPhotosMeta');
 
-export const getPublicPhotoIds = async ({ limit }: { limit?: number }) =>
+export const getAllPublicPhotoIds = async ({ limit }: { limit?: number }) =>
   safelyQuery(() => (limit
     ? sql`SELECT id FROM photos WHERE hidden IS NOT TRUE LIMIT ${limit}`
     : sql`SELECT id FROM photos WHERE hidden IS NOT TRUE`)
     .then(({ rows }) => rows.map(({ id }) => id as string))
   , 'getPublicPhotoIds');
 
-export const getPhotoIdsAndUpdatedAt = async () =>
+export const getAllPhotoIdsWithUpdatedAt = async () =>
   safelyQuery(() =>
     sql`SELECT id, updated_at FROM photos WHERE hidden IS NOT TRUE`
       .then(({ rows }) => rows.map(({ id, updated_at }) =>
@@ -538,7 +702,7 @@ export const getPhoto = async (
     const photoId = translatePhotoId(id);
     return (includeHidden
       ? sql<PhotoDb>`SELECT * FROM photos WHERE id=${photoId} LIMIT 1`
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       : sql<PhotoDb>`SELECT * FROM photos WHERE id=${photoId} AND hidden IS NOT TRUE LIMIT 1`)
       .then(({ rows }) => rows.map(parsePhotoFromDb))
       .then(photos => photos.length > 0 ? photos[0] : undefined);
@@ -567,12 +731,13 @@ const needsAiTextWhereClauses =
       })
     : [];
 
-const needsColorDataWhereClauses = COLOR_SORT_ENABLED
-  ? [`(
+const needsColorDataWhereClauses =
+  AI_CONTENT_GENERATION_ENABLED || COLOR_SORT_ENABLED
+    ? [`(
     color_data IS NULL OR
     color_sort IS NULL
   )`]
-  : [];
+    : [];
 
 const needsSyncWhereStatement =
   `WHERE ${[

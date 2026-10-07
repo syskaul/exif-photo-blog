@@ -1,5 +1,12 @@
 import IconSort from '@/components/icons/IconSort';
-import { BiData, BiGlobe, BiHide, BiLockAlt, BiPencil } from 'react-icons/bi';
+import {
+  BiData,
+  BiGlobe,
+  BiHide,
+  BiLockAlt,
+  BiMap,
+  BiPencil,
+} from 'react-icons/bi';
 import { CgDebug } from 'react-icons/cg';
 import { FaRegFolderClosed } from 'react-icons/fa6';
 import { HiOutlineCog, HiSparkles } from 'react-icons/hi';
@@ -37,6 +44,10 @@ const ADMIN_CONFIG_SECTIONS = [{
   required: false,
   icon: <HiSparkles size={14} />,
 }, {
+  title: 'Location',
+  required: false,
+  icon: <BiMap size={16} />,
+}, {
   title: 'Performance',
   required: false,
   icon: <RiSpeedMiniLine size={19} className="translate-y-[1px]" />,
@@ -65,7 +76,7 @@ const ADMIN_CONFIG_SECTIONS = [{
   required: false,
   icon: <HiOutlineCog size={17} className="translate-y-[0.5px]" />,
 }, {
-  title: 'Scripts & Analytics',
+  title: 'Analytics',
   required: false,
   icon: <TbBrandGoogleAnalytics size={18} className="translate-y-[1px]" />,
 }, {

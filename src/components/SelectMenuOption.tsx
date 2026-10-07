@@ -8,7 +8,7 @@ export type SelectMenuOptionType<T = string> = {
   accessoryStart?: ReactNode
   accessoryEnd?: ReactNode
   note?: ReactNode
-}
+};
 
 export default function SelectMenuOption<T = string>({
   label,
@@ -36,6 +36,11 @@ export default function SelectMenuOption<T = string>({
   }, [isHighlighted]);
 
   return (
+  // Pointer-only: keyboard navigation lives on the parent SelectMenu's
+  // combobox trigger, which keeps focus (standard ARIA combobox pattern)
+    /* eslint-disable-next-line
+      jsx-a11y/click-events-have-key-events,
+      jsx-a11y/interactive-supports-focus */
     <div
       ref={ref}
       onClick={onClick}

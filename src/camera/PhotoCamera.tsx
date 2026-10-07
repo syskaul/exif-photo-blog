@@ -9,24 +9,38 @@ import EntityLink, {
 import IconCamera from '@/components/icons/IconCamera';
 import { isCameraApple } from '@/platforms/apple';
 import useCategoryCounts from '@/category/useCategoryCounts';
+import { getCameraBrand } from './brand';
+import CameraBrand from './CameraBrand';
 
 export default function PhotoCamera({
   camera,
   hideAppleIcon,
+  showBrandLogo,
   ...props
 }: {
   camera: Camera
   hideAppleIcon?: boolean
+  showBrandLogo?: boolean
 } & EntityLinkExternalProps) {
   const { getCameraCount } = useCategoryCounts();
   
   const isApple = isCameraApple(camera);
   const showAppleIcon = !hideAppleIcon && isApple;
+  const brand = showBrandLogo
+    ? getCameraBrand(camera.make)
+    : undefined;
 
   return (
     <EntityLink
       {...props}
-      label={formatCameraText(camera)}
+      label={brand
+        ? <>
+          <CameraBrand brand={brand} />{formatCameraText(camera, 'short')}
+        </>
+        : formatCameraText(camera)}
+      labelForHover={brand
+        ? formatCameraText(camera)
+        : undefined}
       path={pathForCamera(camera)}
       hoverQueryOptions={{ camera }}
       icon={showAppleIcon

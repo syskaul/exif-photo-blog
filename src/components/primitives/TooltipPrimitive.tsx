@@ -2,7 +2,7 @@
 
 import { ReactNode, useRef, useState, ComponentProps } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import MenuSurface from './MenuSurface';
+import ComponentSurface from './surface/ComponentSurface';
 import clsx from 'clsx/lite';
 import useClickInsideOutside from '@/utility/useClickInsideOutside';
 import KeyCommand from './KeyCommand';
@@ -18,6 +18,7 @@ export default function TooltipPrimitive({
   keyCommand,
   keyCommandModifier,
   supportMobile,
+  triggerIsFocusable,
   animateLarge,
   disableHoverableContent,
   delayDuration = 100,
@@ -31,10 +32,13 @@ export default function TooltipPrimitive({
   children: ReactNode
   className?: string
   classNameTrigger?: string
-  color?: ComponentProps<typeof MenuSurface>['color']
+  color?: ComponentProps<typeof ComponentSurface>['color']
   keyCommand?: string
   keyCommandModifier?: ComponentProps<typeof KeyCommand>['modifier']
   supportMobile?: boolean
+  // Set when `children` already contains a button or link, to avoid nesting
+  // interactive elements. Otherwise the trigger renders as a real button.
+  triggerIsFocusable?: boolean
   animateLarge?: boolean
   disableHoverableContent?: boolean
   // Tooltip.Provider
@@ -84,12 +88,12 @@ export default function TooltipPrimitive({
         disableHoverableContent={disableHoverableContent}
       >
         <Tooltip.Trigger asChild>
-          {includeButton
+          {!triggerIsFocusable
             ? <button
               ref={refTrigger}
               type="button"
               onClick={() => {
-                setIsOpen(!isOpen);
+                if (includeButton) { setIsOpen(!isOpen); }
                 // Blur after clicking to prevent keyboard focus being stuck
                 // when tooltip is combined with a button
                 clearGlobalFocus();
@@ -98,6 +102,11 @@ export default function TooltipPrimitive({
             >
               {children}
             </button>
+            // Non-interactive pass-through: `children` supplies the
+            // focusable element, this onClick only clears focus afterward
+            /* eslint-disable-next-line
+              jsx-a11y/no-static-element-interactions,
+              jsx-a11y/click-events-have-key-events */
             : <span
               className={classNameTrigger}
               onClick={clearGlobalFocus}
@@ -126,9 +135,12 @@ export default function TooltipPrimitive({
             )}
           >
             {content &&
-              <MenuSurface {...{ color, className }}>
+              <ComponentSurface {...{
+                color,
+                className: clsx('rounded-lg', className),
+              }}>
                 {content}
-              </MenuSurface>}
+              </ComponentSurface>}
           </Tooltip.Content>
         </Tooltip.Portal>
       </Tooltip.Root>

@@ -64,6 +64,7 @@ export default function AdminTagForm({
         <SubmitButtonWithStatus
           disabled={!isFormValid}
           onFormSubmit={invalidateSwr}
+          primary
         >
           Update
         </SubmitButtonWithStatus>

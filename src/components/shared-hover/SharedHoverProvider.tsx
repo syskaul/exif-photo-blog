@@ -5,13 +5,21 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { SharedHoverContext, SharedHoverProps } from './state';
 import { AnimatePresence, motion } from 'framer-motion';
-import MenuSurface from '../primitives/MenuSurface';
+import ComponentSurface from '../primitives/surface/ComponentSurface';
 import clsx from 'clsx/lite';
+
+type RenderHover = (key: string, content: ReactNode) => void;
+
+type HoverContentUpdate = {
+  key: string
+  content: ReactNode
+};
 
 const WINDOW_CHANGE_EVENTS = ['mouseup', 'mousewheel', 'resize'];
 
@@ -27,10 +35,10 @@ export default function SharedHoverProvider({
   children: ReactNode
 }) {
   const [hoverProps, setHoverProps] = useState<SharedHoverProps>();
-  const [hoverContent, setHoverContent] = useState<ReactNode>();
   const [hoverStyle, setHoverStyle] = useState<CSSProperties>();
 
   const currentTriggerRef = useRef<HTMLElement>(null);
+  const renderHoverRef = useRef<RenderHover>(() => {});
 
   const timeoutInitialHoverRef = useRef<NodeJS.Timeout>(undefined);
   const timeoutDismissRef = useRef<NodeJS.Timeout>(undefined);
@@ -112,57 +120,101 @@ export default function SharedHoverProvider({
     };
   }, [clearState]);
 
+  // Content state must stay in SharedHoverOverlay: triggers rebuild `content`
+  // on every render, so a write that re-renders them never settles
+  const renderHover = useCallback<RenderHover>(
+    (key, content) => renderHoverRef.current(key, content),
+    [],
+  );
+
+  const registerRenderHover = useCallback((fn: RenderHover) => {
+    renderHoverRef.current = fn;
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    showHover,
+    dismissHover,
+    renderHover,
+    isHoverBeingShown,
+  }), [showHover, dismissHover, renderHover, isHoverBeingShown]);
+
   return (
-    <SharedHoverContext.Provider
-      value={{
-        showHover,
-        dismissHover,
-        renderHover: setHoverContent,
-        isHoverBeingShown,
-      }}
-    >
-      <div className="relative inset-0 z-100 pointer-events-none">
-        <AnimatePresence>
-          {hoverProps &&
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
-              layoutId="hover"
-              className="fixed"
-              style={hoverStyle}
-            >
-              <MenuSurface
-                className="max-w-none p-1!"
-                color={hoverProps.color}
-              >
-                <div
-                  className={clsx(
-                    'relative rounded-[0.25rem] overflow-clip',
-                    hoverProps.color !== 'frosted' && 'bg-extra-dim',
-                  )}
-                  style={{
-                    width: hoverProps.width,
-                    height: hoverProps.height,
-                  }}
-                >
-                  {/* Content */}
-                  {hoverContent}
-                  {/* Border */}
-                  <div className={clsx(
-                    'absolute inset-0',
-                    'rounded-[0.25rem]',
-                    hoverProps.color === 'frosted'
-                      ? 'border border-gray-400/25'
-                      : 'border-medium',
-                  )} />
-                </div>
-              </MenuSurface>
-            </motion.div>}
-        </AnimatePresence>
-      </div>
+    <SharedHoverContext.Provider value={contextValue}>
       {children}
+      <SharedHoverOverlay {...{
+        hoverProps,
+        hoverStyle,
+        registerRenderHover,
+      }} />
     </SharedHoverContext.Provider>
+  );
+}
+
+function SharedHoverOverlay({
+  hoverProps,
+  hoverStyle,
+  registerRenderHover,
+}: {
+  hoverProps?: SharedHoverProps
+  hoverStyle?: CSSProperties
+  registerRenderHover: (fn: RenderHover) => void
+}) {
+  const [update, setUpdate] = useState<HoverContentUpdate>();
+
+  useEffect(() => {
+    registerRenderHover((key, content) => setUpdate(current =>
+      current?.key === key && current.content === content
+        ? current
+        : { key, content }));
+  }, [registerRenderHover]);
+
+  // Prefer the snapshot from `showHover` so the hover never fades in empty,
+  // and never repaints the previous trigger's content at the new position
+  const hoverContent = update?.key === hoverProps?.key
+    ? update?.content
+    : hoverProps?.content;
+
+  return (
+    <div className="relative inset-0 z-100 pointer-events-none">
+      <AnimatePresence>
+        {hoverProps &&
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            layoutId="hover"
+            className="fixed"
+            style={hoverStyle}
+          >
+            <ComponentSurface
+              className="max-w-none p-1!"
+              color={hoverProps.color}
+            >
+              <div
+                className={clsx(
+                  'relative rounded-[10px] overflow-clip',
+                  hoverProps.color !== 'frosted-light' && 'bg-extra-dim',
+                )}
+                style={{
+                  width: hoverProps.width,
+                  height: hoverProps.height,
+                }}
+              >
+                {/* Content */}
+                {hoverContent}
+                {/* Border */}
+                <div className={clsx(
+                  'absolute inset-0',
+                  'border rounded-[10px]',
+                  hoverProps.color === 'frosted-light'
+                    ? 'border-gray-400/25'
+                    : 'border-medium',
+                )} />
+              </div>
+            </ComponentSurface>
+          </motion.div>}
+      </AnimatePresence>
+    </div>
   );
 }

@@ -1,10 +1,13 @@
+/* eslint-disable @stylistic/max-len */
 import { query, sql } from '@/platforms/postgres';
 
 interface Migration {
   label: string
   table?: 'photos' | 'albums'
   fields: string[]
-  run: () => ReturnType<typeof sql>
+  // Table-level migrations are invoked from safelyQuery
+  missingRelation?: string
+  run: () => ReturnType<typeof sql> | ReturnType<typeof query>
 }
 
 export const MIGRATIONS: Migration[] = [{
@@ -101,13 +104,58 @@ export const MIGRATIONS: Migration[] = [{
     DROP COLUMN IF EXISTS latitude,
     DROP COLUMN IF EXISTS longitude;
   `),
+}, {
+  label: '09: Image Dimensions',
+  fields: ['width', 'height'],
+  run: () => sql`
+    ALTER TABLE photos
+    ADD COLUMN IF NOT EXISTS width INTEGER,
+    ADD COLUMN IF NOT EXISTS height INTEGER
+  `,
+}, {
+  label: '10: ISO',
+  fields: ['iso'],
+  run: () => query(`
+    ALTER TABLE photos
+    ALTER COLUMN iso TYPE INTEGER
+  `),
+}, {
+  label: '11: Photo Location',
+  fields: ['location'],
+  run: () => sql`
+    ALTER TABLE photos
+    ADD COLUMN IF NOT EXISTS location JSONB
+  `,
 }];
+
+export const migrateAboutTableToLibrary = () =>
+  query(`
+    DO $$
+    BEGIN
+      IF EXISTS(
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_name='about'
+      )
+      AND NOT EXISTS(
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_name='library'
+      )
+      THEN
+        ALTER TABLE about RENAME TO library;
+      END IF;
+    END $$;
+  `);
 
 export const migrationForError = (e: any) =>
   MIGRATIONS.find(({ fields, table = 'photos' }) =>
     fields.some(field =>(
-      // eslint-disable-next-line max-len
+      // Seen in write conditions
       new RegExp(`column "${field}" of relation "${table}" does not exist`, 'i').test(e.message) ||
-      new RegExp(`column "${field}" does not exist`, 'i').test(e.message)
+      // Seen in read/query conditions
+      new RegExp(`column "${field}" does not exist`, 'i').test(e.message) ||
+      // Misc. conditions
+      (table === 'photos' && field === 'iso' && new RegExp('out of range for type smallint', 'i').test(e.message))
     )),
   );

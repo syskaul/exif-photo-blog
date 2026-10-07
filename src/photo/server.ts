@@ -11,7 +11,9 @@ import { ExifData, ExifParserFactory } from 'ts-exif-parser';
 import { PhotoFormData } from './form';
 import sharp, { Sharp } from 'sharp';
 import {
+  AUTO_GENERATE_LOCATIONS,
   GEO_PRIVACY_ENABLED,
+  HAS_LOCATION_SERVICES,
   PRESERVE_ORIGINAL_UPLOADS,
 } from '@/app/config';
 import { isExifForFujifilm } from '@/platforms/fujifilm/server';
@@ -20,19 +22,31 @@ import {
   getFujifilmRecipeFromMakerNote,
 } from '@/platforms/fujifilm/recipe';
 import {
+  getNikonPictureControlFromMakerNote,
+  NikonPictureControl,
+} from '@/platforms/nikon/simulation';
+import { isExifForNikon } from '@/platforms/nikon/server';
+import {
   deletePhoto,
   getRecipeTitleForData,
   updateAllMatchingRecipeTitles,
 } from '@/photo/query';
-import { PhotoDbInsert } from '.';
+import { MAX_PHOTO_UPLOAD_SIZE_IN_BYTES, PhotoDbInsert } from '.';
 import { convertExifToFormData } from './form/server';
 import { getColorFieldsForPhotoForm } from './color/server';
 import exifr from 'exifr';
 import { getCompatibleExifValue } from '@/utility/exif';
+import { fetchUrlWithByteLimit } from '@/utility/fetch';
+import { getPlaceFromCoordinates } from '@/platforms/google-places';
 
 const IMAGE_WIDTH_BLUR = 200;
 const IMAGE_WIDTH_DEFAULT = 200;
 const IMAGE_QUALITY_DEFAULT = 80;
+
+// Buffers an image, refusing to exceed `maxBytes`, so that oversized
+// photos fail fast instead of exhausting serverless memory
+export const fetchImageUrlSafely = (url: string) =>
+  fetchUrlWithByteLimit(url, MAX_PHOTO_UPLOAD_SIZE_IN_BYTES);
 
 export const extractImageDataFromBlobPath = async (
   blobPath: string, {
@@ -40,11 +54,13 @@ export const extractImageDataFromBlobPath = async (
     generateBlurData,
     generateResizedImage,
     updateColorFields = true,
+    lookupLocation,
   }: {
     includeInitialPhotoFields?: boolean
     generateBlurData?: boolean
     generateResizedImage?: boolean
     updateColorFields?: boolean
+    lookupLocation?: boolean
   } = {},
 ): Promise<{
   blobId?: string
@@ -63,7 +79,7 @@ export const extractImageDataFromBlobPath = async (
 
   let dataExif: ExifData | undefined;
   let dataExifr: any | undefined;
-  let film: FujifilmSimulation | undefined;
+  let film: FujifilmSimulation | NikonPictureControl | undefined;
   let recipe: FujifilmRecipe | undefined;
   let blurData: string | undefined;
   let imageResizedBase64: string | undefined;
@@ -71,7 +87,7 @@ export const extractImageDataFromBlobPath = async (
   let error: string | undefined;
 
   const fileBytes = blobPath
-    ? await fetch(url, { cache: 'no-store' }).then(res => res.arrayBuffer())
+    ? await fetchImageUrlSafely(url)
       .catch(e => {
         error = `Error fetching image from ${url}: "${e.message}"`;
         return undefined;
@@ -87,16 +103,20 @@ export const extractImageDataFromBlobPath = async (
       dataExif = parser.parse();
       dataExifr = await exifr.parse(fileBytes, { xmp: true });
 
-      // Capture film simulation for Fujifilm cameras
-      if (isExifForFujifilm(dataExif)) {
+      // Capture film simulation for Fujifilm or Picture Control for Nikon
+      if (isExifForFujifilm(dataExif) || isExifForNikon(dataExif)) {
         // Parse exif data again with binary fields
         // in order to access MakerNote tag
         parser.enableBinaryFields(true);
         const exifDataBinary = parser.parse();
         const makerNote = exifDataBinary.tags?.MakerNote;
         if (Buffer.isBuffer(makerNote)) {
-          film = getFujifilmSimulationFromMakerNote(makerNote);
-          recipe = getFujifilmRecipeFromMakerNote(makerNote);
+          if (isExifForFujifilm(dataExif)) {
+            film = getFujifilmSimulationFromMakerNote(makerNote);
+            recipe = getFujifilmRecipeFromMakerNote(makerNote);
+          } else if (isExifForNikon(dataExif)) {
+            film = getNikonPictureControlFromMakerNote(makerNote);
+          }
         }
       }
 
@@ -123,19 +143,29 @@ export const extractImageDataFromBlobPath = async (
     ? await getColorFieldsForPhotoForm(url)
     : undefined;
 
+  const formDataFromExif = dataExif
+    ? {
+      ...includeInitialPhotoFields && {
+        hidden: 'false',
+        favorite: 'false',
+        extension,
+        url,
+      },
+      ...generateBlurData && { blurData },
+      ...convertExifToFormData(dataExif, dataExifr, film, recipe),
+      ...colorFields,
+    } satisfies Partial<PhotoFormData>
+    : undefined;
+
   return {
     blobId,
-    ...dataExif && {
+    ...formDataFromExif && {
       formDataFromExif: {
-        ...includeInitialPhotoFields && {
-          hidden: 'false',
-          favorite: 'false',
-          extension,
-          url,
-        },
-        ...generateBlurData && { blurData },
-        ...convertExifToFormData(dataExif, dataExifr, film, recipe),
-        ...colorFields,
+        ...formDataFromExif,
+        ...await getLocationFormFieldsFromExif(
+          formDataFromExif,
+          lookupLocation,
+        ),
       },
     },
     imageResizedBase64,
@@ -143,6 +173,39 @@ export const extractImageDataFromBlobPath = async (
     fileBytes,
     error,
   };
+};
+
+const getLocationFormFieldsFromExif = async (
+  formData: Partial<PhotoFormData>,
+  lookupLocation?: boolean,
+): Promise<Partial<PhotoFormData> | undefined> => {
+  if (
+    !lookupLocation ||
+    !AUTO_GENERATE_LOCATIONS ||
+    GEO_PRIVACY_ENABLED ||
+    !HAS_LOCATION_SERVICES ||
+    !formData.latitude ||
+    !formData.longitude
+  ) {
+    return;
+  }
+
+  const latitude = parseFloat(formData.latitude);
+  const longitude = parseFloat(formData.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return;
+  }
+
+  try {
+    const place = await getPlaceFromCoordinates(latitude, longitude);
+    if (!place) { return; }
+    return {
+      location: JSON.stringify(place),
+      locationDisplayName: place.nameFormatted ?? place.name,
+    };
+  } catch (e) {
+    console.log('Error looking up place from coordinates', e);
+  }
 };
 
 const generateBase64 = async (

@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 import {
   TEMPLATE_REPO_OWNER,
   TEMPLATE_REPO_NAME,
@@ -14,9 +14,9 @@ export function GET() {
 
   url.searchParams.set('demo-title', TEMPLATE_TITLE);
   url.searchParams.set('demo-description', TEMPLATE_DESCRIPTION);
-  url.searchParams.set('demo-url', 'https://photos.eshaankaul.com');
+  url.searchParams.set('demo-url', 'https://photos.sambecker.com');
   url.searchParams.set('demo-description', TEMPLATE_DESCRIPTION);
-  url.searchParams.set('demo-image', 'https://photos.eshaankaul.com/template-image-tight');
+  url.searchParams.set('demo-image', 'https://photos.sambecker.com/template-image-tight');
   url.searchParams.set('project-name', TEMPLATE_TITLE);
   url.searchParams.set('repository-name', TEMPLATE_REPO_NAME);
   url.searchParams.set('repository-url', `https://github.com/${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`);

@@ -6,28 +6,39 @@ import clsx from 'clsx/lite';
 export default function LoaderLink({
   icon,
   classNameIcon,
+  classNameWrapper,
+  classNameContent,
   children,
   ...props
 }: Omit<ComponentProps<typeof LinkWithStatus>, 'children'> & {
-  icon: ReactNode
+  icon?: ReactNode
   classNameIcon?: string
+  classNameWrapper?: string
+  classNameContent?: string
   children?: ReactNode
 }) {
   return (
     <LinkWithStatus {...props}>
       {({ isLoading }) =>
-        <span className="inline-flex items-center gap-1.5">
-          <span className={clsx(
-            'inline-flex items-center justify-center',
-            'min-w-[1.25rem] h-6',
-            classNameIcon,
-          )}>
-            {isLoading
-              ? <Spinner />
-              : icon}
-          </span>
+        <span className={clsx(
+          'inline-flex items-center gap-1.5',
+          classNameWrapper,
+        )}>
+          {icon &&
+            <span className={clsx(
+              'inline-flex items-center justify-center',
+              'min-w-[1.25rem] h-6',
+              classNameIcon,
+            )}>
+              {isLoading
+                ? <Spinner />
+                : icon}
+            </span>}
           {children &&
-            <span>
+            <span className={clsx(
+              isLoading && !icon && 'text-dim',
+              classNameContent,
+            )}>
               {children}
             </span>}
         </span>}

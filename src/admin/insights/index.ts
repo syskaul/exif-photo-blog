@@ -48,7 +48,7 @@ export type AdminAppInsight =
   AdminAppInsightRecommendation |
   AdminAppInsightLibrary;
 
-export type AdminAppInsights = Record<AdminAppInsight, boolean>
+export type AdminAppInsights = Record<AdminAppInsight, boolean>;
 
 export type InsightsIndicatorStatus = 'blue' | 'yellow' | undefined;
 
@@ -86,7 +86,7 @@ export const getSignificantInsights = ({
   photosCountNeedSync: number
 }) => {
   const {
-    isAiTextGenerationEnabled,
+    isAiContentGenerationEnabled,
     hasLocationServices,
     hasRedisStorage,
     hasDomain,
@@ -96,7 +96,7 @@ export const getSignificantInsights = ({
     deprecatedEnvVars: HAS_DEPRECATED_ENV_VARS,
     forkBehind: Boolean(codeMeta?.isBehind),
     noRateLimiting: (
-      isAiTextGenerationEnabled ||
+      isAiContentGenerationEnabled ||
       hasLocationServices
     ) && !hasRedisStorage,
     noConfiguredDomain: !hasDomain,

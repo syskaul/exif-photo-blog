@@ -33,6 +33,7 @@ export default function PlaceInput({
     if (inputTextDebounced) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingPlaces(true);
+      console.log('getPlaceAutoCompleteAction', inputTextDebounced);
       getPlaceAutoCompleteAction(inputTextDebounced)
         .then(options => {
           options.forEach(option => {
@@ -55,7 +56,7 @@ export default function PlaceInput({
       id="place-input"
       label="Location"
       className={className}
-      isModified={placeId !== initialPlace?.id}
+      isModified={placeId !== (initialPlace?.id ?? '')}
       tagOptions={placeOptions}
       value={placeId}
       onChange={id => {

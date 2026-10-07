@@ -4,6 +4,10 @@ import { Camera } from '@/camera';
 import { Lens } from '@/lens';
 import { APP_DEFAULT_SORT_BY, SortBy } from '@/photo/sort';
 import { Album } from '@/album';
+import { getPathComponents } from '@/app/path';
+import { getAlbumFromSlug } from '@/album/query';
+import { isTagPrivate } from '@/tag';
+import { getPhotoCount } from '@/photo/query';
 
 export const GENERATE_STATIC_PARAMS_LIMIT = 1000;
 export const PHOTO_DEFAULT_LIMIT = 100;
@@ -12,7 +16,7 @@ export const PHOTO_DEFAULT_LIMIT = 100;
 const CHARACTERS_TO_REMOVE = [',', '/'];
 const CHARACTERS_TO_REPLACE = ['+', '&', '|', ':', '_', ' '];
 
-const parameterizeForDb = (field: string) =>
+export const parameterizeForDb = (field: string) =>
   `REGEXP_REPLACE(
     REGEXP_REPLACE(
       LOWER(TRIM(${field})),
@@ -37,6 +41,7 @@ export type PhotoQueryOptions = {
   camera?: Partial<Camera>
   lens?: Partial<Lens>
   album?: Album
+  photoIds?: string[]
 };
 
 export const areOptionsSensitive = (options: PhotoQueryOptions) =>
@@ -68,6 +73,7 @@ export const getWheresFromOptions = (
     film,
     recipe,
     focal,
+    photoIds,
   } = options;
 
   const wheres = [] as string[];
@@ -99,7 +105,7 @@ export const getWheresFromOptions = (
     wheresValues.push(updatedBefore.toISOString());
   }
   if (query) {
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     wheres.push(`CONCAT(title, ' ', caption, ' ', semantic_description) ILIKE $${valuesIndex++}`);
     wheresValues.push(`%${query.toLocaleLowerCase()}%`);
   }
@@ -109,10 +115,10 @@ export const getWheresFromOptions = (
   }
   if (recent) {
     // Newest upload must be within past 2 weeks
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     wheres.push('(SELECT MAX(created_at) FROM photos) >= (now() - INTERVAL \'14 days\')');
     // Selects must be within 1 week of newest upload
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     wheres.push('created_at >= (SELECT MAX(created_at) - INTERVAL \'7 days\' FROM photos)');
   }
   if (year) {
@@ -153,9 +159,14 @@ export const getWheresFromOptions = (
     wheres.push(`recipe_title=$${valuesIndex++}`);
     wheresValues.push(recipe);
   }
-  if (focal) {
+  // Compare against undefined so focal lengths of 0 are filtered
+  if (focal !== undefined) {
     wheres.push(`focal_length=$${valuesIndex++}`);
     wheresValues.push(focal);
+  }
+  if (photoIds && photoIds.length > 0) {
+    wheres.push(`id=ANY($${valuesIndex++})`);
+    wheresValues.push(convertArrayToPostgresString(photoIds) ?? '');
   }
 
   return {
@@ -171,6 +182,7 @@ export const getOrderByFromOptions = (options: PhotoQueryOptions) => {
   const {
     sortBy = APP_DEFAULT_SORT_BY,
     sortWithPriority,
+    limit = PHOTO_DEFAULT_LIMIT,
   } = options;
 
   switch (sortBy) {
@@ -199,6 +211,15 @@ export const getOrderByFromOptions = (options: PhotoQueryOptions) => {
       return sortWithPriority
         ? 'ORDER BY priority_order ASC, color_sort ASC, taken_at ASC'
         : 'ORDER BY color_sort ASC, taken_at ASC';
+    case 'random': {
+      // Stable newest-first stride, 2× limit so hits are spaced further apart
+      const stride = Math.max(2, (Math.floor(Number(limit)) || 1) * 2);
+      return [
+        'ORDER BY',
+        `(ROW_NUMBER() OVER (ORDER BY taken_at DESC, id) - 1) % ${stride},`,
+        'taken_at DESC, id',
+      ].join(' ');
+    }
   }
 };
 
@@ -246,5 +267,32 @@ export const generateManyToManyValues = (idsA: string[], idsB: string[]) => {
   return {
     valueString,
     values,
+  };
+};
+
+export const getPhotoOptionsCountForPath = async (
+  path: string,
+): Promise<{ options: PhotoQueryOptions, count: number }> => {
+  const { album: albumSlug, tag, ...components } = getPathComponents(path);
+
+  let album: Album | undefined;
+  if (albumSlug) {
+    album = await getAlbumFromSlug(albumSlug);
+  }
+
+  const options: PhotoQueryOptions = {
+    album,
+    ...isTagPrivate(tag) ? { hidden: 'only' } : { tag },
+    ...components,
+  };
+
+  const count = await getPhotoCount(options);
+
+  return {
+    options: {
+      ...options,
+      limit: count,
+    },
+    count,
   };
 };

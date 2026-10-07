@@ -3,34 +3,39 @@ import { PhotoFormData } from '../form';
 import IconLock from '@/components/icons/IconLock';
 import { SelectMenuOptionType } from '@/components/SelectMenuOption';
 import { Photo } from '..';
+import { AppTextState } from '@/i18n/state';
 
 export type VisibilityValue = 'default' | 'exclude' | 'private';
 
-export const EXCLUDE_DESCRIPTION =
-  'Excluded from homepage views, rss.xml, etc.';
-export const PRIVATE_DESCRIPTION =
-  'Visible only to admins';
-
-export const VISIBILITY_OPTIONS: SelectMenuOptionType<VisibilityValue>[] = [
+export const getVisibilityOptions = (
+  appText: AppTextState,
+): (SelectMenuOptionType<VisibilityValue> & { label: string })[] => [
   {
     value: 'default',
-    accessoryStart: <IconHidden size={17} visible />,
-    label: 'Default',
-    note: 'Viewable everywhere',
+    accessoryStart: <IconHidden size={18} visible />,
+    label: appText.admin.visibilityDefault,
+    note: appText.admin.visibilityDefaultNote,
   },
   {
     value: 'exclude',
-    accessoryStart: <IconHidden size={17} />,
-    label: 'Hide from feeds',
-    note: EXCLUDE_DESCRIPTION,
+    accessoryStart: <IconHidden size={18} />,
+    label: appText.admin.visibilityExclude,
+    note: appText.admin.visibilityExcludeNote,
   },
   {
     value: 'private',
-    accessoryStart: <IconLock size={14} />,
-    label: 'Private',
-    note: PRIVATE_DESCRIPTION,
+    accessoryStart: <IconLock size={15} />,
+    label: appText.admin.visibilityPrivate,
+    note: appText.admin.visibilityPrivateNote,
   },
 ];
+
+export const getVisibilityLabel = (
+  appText: AppTextState,
+  value?: VisibilityValue | '',
+) => getVisibilityOptions(appText)
+  .find(({ value: v }) => v === value)
+  ?.label;
 
 export const getVisibilityValue = (
   formData: Partial<PhotoFormData>,
@@ -60,5 +65,12 @@ export const didVisibilityChange = (
   current: Partial<PhotoFormData>,
 ) => getVisibilityValue(original) !== getVisibilityValue(current);
 
+export const getVisibilityFromPhoto = (photo: Photo): VisibilityValue =>
+  photo.hidden
+    ? 'private'
+    : photo.excludeFromFeeds
+      ? 'exclude'
+      : 'default';
+
 export const doesPhotoHaveDefaultVisibility = (photo: Photo) =>
-  !photo.hidden && !photo.excludeFromFeeds;
+  getVisibilityFromPhoto(photo) === 'default';

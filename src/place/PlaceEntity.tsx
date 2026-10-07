@@ -38,7 +38,7 @@ export default function PlaceEntity({
           </span>
         </div>
       </div>,
-      className: 'inline-flex',
+      className: 'inline-flex max-w-full',
       width,
       height,
     }}>
@@ -50,7 +50,7 @@ export default function PlaceEntity({
         label={place.nameFormatted || place.name}
         path={place.link}
         pathTarget="_blank"
-        badged
+        badged={props.badged ?? true}
       />
     </SharedHover>
   );

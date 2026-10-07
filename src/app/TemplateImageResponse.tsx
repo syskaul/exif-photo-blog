@@ -3,6 +3,7 @@ import IconFull from '@/components/icons/IconFull';
 import IconGrid from '@/components/icons/IconGrid';
 import ImagePhotoGrid from '../image-response/components/ImagePhotoGrid';
 import { NextImageSize } from '@/platforms/next-image';
+import { MAX_PHOTOS_TO_SHOW_TEMPLATE } from '@/image-response';
 
 export default function TemplateImageResponse({
   photos,
@@ -66,13 +67,13 @@ export default function TemplateImageResponse({
                 color: '#333',
                 borderRight: '2px solid #333',
               }}>
-                <IconFull includeTitle={false} width={80} />
+                <IconFull width={80} />
               </div>
               <div style={{
                 display: 'flex',
                 padding: '3px 10px',
               }}>
-                <IconGrid includeTitle={false} width={80} />
+                <IconGrid width={80} />
               </div>
             </div>
           </div>
@@ -81,7 +82,7 @@ export default function TemplateImageResponse({
             justifyContent: 'flex-end',
             flexGrow: 1,
           }}>
-            photos.eshaankaul.com
+            photos.sambecker.com
           </div>
         </div>}
       <div style={{
@@ -95,6 +96,7 @@ export default function TemplateImageResponse({
             ? height - 130 - outerMargin * 2
             : height,
           gap: 10,
+          maxPhotos: MAX_PHOTOS_TO_SHOW_TEMPLATE,
         }} />
       </div>
     </div>
