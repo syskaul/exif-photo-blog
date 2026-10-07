@@ -333,7 +333,7 @@ export default function AdminAppConfigurationClient({
                   {' '}
                   <AdminLink
                   // eslint-disable-next-line max-len
-                    href="https://github.com/sambecker/exif-photo-blog#cloudflare-r2"
+                    href="https://github.com/syskaul/exif-photo-blog#cloudflare-r2"
                     externalIcon
                   >
                     create/configure bucket
@@ -345,7 +345,7 @@ export default function AdminAppConfigurationClient({
                   {labelForStorage('aws-s3')}:
                   {' '}
                   <AdminLink
-                    href="https://github.com/sambecker/exif-photo-blog#aws-s3"
+                    href="https://github.com/syskaul/exif-photo-blog#aws-s3"
                     externalIcon
                   >
                     create/configure bucket
@@ -357,7 +357,7 @@ export default function AdminAppConfigurationClient({
                   {labelForStorage('minio')}:
                   {' '}
                   <AdminLink
-                    href="https://github.com/sambecker/exif-photo-blog#minio"
+                    href="https://github.com/syskaul/exif-photo-blog#minio"
                     externalIcon
                   >
                     setup MinIO server
@@ -408,7 +408,7 @@ export default function AdminAppConfigurationClient({
             {' '}
             <AdminLink
             // eslint-disable-next-line max-len
-              href="https://github.com/sambecker/exif-photo-blog?tab=readme-ov-file#supported-languages"
+              href="https://github.com/syskaul/exif-photo-blog?tab=readme-ov-file#supported-languages"
             >
               supported languages
             </AdminLink>
