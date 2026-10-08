@@ -452,12 +452,12 @@ Vercel Postgres can be switched to another Postgres-compatible, pooling provider
 💬 &nbsp;&nbsp;I18N
 -
 
-Partial internationalization (for non-admin, user-facing text) provided for a handful of languages. Configure locale by setting environment variable `NEXT_PUBLIC_LOCALE`.
+Partial internationalization (for non-admin, user-facing text) is fixed to `en-US`.
 
 ### Supported Languages
 - `bd-bn`
 - `en-gb`
-- `en-us`
+- `en-US`
 - `es-es`
 - `hi-in`
 - `id-id`

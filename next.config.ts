@@ -65,9 +65,10 @@ if (HOSTNAME_MINIO) {
   ));
 }
 
-const LOCALE = process.env.NEXT_PUBLIC_LOCALE || 'en-us';
+const LOCALE = 'en-US';
+const LOCALE_PATH = LOCALE.toLocaleLowerCase();
 const LOCALE_ALIAS = './date-fns-locale-alias';
-const LOCALE_DYNAMIC = `i18n/locales/${LOCALE}`;
+const LOCALE_DYNAMIC = `i18n/locales/${LOCALE_PATH}`;
 
 const IMAGE_QUALITY =
   process.env.NEXT_PUBLIC_IMAGE_QUALITY

@@ -109,11 +109,8 @@ const SITE_DOMAIN_SHORT = shortenUrl(SITE_DOMAIN);
 
 // SITE META
 
-export const APP_LOCALE = (process.env.NEXT_PUBLIC_LOCALE || 'en-us')
-  // Accepts both `en-us` and `EN_US`
-  .toLocaleLowerCase()
-  .replace('_', '-');
-export const HTML_LANG = (APP_LOCALE.split('-')[0] || 'en');
+export const APP_LOCALE = 'en-US';
+export const HTML_LANG = 'en';
 
 export const CUSTOM_NAV_TITLE =
   process.env.NEXT_PUBLIC_NAV_TITLE;
@@ -487,7 +484,7 @@ export const APP_CONFIGURATION = {
   ),
   // Content
   locale: APP_LOCALE,
-  hasLocale: Boolean(process.env.NEXT_PUBLIC_LOCALE),
+  hasLocale: true,
   domain: SITE_DOMAIN_SHORT,
   hasDomain: Boolean(
     process.env.NEXT_PUBLIC_DOMAIN ||
