@@ -129,8 +129,6 @@ export default function AdminAppConfigurationClient({
   hasHighGridDensity,
   hasGridDensityPreference,
   // Design
-  hasDefaultTheme,
-  defaultTheme,
   arePhotoTitlesUppercase,
   arePhotosMatted,
   arePhotoMatteColorsConfigured,
@@ -961,18 +959,6 @@ export default function AdminAppConfigurationClient({
         </>;
       case 'Design':
         return <>
-          <ChecklistRow
-            title={`Default theme: ${defaultTheme}`}
-            status={hasDefaultTheme}
-            optional
-          >
-            {'Set environment variable to \'light\' or \'dark\''}
-            {' '}
-            to configure initial theme
-            {' '}
-            (defaults to {'\'system\''})
-            {renderEnvVars(['NEXT_PUBLIC_DEFAULT_THEME'])}
-          </ChecklistRow>
           <ChecklistRow
             title="Uppercase titles"
             status={arePhotoTitlesUppercase}
