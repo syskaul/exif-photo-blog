@@ -407,12 +407,14 @@ export const HIGH_DENSITY_GRID =
 
 // DESIGN
 
-export const DEFAULT_THEME =
-  process.env.NEXT_PUBLIC_DEFAULT_THEME === 'dark'
+export const DARK_MODE_ENABLED = false;
+export const DEFAULT_THEME = DARK_MODE_ENABLED
+  ? process.env.NEXT_PUBLIC_DEFAULT_THEME === 'dark'
     ? 'dark'
     : process.env.NEXT_PUBLIC_DEFAULT_THEME === 'light'
       ? 'light'
-      : 'system';
+      : 'system'
+  : 'light';
 export const UPPERCASE_TITLES =
   process.env.NEXT_PUBLIC_DISABLE_UPPERCASE_TITLES !== '1';
 export const MATTE_PHOTOS =
@@ -569,8 +571,6 @@ export const APP_CONFIGURATION = {
   hasGridDensityPreference:
     Boolean(process.env.NEXT_PUBLIC_SHOW_LARGE_THUMBNAILS),
   // Design
-  hasDefaultTheme: Boolean(process.env.NEXT_PUBLIC_DEFAULT_THEME),
-  defaultTheme: DEFAULT_THEME,
   arePhotosMatted: MATTE_PHOTOS,
   arePhotoMatteColorsConfigured:
     Boolean(MATTE_COLOR) ||

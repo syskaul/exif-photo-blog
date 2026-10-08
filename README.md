@@ -21,7 +21,7 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 - Photo upload with EXIF extraction
 - Organize photos by tag
 - Infinite scroll
-- Light/dark mode
+- Light mode
 - Automatic OG image generation
 - CMD-K menu with photo search
 - AI-generated text descriptions
@@ -240,7 +240,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 - `NEXT_PUBLIC_SHOW_LARGE_THUMBNAILS = 1` ensures large thumbnails on photo grid views (if not configured, density is based on aspect ratio)
 
 ### Design
-- `NEXT_PUBLIC_DEFAULT_THEME = light | dark` sets preferred initial theme (defaults to `system` when not configured)
+- Dark mode can be re-enabled by setting `DARK_MODE_ENABLED = true` in `src/app/config.ts`.
 - `NEXT_PUBLIC_DISABLE_UPPERCASE_TITLES = 1` prevents photo titles and captions displaying in uppercase
 - `NEXT_PUBLIC_MATTE_PHOTOS = 1` constrains the size of each photo, and displays a surrounding border, potentially useful for photos with tall aspect ratios (colors can be customized via `NEXT_PUBLIC_MATTE_COLOR` + `NEXT_PUBLIC_MATTE_COLOR_DARK`)
 - `NEXT_PUBLIC_TINT_FOLDERS = 1` shows tinted folders on /library page

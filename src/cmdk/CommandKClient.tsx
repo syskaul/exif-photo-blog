@@ -73,6 +73,7 @@ import CommandKItem from './CommandKItem';
 import {
   CATEGORY_VISIBILITY,
   COLOR_SORT_ENABLED,
+  DARK_MODE_ENABLED,
   GRID_HOMEPAGE_ENABLED,
   HIDE_TAGS_WITH_ONE_PHOTO,
 } from '@/app/config';
@@ -523,7 +524,7 @@ export default function CommandKClient({
     focalLengths,
   ]);
 
-  const clientSections: CommandKSection[] = [{
+  const clientSections: CommandKSection[] = DARK_MODE_ENABLED ? [{
     heading: appText.theme.theme,
     accessory: <IoInvertModeSharp
       size={14}
@@ -542,7 +543,7 @@ export default function CommandKClient({
       annotation: <BiMoon className="translate-x-[1px]" />,
       action: () => setTheme('dark'),
     }],
-  }];
+  }] : [];
 
   if (isUserSignedIn && areAdminDebugToolsEnabled) {
     clientSections.push({

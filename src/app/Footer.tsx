@@ -4,7 +4,7 @@ import { clsx } from 'clsx/lite';
 import AppGrid from '../components/AppGrid';
 import ThemeSwitcher from '@/app/ThemeSwitcher';
 import Link from 'next/link';
-import { SHOW_TEMPLATE_ATTRIBUTION } from '@/app/config';
+import { DARK_MODE_ENABLED, SHOW_TEMPLATE_ATTRIBUTION } from '@/app/config';
 import RepoLink from '../components/RepoLink';
 import { usePathname } from 'next/navigation';
 import { PATH_ADMIN_PHOTOS, isPathAdmin, isPathSignIn } from './path';
@@ -82,7 +82,7 @@ export default function Footer() {
                 >
                   {appText.privacy.privacySettings}
                 </button>
-                <ThemeSwitcher />
+                {DARK_MODE_ENABLED && <ThemeSwitcher />}
               </div>
             </footer>]
             : []}

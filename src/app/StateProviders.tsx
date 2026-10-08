@@ -3,6 +3,7 @@ import { ThemeProvider } from 'next-themes';
 import {
   ADMIN_AI_MODEL_DEBUG_ENABLED,
   ADMIN_DEBUG_TOOLS_ENABLED,
+  DARK_MODE_ENABLED,
   DEFAULT_THEME,
 } from '@/app/config';
 import AppStateProvider from '@/app/AppStateProvider';
@@ -30,7 +31,12 @@ export default function StateProviders({
         <AppTextProvider>
           <SelectPhotosProvider>
             <EditTitlesProvider>
-              <ThemeProvider attribute="class" defaultTheme={DEFAULT_THEME}>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme={DEFAULT_THEME}
+                enableSystem={DARK_MODE_ENABLED}
+                forcedTheme={DARK_MODE_ENABLED ? undefined : 'light'}
+              >
                 <SwrConfigClient>
                   <SharedHoverProvider>
                     <StickyHeaderProvider>
