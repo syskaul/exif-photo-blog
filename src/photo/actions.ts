@@ -299,7 +299,7 @@ export const addUploadsAction = async ({
           currentUploadUrl = url;
           progress = 0;
           const title = uploadTitles[index];
-          streamUpdate('Parsing EXIF data');
+          streamUpdate('Reading camera metadata');
 
           await addUpload({
             url,

@@ -364,8 +364,7 @@ export default function AdminAppConfigurationClient({
                   {labelForStorage('cloudflare-r2')}:
                   {' '}
                   <AdminLink
-                  // eslint-disable-next-line @stylistic/max-len
-                    href="https://github.com/sambecker/exif-photo-blog#cloudflare-r2"
+                    href="https://developers.cloudflare.com/r2/buckets/"
                     externalIcon
                   >
                     create/configure bucket
@@ -377,7 +376,8 @@ export default function AdminAppConfigurationClient({
                   {labelForStorage('aws-s3')}:
                   {' '}
                   <AdminLink
-                    href="https://github.com/sambecker/exif-photo-blog#aws-s3"
+                  // eslint-disable-next-line @stylistic/max-len
+                    href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html"
                     externalIcon
                   >
                     create/configure bucket
@@ -389,7 +389,8 @@ export default function AdminAppConfigurationClient({
                   {labelForStorage('minio')}:
                   {' '}
                   <AdminLink
-                    href="https://github.com/sambecker/exif-photo-blog#minio"
+                  // eslint-disable-next-line @stylistic/max-len
+                    href="https://min.io/docs/minio/linux/administration/identity-access-management/policy-based-access-control.html"
                     externalIcon
                   >
                     setup MinIO server
@@ -435,14 +436,7 @@ export default function AdminAppConfigurationClient({
             optional
           >
             {renderContent(locale)}
-            Check README for
-            {' '}
-            <AdminLink
-            // eslint-disable-next-line @stylistic/max-len
-              href="https://github.com/sambecker/exif-photo-blog?tab=readme-ov-file#supported-languages"
-            >
-              supported languages
-            </AdminLink>
+            See the repository README for supported languages.
             {renderEnvVars(['NEXT_PUBLIC_LOCALE'])}
           </ChecklistRow>
           <ChecklistRow
@@ -873,12 +867,12 @@ export default function AdminAppConfigurationClient({
             {renderEnvVars(['NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS'])}
           </ChecklistRow>
           <ChecklistRow
-            title="Show EXIF data"
+            title="Show camera metadata"
             status={showExifInfo}
             optional
           >
-            Set environment variable to {'"1"'} to hide EXIF data
-            {renderEnvVars(['NEXT_PUBLIC_HIDE_EXIF_DATA'])}
+            Set environment variable to {'"1"'} to hide camera metadata
+            {renderEnvVars(['NEXT_PUBLIC_HIDE_CAMERA_DATA'])}
           </ChecklistRow>
           <ChecklistRow
             title="Always show exposure compensation"
@@ -912,8 +906,7 @@ export default function AdminAppConfigurationClient({
             status={showRepoLink}
             optional
           >
-            Set environment variable to {'"1"'} to
-            hide {'\"made with exif-photo-blog\"'} references
+            Set environment variable to {'"1"'} to hide template attribution
             {renderEnvVars(['NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION'])}
           </ChecklistRow>
         </>;

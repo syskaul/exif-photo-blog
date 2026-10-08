@@ -20,7 +20,7 @@ export default function ExifCaptureButton({
 
   return (
     <Tooltip
-      content="Refresh form with EXIF data from original file"
+      content="Refresh form with camera metadata from original file"
       triggerIsFocusable
     >
       <LoaderButton
@@ -38,7 +38,7 @@ export default function ExifCaptureButton({
             'sm:translate-x-[-0.5px]',
           )} />}
       >
-        EXIF
+        Metadata
       </LoaderButton>
     </Tooltip>
   );

@@ -1,8 +1,6 @@
-# 📷 `EXIF` Photo Blog
+# Eshaan Kaul's Website
 
-https://github.com/sambecker/exif-photo-blog/assets/169298/4253ea54-558a-4358-8834-89943cfbafb4
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/sambecker-pro/clone?demo-description=Store%20photos%20with%20original%20camera%20data&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F39rys245Px3FVBGRJNYEON%2Fbf68d5c052bda9e9e5bec21878764bc3%2Fimage.png&demo-title=Photo%20Blog&demo-url=https%3A%2F%2Fphotos.sambecker.com&from=templates&project-name=Photo%20Blog&repository-name=exif-photo-blog&repository-url=https%3A%2F%2Fgithub.com%2Fsambecker%2Fexif-photo-blog&skippable-integrations=1&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D&teamCreateStatus=hidden)
+Personal photography website for Eshaan Kaul.
 
 🎬&nbsp;&nbsp;Example sites
 -
@@ -13,12 +11,10 @@ https://github.com/sambecker/exif-photo-blog/assets/169298/4253ea54-558a-4358-88
 - [photos.dteles.dev](https://photos.dteles.dev)
 - [jahidshots.com](https://jahidshots.com)
 
-_Submit your site as an example by [opening an issue](https://github.com/sambecker/exif-photo-blog/issues/new?template=example_site_submission.md)_
-
 ✨&nbsp;&nbsp;Features
 -
 - Built-in auth
-- Photo upload with EXIF extraction
+- Photo uploads with camera metadata
 - Organize photos by tag
 - Infinite scroll
 - Light mode
@@ -46,7 +42,7 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 -
 ### 1. Deploy to Vercel
 
-1. Click [Deploy](https://vercel.com/new/clone?demo-title=Photo+Blog&demo-description=Store+photos+with+original+camera+data&demo-url=https%3A%2F%2Fphotos.sambecker.com&demo-image=https%3A%2F%2Fphotos.sambecker.com%2Ftemplate-image-tight&project-name=Photo+Blog&repository-name=exif-photo-blog&repository-url=https%3A%2F%2Fgithub.com%2Fsambecker%2Fexif-photo-blog&from=templates&skippable-integrations=1&teamCreateStatus=hidden&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D)
+1. Deploy this repository to Vercel and connect the required services.
 2. Add required storage ([Vercel Postgres](https://vercel.com/docs/postgres) + [Vercel Blob](https://vercel.com/docs/vercel-blob)) as part of template installation
    - _When creating new blob store, make sure to configure as "public"_
    - _Preferred postgres provider: Neon, from Vercel Marketplace_
@@ -72,7 +68,7 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 
 🔄&nbsp;&nbsp;Receiving updates
 -
-If you don't plan to change the code, or don't mind making your updates public, consider [forking](https://github.com/sambecker/exif-photo-blog/fork) this repo to easily receive future updates. If you've already set up your project on Vercel see these [migration instructions](#how-do-i-receive-template-updates).
+Deploy updates by pushing changes to the connected repository and redeploying the project.
 
 💻&nbsp;&nbsp;Local development
 -
@@ -157,7 +153,7 @@ To enable AI-powered color analysis and text descriptions of photos, configure a
 #### Alternate: Direct OpenAI (or OpenAI-compatible)
 
 1. Setup OpenAI
-   - Create [OpenAI](https://openai.com) account and fund it ([see thread](https://github.com/sambecker/exif-photo-blog/issues/110) if you're having issues)
+   - Create an [OpenAI](https://openai.com) account and fund it if using the direct OpenAI provider.
    - Setup usage limits to avoid unexpected charges (_recommended_)
 2. Generate API key and store in environment variable `OPENAI_SECRET_KEY` (enable Responses API write access if customizing permissions)
    - Setting `OPENAI_SECRET_KEY` overrides a configured `AI_GATEWAY_MODEL`
@@ -185,7 +181,7 @@ To add location meta to entities like photos and albums:
 
 ### Rate limiting
 
-Create Upstash Redis store from storage tab of Vercel dashboard and link to your project (if required, add environment variable prefix `EXIF`) in order to enable rate limiting—no further configuration necessary.
+Create an Upstash Redis store from the Vercel dashboard and link it to your project to enable rate limiting.
 
 ### Categories
 - `NEXT_PUBLIC_CATEGORY_VISIBILITY`
@@ -227,11 +223,11 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 
 ### Display
 - `NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS = 1` hides keyboard shortcut hints in areas like the main nav, and previous/next photo links
-- `NEXT_PUBLIC_HIDE_EXIF_DATA = 1` hides EXIF data in photo details and OG images (potentially useful for portfolios, which don't focus on photography)
+- `NEXT_PUBLIC_HIDE_CAMERA_DATA = 1` hides camera metadata in photo details and OG images
 - `NEXT_PUBLIC_ALWAYS_SHOW_EXPOSURE_COMP = 1` displays exposure compensation even when it's 0ev
 - `NEXT_PUBLIC_HIDE_ZOOM_CONTROLS = 1` hides fullscreen photo zoom controls
 - `NEXT_PUBLIC_HIDE_TAKEN_AT_TIME = 1` hides taken at time from photo meta
-- `NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION = 1` hides "made with exif-photo-blog" references
+- `NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION = 1` hides template attribution
 
 ### Grid
 - `NEXT_PUBLIC_GRID_HOMEPAGE = 1` shows grid layout on homepage
@@ -268,7 +264,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 
 ## Alternate storage providers
 
-Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be used at a time. Ideally, this is configured before photos are uploaded (see [Issue #34](https://github.com/sambecker/exif-photo-blog/issues/34) for migration considerations). If you have multiple adapters, you can set one as preferred by storing `aws-s3`, `cloudflare-r2`, `minio`, or `vercel-blob` in `NEXT_PUBLIC_STORAGE_PREFERENCE`. See [FAQ](#will-there-be-support-for-image-storage-providers-beyond-vercel-aws-and-cloudflare) regarding unsupported providers.
+Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be used at a time. Ideally, configure this before photos are uploaded. If you have multiple adapters, you can set one as preferred by storing `aws-s3`, `cloudflare-r2`, `minio`, or `vercel-blob` in `NEXT_PUBLIC_STORAGE_PREFERENCE`. See [FAQ](#will-there-be-support-for-image-storage-providers-beyond-vercel-aws-and-cloudflare) regarding unsupported providers.
 
 ### Cloudflare R2
 
@@ -307,52 +303,87 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
 ### AWS S3
 
 1. Setup bucket
-   - [Create S3 bucket](https://s3.console.aws.amazon.com/s3) with "ACLs enabled," and "Block all public access" turned off
-   - Setup CORS under bucket permissions:
+   - [Create an S3 bucket](https://s3.console.aws.amazon.com/s3) with Object Ownership set to **Bucket owner enforced** (ACLs disabled)
+   - Configure public photo delivery:
+     - Keep `BlockPublicAcls` and `IgnorePublicAcls` enabled
+     - Disable `BlockPublicPolicy` and `RestrictPublicBuckets` only if required to apply the public-read bucket policy below. Account-level or Organizations policies can still block public access.
+     - Apply this bucket policy after replacing `{BUCKET_NAME}`. It grants anonymous reads only and rejects insecure transport:
+       ```json
+       {
+         "Version": "2012-10-17",
+         "Statement": [
+           {
+             "Sid": "AllowPublicRead",
+             "Effect": "Allow",
+             "Principal": "*",
+             "Action": "s3:GetObject",
+             "Resource": "arn:aws:s3:::{BUCKET_NAME}/*"
+           },
+           {
+             "Sid": "DenyInsecureTransport",
+             "Effect": "Deny",
+             "Principal": "*",
+             "Action": "s3:*",
+             "Resource": [
+               "arn:aws:s3:::{BUCKET_NAME}",
+               "arn:aws:s3:::{BUCKET_NAME}/*"
+             ],
+             "Condition": {
+               "Bool": {
+                 "aws:SecureTransport": "false"
+               }
+             }
+           }
+         ]
+       }
+       ```
+       Do not grant public list, write, or delete access.
+     - Enable default server-side encryption (SSE-S3)
+   - Configure CORS for the exact site origins that need browser uploads:
      ```json
-     [{
-      "AllowedHeaders": ["*"],
-      "AllowedMethods": [
-        "GET",
-        "PUT"
-      ],
-      "AllowedOrigins": [
-        "http://localhost:*",
-        "https://{VERCEL_PROJECT_NAME}*.vercel.app",
-        "{PRODUCTION_DOMAIN}"
-      ],
-      "ExposeHeaders": []
-     }]
+     {
+       "CORSRules": [{
+         "AllowedHeaders": ["*"],
+         "AllowedMethods": ["GET", "HEAD", "PUT"],
+         "AllowedOrigins": ["https://{PRODUCTION_DOMAIN}", "http://localhost:3000"],
+         "ExposeHeaders": ["ETag"],
+         "MaxAgeSeconds": 3600
+       }]
+     }
      ```
+     Replace `{PRODUCTION_DOMAIN}` with the production hostname and add any specific preview hostname that needs uploads. Do not use a broad `*` origin for authenticated uploads.
    - Store public configuration
      - `NEXT_PUBLIC_AWS_S3_BUCKET`: bucket name
      - `NEXT_PUBLIC_AWS_S3_REGION`: bucket region, e.g., "us-east-1"
-2. Setup private credentials
-   - [Create IAM policy](https://console.aws.amazon.com/iam/home#/policies) using JSON editor:
+2. Give the app server least-privilege access to the bucket. Prefer an IAM role or short-lived federated credentials; use an AWS profile/SSO for local development. The AWS SDK default credential provider chain is used when the optional static key variables below are unset.
+   - Scope the IAM policy to this bucket:
      ```json
      {
        "Version": "2012-10-17",
        "Statement": [
          {
            "Effect": "Allow",
-           "Action": [
-             "s3:PutObject",
-             "s3:PutObjectACL",
-             "s3:GetObject",
-             "s3:ListBucket",
-             "s3:DeleteObject"
-           ],
-           "Resource": [
-             "arn:aws:s3:::{BUCKET_NAME}",
-             "arn:aws:s3:::{BUCKET_NAME}/*"
-           ]
+           "Action": ["s3:ListBucket"],
+           "Resource": "arn:aws:s3:::{BUCKET_NAME}"
+         },
+         {
+           "Effect": "Allow",
+           "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+           "Resource": "arn:aws:s3:::{BUCKET_NAME}/*"
          }
        ]
      }
      ```
-   - [Create IAM user](https://console.aws.amazon.com/iam/home#/users) by choosing "Attach policies directly," and selecting the policy created above. Create "Access key" under "Security credentials," choose "Application running outside AWS," and store credentials (⚠️ _Ensure access keys are not prefixed with `NEXT_PUBLIC`_):
+     Do not add `s3:PutObjectAcl`: this setup uses **Bucket owner enforced** with ACLs disabled, and the app uploads and copies objects without setting ACLs. The app's S3 operations are covered by the bucket-level list permission and the object-level read, write, and delete permissions above.
+   - For direct credentials from Vercel, create a dedicated IAM user with no console access, attach only the bucket-scoped policy above, and create an access key for an application running outside AWS.
+   - Add these values to the Vercel project’s **Production** environment. Keep the access key variables server-only (never prefix them with `NEXT_PUBLIC_`) and rotate them regularly:
      - `AWS_S3_ACCESS_KEY`
      - `AWS_S3_SECRET_ACCESS_KEY`
+     - `NEXT_PUBLIC_AWS_S3_BUCKET`
+     - `NEXT_PUBLIC_AWS_S3_REGION`
+   - For local development, use an AWS CLI profile/SSO where possible; otherwise set the same two key variables in the ignored `.env.local` file. Never commit credentials.
+   - Public-read bucket policies make every uploaded object retrievable by anyone who knows its URL. Do not store private photos or other sensitive content in this bucket.
+   - For observability, enable S3 server access logging to a separate encrypted bucket, CloudTrail data events for this bucket, and CloudWatch request metrics. These may incur log storage, CloudTrail data-event, and CloudWatch custom-metric charges; see [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
 
 ### MinIO
 
@@ -467,14 +498,14 @@ Partial internationalization (for non-admin, user-facing text) is fixed to `en-U
 - `vi-vn`
 - `zh-cn`
 
-To add support for a new language, open a PR following instructions in [/src/i18n/index.ts](https://github.com/sambecker/exif-photo-blog/blob/main/src/i18n/index.ts), using [en-us.ts](https://github.com/sambecker/exif-photo-blog/blob/main/src/i18n/locales/en-us.ts) as reference.
+To add support for a new language, follow the instructions in [/src/i18n/index.ts](./src/i18n/index.ts), using [en-us.ts](./src/i18n/locales/en-us.ts) as a reference.
 
 Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`, `pt-pt`, `es-es`), [@brandnholl](https://github.com/brandnholl) (`id-id`), [@TongEc](https://github.com/TongEc) (`zh-cn`), [@xahidex](https://github.com/xahidex) (`bd-bn`, `hi-in`), [@mehmetabak](https://github.com/mehmetabak) (`tr-tr`), [@simondeeley](https://github.com/simondeeley) (`en-gb`), [@jasonquache](https://github.com/jasonquache) (`vi-vn`)
 
 📖&nbsp;&nbsp;FAQ
 -
 #### How do I receive template updates?
-> For forked repos, click "Code," then "Update branch" from the main repo page. If you originally cloned the code, you can [create a fork](https://github.com/sambecker/exif-photo-blog/fork) from GitHub, then update your Git connection from your Vercel project settings. Once you've done this, you may need to go to your project deployments page, click •••, select "Create deployment," and choose `main`.
+> For repository updates, push the changes to the connected Git repository and redeploy from the Vercel project.
 
 #### How do I edit multiple photos?
 > In the admin menu, select "Batch edit ..." From there, you can perform bulk tag, favorite, and delete actions.
@@ -483,10 +514,10 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > This template statically optimizes core views such as `/` and `/grid` to minimize visitor load times. Consequently, when photos are added, edited, or removed, it might take several minutes for those changes to propagate. If it seems like a change is not taking effect, try navigating to `/admin/configuration` and clicking "Clear Cache."
 
 #### Why do production deployments fail when static optimization is enabled?
-> There have been reports ([#184](https://github.com/sambecker/exif-photo-blog/issues/184#issuecomment-2629474045) + [#185](https://github.com/sambecker/exif-photo-blog/issues/185#issuecomment-2629478570)) that having large photos (over 30MB), or a CDN, e.g., Cloudflare in front of Vercel, may destabilize static optimization.
+> Large photos (over 30MB), or a CDN such as Cloudflare in front of Vercel, may destabilize static optimization.
 
 #### Why don't my older photos look right?
-> As the template has evolved, EXIF fields (such as lenses) have been added, blur data is generated through a different method, and AI/privacy features have been added. In order to bring older photos up to date, either click the 'sync' button next to a photo or go to photo updates (`/admin/photos/updates`) to sync all photos that need updates.
+> As the site evolves, camera metadata, blur data, and AI/privacy features may be updated. To refresh older photos, click the 'sync' button next to a photo or visit photo updates (`/admin/photos/updates`).
 
 #### Why don't my OG images load when I share a link?
 > Many services such as iMessage, Slack, and X, require near-instant responses when unfurling link-based content. In order to guarantee sufficient responsiveness, consider rendering pages and image assets ahead of time by enabling static optimization by setting `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTOS = 1` and `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_OG_IMAGES = 1`. Keep in mind that this will increase platform usage.
@@ -504,16 +535,16 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > Navigate to `/admin/configuration` and click "Clear Cache."
 
 #### I'm seeing server-side runtime errors when loading a page after updating my fork. What do I do?
-> Navigate to `/admin/configuration` and click "Clear Cache." If this doesn't help, [open an issue](https://github.com/sambecker/exif-photo-blog/issues/new).
+> Navigate to `/admin/configuration` and click "Clear Cache." If this doesn't help, contact the site maintainer.
 
 #### Why can’t I upload HEIC files?
-> This template relies on `sharp` to manipulate images and `next/image` to serve them, neither of which currently support HEIC (https://github.com/vercel/next.js/discussions/30043 + https://github.com/lovell/sharp/issues/3981). Fortunately, you can still upload HEIC files directly from native share controls on Apple platforms and they will automatically be converted to JPG upon upload. If you think you have a viable HEIC strategy, feel free to open a PR. See https://github.com/sambecker/exif-photo-blog/issues/229 for discussion.
+> This site relies on `sharp` to manipulate images and `next/image` to serve them, neither of which currently support HEIC (https://github.com/vercel/next.js/discussions/30043 + https://github.com/lovell/sharp/issues/3981). HEIC files uploaded from native share controls on Apple platforms are automatically converted to JPG.
 
 #### Why are my thumbnails square?
 > Absent configuration, the default grid aspect ratio is `1`. `NEXT_PUBLIC_GRID_ASPECT_RATIO` can be set to any number (for instance, `1.5` for 3:2 images) or ignored by setting to `0`.
 
-#### Why aren't Fujifilm simulations importing alongside EXIF data?
-> Fujifilm simulation data is stored in vendor-specific Makernote binaries embedded in EXIF data. Under certain circumstances an intermediary may strip out this data. For instance, there is a known issue on iOS where editing an image, e.g., cropping it, causes Makernote data loss. If simulation data appears to be missing, try importing the original file as it was stored by the camera. Additionally, if you can confirm the simulation mode, you can edit the photo and manually select it.
+#### Why aren't Fujifilm simulations importing with camera metadata?
+> Fujifilm simulation data is stored in vendor-specific MakerNote data embedded in image metadata. Some editing or sharing tools may strip this data. If a simulation is missing, try importing the original camera file or select the simulation manually when editing the photo.
 
 #### My Fujifilm recipes are missing/displaying incorrect data. What should I do?
 > If you don't see a recipe, first try syncing your photo from the ••• menu, or from `/admin/photos`. If the data looks incorrect, open an issue with the file in question attached in order for it to be investigated. Fujifilm file specifications have evolved over time and recipe parsing may need to be adjusted based on camera model/vintage.
@@ -522,7 +553,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > This can be accomplished by setting `NEXT_PUBLIC_CATEGORY_VISIBILITY` (which has a default value of `tags,cameras,lenses,recipes,films`) to `tags,cameras,lenses`.
 
 #### Why do my images appear flipped/rotated incorrectly?
-> For a number of reasons, only EXIF orientations: 1, 3, 6, and 8 are supported. Orientations 2, 4, 5, and 7—which make use of mirroring—are not supported.
+> Image orientations 1, 3, 6, and 8 are supported. Orientations 2, 4, 5, and 7—which use mirroring—are not supported.
 
 #### Why does my image placeholder blur look different from photo to photo?
 > Earlier versions of this template generated blur data on the client, which varied visually from browser to browser. Data is now generated consistently on the server. If you wish to update blur data for a particular photo, edit the photo in question, make no changes, and choose "Update."
@@ -531,7 +562,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > The default timeout for processing multiple uploads is 60 seconds (the limit for Hobby accounts). This can be extended to 5 minutes on Pro accounts by setting `maxDuration = 300` in `src/app/admin/uploads/page.tsx`.
 
 #### I've added my OpenAI key but can't seem to make it work. Why am I seeing connection errors?
-> You may need to pre-purchase credits before accessing the OpenAI API. See [#110](https://github.com/sambecker/exif-photo-blog/issues/110) for discussion. If you've customized key permissions, make sure write access to the Responses API is enabled.
+> You may need to pre-purchase credits before accessing the OpenAI API. If you've customized key permissions, make sure write access to the Responses API is enabled.
 
 #### How do I generate AI text for preexisting photos?
 > Once AI text generation is configured, photos missing text will show up in photo updates (`/admin/photos/updates`).
@@ -543,7 +574,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > At this time, an external storage provider is necessary in order to develop locally. If you have a strategy to propose which allows files to be locally uploaded and served to `next/image` in away that mirrors an external storage provider for debugging purposes, please open a PR.
 
 #### Can this template be self-hosted?
-> Possibly. See [#116](https://github.com/sambecker/exif-photo-blog/issues/116) and [#132](https://github.com/sambecker/exif-photo-blog/issues/132) for discussion around image hosting and docker usage.
+> Possibly. Image hosting and Docker configuration depend on the selected storage provider.
 
 #### Why am I seeing many merge conflicts when syncing my fork?
-> Previous versions of this template stored Next.js "App Router" files in `/src`, and app-level functionality in `/src/site`. If you've made customizations and are having difficulty merging updates, consider moving `/src/app` files to `/`, and renaming `src/site` to `/src/app`. Other structural changes include moving `tailwind.css` and `middleware.ts` to `/`. Additionally, it may be helpful to review [PR #195](https://github.com/sambecker/exif-photo-blog/pull/195) for an overview of the most significant changes.
+> This site uses the Next.js App Router. Keep application routes in `/app` and shared application code in `/src`.

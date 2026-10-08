@@ -20,8 +20,8 @@ export const SHOULD_PREFETCH_ALL_LINKS: boolean | undefined = undefined;
 
 // TEMPLATE META
 
-export const TEMPLATE_TITLE = 'Photo Blog';
-export const TEMPLATE_DESCRIPTION = 'Store photos with original camera data';
+export const TEMPLATE_TITLE = 'Eshaan Kaul\'s Website';
+export const TEMPLATE_DESCRIPTION = 'Photography by Eshaan Kaul';
 
 // SOURCE CODE
 
@@ -140,11 +140,10 @@ export const IS_META_DESCRIPTION_CONFIGURED =
 export const META_DESCRIPTION =
   process.env.NEXT_PUBLIC_META_DESCRIPTION ||
   NAV_CAPTION ||
-  SITE_DOMAIN_SHORT;
+  TEMPLATE_DESCRIPTION;
 
 export const NAV_TITLE =
   CUSTOM_NAV_TITLE ||
-  SITE_DOMAIN_SHORT ||
   META_TITLE;
 
 export const SIDEBAR_TEXT =
@@ -202,9 +201,7 @@ export const HAS_AWS_S3_STORAGE_CLIENT =
   Boolean(process.env.NEXT_PUBLIC_AWS_S3_BUCKET) &&
   Boolean(process.env.NEXT_PUBLIC_AWS_S3_REGION);
 export const HAS_AWS_S3_STORAGE =
-  HAS_AWS_S3_STORAGE_CLIENT &&
-  Boolean(process.env.AWS_S3_ACCESS_KEY) &&
-  Boolean(process.env.AWS_S3_SECRET_ACCESS_KEY);
+  HAS_AWS_S3_STORAGE_CLIENT;
 
 // STORAGE: MINIO
 // Includes separate check for client-side usage, i.e., url construction
@@ -376,6 +373,7 @@ export const NAV_SORT_CONTROL = COLOR_SORT_ENABLED
 export const SHOW_KEYBOARD_SHORTCUT_TOOLTIPS =
   process.env.NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS !== '1';
 export const SHOW_EXIF_DATA =
+  process.env.NEXT_PUBLIC_HIDE_CAMERA_DATA !== '1' &&
   process.env.NEXT_PUBLIC_HIDE_EXIF_DATA !== '1';
 export const ALWAYS_SHOW_EXPOSURE_COMP =
   process.env.NEXT_PUBLIC_ALWAYS_SHOW_EXPOSURE_COMP === '1';
@@ -384,7 +382,7 @@ export const SHOW_ZOOM_CONTROLS =
 export const SHOW_TAKEN_AT_TIME =
   process.env.NEXT_PUBLIC_HIDE_TAKEN_AT_TIME !== '1';
 export const SHOW_TEMPLATE_ATTRIBUTION =
-  process.env.NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION !== '1';
+  process.env.NEXT_PUBLIC_HIDE_TEMPLATE_ATTRIBUTION === '0';
 
 // GRID
 

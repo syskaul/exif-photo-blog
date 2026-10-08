@@ -232,9 +232,9 @@ export default function PhotoForm({
         !FIELDS_TO_NOT_TOAST.includes(key));
       if (keysToToast.length > 0) {
         const fields = convertFormKeysToLabels(keysToToast);
-        toastSuccess(`Updated EXIF fields: ${fields.join(', ')}`, 8000);
+        toastSuccess(`Updated camera metadata: ${fields.join(', ')}`, 8000);
       } else {
-        toastWarning('No new EXIF data found');
+        toastWarning('No new camera metadata found');
       }
     }
   }, [updatedExifData]);

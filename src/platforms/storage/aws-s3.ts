@@ -12,20 +12,32 @@ import { formatBytes } from '@/utility/number';
 
 const AWS_S3_BUCKET = process.env.NEXT_PUBLIC_AWS_S3_BUCKET ?? '';
 const AWS_S3_REGION = process.env.NEXT_PUBLIC_AWS_S3_REGION ?? '';
-const AWS_S3_ACCESS_KEY = process.env.AWS_S3_ACCESS_KEY ?? '';
-const AWS_S3_SECRET_ACCESS_KEY = process.env.AWS_S3_SECRET_ACCESS_KEY ?? '';
+const AWS_S3_ACCESS_KEY = process.env.AWS_S3_ACCESS_KEY;
+const AWS_S3_SECRET_ACCESS_KEY = process.env.AWS_S3_SECRET_ACCESS_KEY;
 
 export const AWS_S3_BASE_URL = AWS_S3_BUCKET && AWS_S3_REGION
   ? `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com`
   : undefined;
 
-export const awsS3Client = () => new S3Client({
-  region: AWS_S3_REGION,
-  credentials: {
-    accessKeyId: AWS_S3_ACCESS_KEY,
-    secretAccessKey: AWS_S3_SECRET_ACCESS_KEY,
-  },
-});
+export const awsS3Client = () => {
+  if (Boolean(AWS_S3_ACCESS_KEY) !== Boolean(AWS_S3_SECRET_ACCESS_KEY)) {
+    throw new Error(
+      'AWS_S3_ACCESS_KEY and AWS_S3_SECRET_ACCESS_KEY must be set together.',
+    );
+  }
+
+  const credentials = AWS_S3_ACCESS_KEY && AWS_S3_SECRET_ACCESS_KEY
+    ? {
+      accessKeyId: AWS_S3_ACCESS_KEY,
+      secretAccessKey: AWS_S3_SECRET_ACCESS_KEY,
+    }
+    : undefined;
+
+  return new S3Client({
+    region: AWS_S3_REGION,
+    ...(credentials ? { credentials } : {}),
+  });
+};
 
 const urlForKey = (key?: string) => `${AWS_S3_BASE_URL}/${key}`;
 
@@ -40,7 +52,6 @@ export const awsS3Put = async (
     Bucket: AWS_S3_BUCKET,
     Key: fileName,
     Body: file,
-    ACL: 'public-read',
   }))
     .then(() => urlForKey(fileName));
 
@@ -58,7 +69,6 @@ export const awsS3Copy = async (
     Bucket: AWS_S3_BUCKET,
     CopySource: fileNameSource,
     Key,
-    ACL: 'public-read',
   }))
     .then(() => urlForKey(fileNameDestination));
 };
@@ -92,6 +102,6 @@ export const awsS3GetSignedUrl = (
   const client = awsS3Client();
   const command = method === 'GET'
     ? new GetObjectCommand({ Bucket: AWS_S3_BUCKET, Key })
-    : new PutObjectCommand({ Bucket: AWS_S3_BUCKET, Key, ACL: 'public-read' });
+    : new PutObjectCommand({ Bucket: AWS_S3_BUCKET, Key });
   return getSignedUrl(client, command, { expiresIn });
 };

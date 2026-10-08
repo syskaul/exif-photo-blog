@@ -154,7 +154,7 @@ export default function AdminUploadsTableRow({
                   <EditButton
                     path={pathForAdminUploadUrl(url, draftTitle)}
                     disabled={isRowLoading}
-                    tooltip="Review EXIF details before adding"
+                    tooltip="Review camera details before adding"
                     hideText="always"
                     tooltipSide="bottom"
                   />

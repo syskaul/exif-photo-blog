@@ -139,7 +139,7 @@ export default function AdminPhotosUpdateClient({
             {arePhotoIdsSyncing
               ? <>Leave browser open until updates complete</>
               : <>
-                Sync to capture new EXIF fields, optimize image data,
+                Sync to capture new camera metadata, optimize image data,
                 {' '}
                 use AI to generate missing text (if configured)
               </>}
