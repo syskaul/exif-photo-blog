@@ -25,14 +25,14 @@ export const TEMPLATE_DESCRIPTION = 'Photography by Eshaan Kaul';
 
 // SOURCE CODE
 
-export const TEMPLATE_REPO_OWNER  = 'sambecker';
-export const TEMPLATE_REPO_NAME   = 'exif-photo-blog';
-export const TEMPLATE_REPO_BRANCH = 'main';
-export const TEMPLATE_REPO_URL =
-  `https://github.com/${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`;
-export const TEMPLATE_REPO_URL_FORK = `${TEMPLATE_REPO_URL}/fork`;
-export const TEMPLATE_REPO_URL_README =
-  `${TEMPLATE_REPO_URL}?tab=readme-ov-file`;
+export const PROJECT_REPO_OWNER = 'syskaul';
+export const PROJECT_REPO_NAME = 'photos.eshaankaul.com';
+export const PROJECT_REPO_BRANCH = 'main';
+export const PROJECT_REPO_URL =
+  `https://github.com/${PROJECT_REPO_OWNER}/${PROJECT_REPO_NAME}`;
+export const PROJECT_REPO_URL_FORK = `${PROJECT_REPO_URL}/fork`;
+export const PROJECT_REPO_URL_README =
+  `${PROJECT_REPO_URL}?tab=readme-ov-file`;
 
 export const VERCEL_GIT_PROVIDER =
   process.env.NEXT_PUBLIC_VERCEL_GIT_PROVIDER;
@@ -105,7 +105,7 @@ export const BASE_URL_SHARE =
 export const getBaseUrl = (share?: boolean) =>
   (share && BASE_URL_SHARE) ? BASE_URL_SHARE : BASE_URL;
 
-const SITE_DOMAIN_SHORT = shortenUrl(SITE_DOMAIN);
+export const SITE_DOMAIN_SHORT = shortenUrl(SITE_DOMAIN);
 
 // SITE META
 
@@ -159,10 +159,13 @@ export const LIBRARY_DESCRIPTION_DEFAULT =
 // STORAGE
 
 // STORAGE: DATABASE
+export const POSTGRES_IAM_AUTH_ENABLED =
+  process.env.POSTGRES_IAM_AUTH_ENABLED === '1';
 export const HAS_DATABASE =
-  Boolean(process.env.POSTGRES_URL);
+  Boolean(process.env.POSTGRES_URL) || POSTGRES_IAM_AUTH_ENABLED;
 export const POSTGRES_SSL_ENABLED =
-  process.env.DISABLE_POSTGRES_SSL === '1' ? false : true;
+  POSTGRES_IAM_AUTH_ENABLED ||
+  process.env.DISABLE_POSTGRES_SSL !== '1';
 
 // STORAGE: REDIS
 export const REDIS_URL = normalizeRedisUrl(

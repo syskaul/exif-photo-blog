@@ -1,4 +1,7 @@
-import { TEMPLATE_REPO_NAME, TEMPLATE_REPO_URL } from '@/app/config';
+import {
+  PROJECT_REPO_NAME,
+  PROJECT_REPO_URL,
+} from '@/app/config';
 import { useAppText } from '@/i18n/state/client';
 import { clsx } from 'clsx/lite';
 import Link from 'next/link';
@@ -13,7 +16,7 @@ export default function RepoLink() {
         {utility.madeWith}
       </span>
       <Link
-        href={TEMPLATE_REPO_URL}
+        href={PROJECT_REPO_URL}
         target="_blank"
         className={clsx(
           'flex items-center gap-0.5',
@@ -25,7 +28,7 @@ export default function RepoLink() {
           size={16}
           className="translate-y-[0.5px] hidden xs:inline-block"
         />
-        {TEMPLATE_REPO_NAME}
+        {PROJECT_REPO_NAME}
       </Link>
     </span>
   );

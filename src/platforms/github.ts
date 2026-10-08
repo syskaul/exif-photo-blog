@@ -1,7 +1,7 @@
 import {
-  TEMPLATE_REPO_OWNER,
-  TEMPLATE_REPO_NAME,
-  TEMPLATE_REPO_BRANCH,
+  PROJECT_REPO_OWNER,
+  PROJECT_REPO_NAME,
+  PROJECT_REPO_BRANCH,
 } from '@/app/config';
 
 const DEFAULT_BRANCH = 'main';
@@ -43,26 +43,26 @@ const fetchGitHub = async (
 // Website urls
 
 export const getGitHubUrlOwner = ({
-  owner = TEMPLATE_REPO_OWNER,
+  owner = PROJECT_REPO_OWNER,
 }: RepoParams = {}) =>
   `https://github.com/${owner}`;
 
 export const getGitHubUrlRepo = ({
-  owner = TEMPLATE_REPO_OWNER,
-  repo = TEMPLATE_REPO_NAME,
+  owner = PROJECT_REPO_OWNER,
+  repo = PROJECT_REPO_NAME,
 }: RepoParams = {}) =>
   `${getGitHubUrlOwner({ owner })}/${repo}`;
 
 export const getGitHubUrlBranch = ({
-  owner = TEMPLATE_REPO_OWNER,
-  repo = TEMPLATE_REPO_NAME,
+  owner = PROJECT_REPO_OWNER,
+  repo = PROJECT_REPO_NAME,
   branch = DEFAULT_BRANCH,
 }: RepoParams = {}) =>
   `${getGitHubUrlRepo({ owner, repo })}/tree/${branch}`;
 
 export const getGitHubUrlCommit = ({
-  owner = TEMPLATE_REPO_OWNER,
-  repo = TEMPLATE_REPO_NAME,
+  owner = PROJECT_REPO_OWNER,
+  repo = PROJECT_REPO_NAME,
   commit,
 }: RepoParams = {}) =>
   commit
@@ -75,13 +75,13 @@ export const getGitHubUrlCompare = ({
   branch = DEFAULT_BRANCH,
 }: RepoParams = {}) =>
   // eslint-disable-next-line @stylistic/max-len
-  `${getGitHubUrlRepo({ owner, repo })}/compare/${branch}...${TEMPLATE_REPO_OWNER}:${TEMPLATE_REPO_NAME}:${TEMPLATE_REPO_BRANCH}`;
+  `${getGitHubUrlRepo({ owner, repo })}/compare/${branch}...${PROJECT_REPO_OWNER}:${PROJECT_REPO_NAME}:${PROJECT_REPO_BRANCH}`;
 
 // API urls
 
 const getGitHubApiRepoUrl = ({
-  owner = TEMPLATE_REPO_OWNER,
-  repo = TEMPLATE_REPO_NAME,
+  owner = PROJECT_REPO_OWNER,
+  repo = PROJECT_REPO_NAME,
 }: RepoParams = {}) =>
   `https://api.github.com/repos/${owner}/${repo}`;
 
@@ -100,10 +100,10 @@ const getGitHubApiCompareToRepoUrl = ({
   branch = DEFAULT_BRANCH,
 }: RepoParams = {}) =>
   // eslint-disable-next-line @stylistic/max-len
-  `${getGitHubApiRepoUrl()}/compare/${TEMPLATE_REPO_BRANCH}...${owner}:${repo}:${branch}`;
+  `${getGitHubApiRepoUrl()}/compare/${PROJECT_REPO_BRANCH}...${owner}:${repo}:${branch}`;
 
 const getGitHubApiCompareToCommitUrl = ({ commit }: RepoParams = {}) =>
-  `${getGitHubApiRepoUrl()}/compare/${TEMPLATE_REPO_BRANCH}...${commit}`;
+  `${getGitHubApiRepoUrl()}/compare/${PROJECT_REPO_BRANCH}...${commit}`;
 
 // Requests
 
@@ -116,7 +116,7 @@ const getIsRepoForkedFromBase = async (params: RepoParams) => {
   const data = await fetchGitHub(getGitHubApiRepoUrl(params));
   return (
     Boolean(data.fork) &&
-    data.source?.full_name === `${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`
+    data.source?.full_name === `${PROJECT_REPO_OWNER}/${PROJECT_REPO_NAME}`
   );
 };
 
@@ -141,8 +141,8 @@ const getGitHubCommitsBehindFromCommit = async (params?: RepoParams) => {
 };
 
 const isRepoBaseRepo = ({ owner, repo }: RepoParams) =>
-  owner?.toLowerCase() === TEMPLATE_REPO_OWNER &&
-  repo?.toLowerCase() === TEMPLATE_REPO_NAME;
+  owner?.toLowerCase() === PROJECT_REPO_OWNER &&
+  repo?.toLowerCase() === PROJECT_REPO_NAME;
 
 export const getGitHubPublicFork = async (): Promise<RepoParams> => {
   const data = await fetchGitHub(getGitHubApiForksUrl());

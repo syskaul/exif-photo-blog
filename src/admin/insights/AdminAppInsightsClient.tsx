@@ -9,13 +9,13 @@ import { PiWarningBold } from 'react-icons/pi';
 import { TbSparkles } from 'react-icons/tb';
 import { BiGitBranch, BiGitCommit, BiLogoGithub } from 'react-icons/bi';
 import {
-  TEMPLATE_REPO_BRANCH,
-  TEMPLATE_REPO_OWNER,
-  TEMPLATE_REPO_NAME,
+  PROJECT_REPO_BRANCH,
+  PROJECT_REPO_OWNER,
+  PROJECT_REPO_NAME,
   VERCEL_GIT_COMMIT_SHA_SHORT,
   VERCEL_GIT_COMMIT_MESSAGE,
-  TEMPLATE_REPO_URL_FORK,
-  TEMPLATE_REPO_URL_README,
+  PROJECT_REPO_URL_FORK,
+  PROJECT_REPO_URL_README,
   CATEGORY_VISIBILITY,
   USED_DEPRECATED_ENV_VARS,
 } from '@/app/config';
@@ -64,7 +64,7 @@ const TEXT_COLOR_WARNING  = 'text-amber-600 dark:text-amber-500';
 const TEXT_COLOR_BLUE     = 'text-blue-600 dark:text-blue-500';
 
 const readmeAnchor = (anchor: string) =>
-  <AdminLink href={`${TEMPLATE_REPO_URL_README}#${anchor}`}>
+  <AdminLink href={`${PROJECT_REPO_URL_README}#${anchor}`}>
     README/{anchor}
   </AdminLink>;
 
@@ -170,7 +170,7 @@ export default function AdminAppInsightsClient({
     href={codeMeta?.urlBranch}
     target="blank"
   >
-    {codeMeta?.branch ?? TEMPLATE_REPO_BRANCH}
+    {codeMeta?.branch ?? PROJECT_REPO_BRANCH}
   </a>;
 
   const renderTooltipContent = (content: ReactNode) =>
@@ -203,10 +203,10 @@ export default function AdminAppInsightsClient({
                 size={15}
                 className="text-blue-500 translate-y-[1px]"
               />}
-              content="This template is not forked"
+              content="This repository is not a fork"
               expandContent={<>
-                <AdminLink href={TEMPLATE_REPO_URL_FORK}>
-                  Fork original template
+                <AdminLink href={PROJECT_REPO_URL_FORK}>
+                  Fork this website
                 </AdminLink>
                 {' '}
                 to receive the latest fixes and features.
@@ -249,14 +249,14 @@ export default function AdminAppInsightsClient({
                   href={codeMeta?.urlOwner}
                   target="blank"
                 >
-                  {codeMeta?.owner ?? TEMPLATE_REPO_OWNER}
+                  {codeMeta?.owner ?? PROJECT_REPO_OWNER}
                 </a>
                 <div>/</div>
                 <a
                   href={codeMeta?.urlRepo}
                   target="blank"
                 >
-                  {codeMeta?.repo ?? TEMPLATE_REPO_NAME}
+                  {codeMeta?.repo ?? PROJECT_REPO_NAME}
                 </a>
               </div>
               <div className="hidden sm:flex items-center gap-1 min-w-0">

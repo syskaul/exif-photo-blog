@@ -1,7 +1,7 @@
 import { migrateAboutTableToLibrary, migrationForError } from './migration';
 import { createPhotosTable } from '@/photo/query';
 import sleep from '@/utility/sleep';
-import { ADMIN_SQL_DEBUG_ENABLED } from '@/app/config';
+import { ADMIN_SQL_DEBUG_ENABLED, HAS_DATABASE } from '@/app/config';
 import { createAlbumPhotoTable, createAlbumsTable } from '@/album/query';
 import { createLibraryTable } from '@/library/query';
 
@@ -85,7 +85,7 @@ export const safelyQuery = async <T>(
         throw e;
       }
     } else if (
-      !process.env.POSTGRES_URL &&
+      !HAS_DATABASE &&
       isDatabaseConnectionRefused(e)
     ) {
       // Template installs have no database. Callers catch this

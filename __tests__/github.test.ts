@@ -2,13 +2,13 @@ import {
   getGitHubMeta,
   getGitHubPublicFork,
 } from '@/platforms/github';
-import { TEMPLATE_REPO_OWNER, TEMPLATE_REPO_NAME } from '@/app/config';
+import { PROJECT_REPO_OWNER, PROJECT_REPO_NAME } from '@/app/config';
 
 describe('GitHub', () => {
   it('fetches base repo meta', async () => {
     const meta = await getGitHubMeta({
-      owner: TEMPLATE_REPO_OWNER,
-      repo: TEMPLATE_REPO_NAME,
+      owner: PROJECT_REPO_OWNER,
+      repo: PROJECT_REPO_NAME,
     });
     expect(meta).toBeDefined();
     expect(meta.urlRepo).toBeDefined();

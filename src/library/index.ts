@@ -39,6 +39,6 @@ export const getLibraryMeta = (
 ) => ({
   title: title || META_TITLE || appText.library.titleDefault,
   subhead: subhead || (SHOW_TEMPLATE_ATTRIBUTION
-    ? appText.utility.madeWithExifPhotoBlog
+    ? appText.utility.madeWithProject
     : undefined),
 });

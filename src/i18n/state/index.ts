@@ -1,4 +1,4 @@
-import { TEMPLATE_REPO_NAME } from '@/app/config';
+import { TEMPLATE_TITLE } from '@/app/config';
 import { I18N } from '..';
 
 export type AppTextState = ReturnType<typeof generateAppTextState>;
@@ -97,7 +97,7 @@ export const generateAppTextState = (i18n: I18N) => {
           .replace('{{index}}', index.toString())
           .replace('{{count}}', count.toString())
           .replace('{{action}}', action),
-      madeWithExifPhotoBlog: `${i18n.utility.madeWith} ${TEMPLATE_REPO_NAME}`,
+      madeWithProject: `${i18n.utility.madeWith} ${TEMPLATE_TITLE}`,
     },
   };
 };

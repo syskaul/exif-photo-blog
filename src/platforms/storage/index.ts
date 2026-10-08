@@ -143,7 +143,11 @@ const putBlobWithProgress = (
         reject(new Error(`Upload failed with status ${xhr.status}`));
       }
     };
-    xhr.onerror = () => reject(new Error('Upload failed'));
+    xhr.onerror = () => reject(new Error(
+      'Upload failed due to a network error. Check the storage endpoint and ' +
+      'confirm its CORS configuration allows this site origin and PUT ' +
+      'requests.',
+    ));
     xhr.onabort = () =>
       reject(new DOMException('The operation was aborted.', 'AbortError'));
 
@@ -162,11 +166,16 @@ export const uploadFromClientViaPresignedUrl = async (
   fileName: string,
   options?: ClientUploadOptions,
 ) => {
-  const url = await fetch(
+  const response = await fetch(
     `${PATH_API_PRESIGNED_URL}/${fileName}`,
     { signal: options?.abortSignal },
-  )
-    .then((response) => response.text());
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Unable to get upload URL (HTTP ${response.status})`,
+    );
+  }
+  const url = await response.text();
 
   await putBlobWithProgress(url, file, options);
 

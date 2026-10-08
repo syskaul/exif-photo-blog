@@ -2,15 +2,6 @@
 
 Personal photography website for Eshaan Kaul.
 
-🎬&nbsp;&nbsp;Example sites
--
-- [photos.sambecker.com](https://photos.sambecker.com)
-- [birdnerd.photo](https://birdnerd.photo)
-- [booshie.photo](https://booshie.photo)
-- [photos.sconetto.me](https://photos.sconetto.me)
-- [photos.dteles.dev](https://photos.dteles.dev)
-- [jahidshots.com](https://jahidshots.com)
-
 ✨&nbsp;&nbsp;Features
 -
 - Built-in auth
@@ -280,6 +271,7 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
        ],
        "AllowedOrigins": [
           "http://localhost:3000",
+          "http://localhost:3001",
           "https://{VERCEL_PROJECT_NAME}*.vercel.app",
           "{PRODUCTION_DOMAIN}"
        ]
@@ -345,7 +337,11 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
        "CORSRules": [{
          "AllowedHeaders": ["*"],
          "AllowedMethods": ["GET", "HEAD", "PUT"],
-         "AllowedOrigins": ["https://{PRODUCTION_DOMAIN}", "http://localhost:3000"],
+         "AllowedOrigins": [
+           "https://{PRODUCTION_DOMAIN}",
+           "http://localhost:3000",
+           "http://localhost:3001"
+         ],
          "ExposeHeaders": ["ETag"],
          "MaxAgeSeconds": 3600
        }]
@@ -354,7 +350,7 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
      Replace `{PRODUCTION_DOMAIN}` with the production hostname and add any specific preview hostname that needs uploads. Do not use a broad `*` origin for authenticated uploads.
    - Store public configuration
      - `NEXT_PUBLIC_AWS_S3_BUCKET`: bucket name
-     - `NEXT_PUBLIC_AWS_S3_REGION`: bucket region, e.g., "us-east-1"
+     - `NEXT_PUBLIC_AWS_S3_REGION`: bucket region, e.g., "us-east-2"
 2. Give the app server least-privilege access to the bucket. Prefer an IAM role or short-lived federated credentials; use an AWS profile/SSO for local development. The AWS SDK default credential provider chain is used when the optional static key variables below are unset.
    - Scope the IAM policy to this bucket:
      ```json
@@ -479,6 +475,31 @@ Vercel Postgres can be switched to another Postgres-compatible, pooling provider
 ### Supabase
 1. Ensure connection string is set to "Transaction Mode" via port `6543`
 2. Disable SSL by setting `DISABLE_POSTGRES_SSL = 1`
+
+### Amazon Aurora PostgreSQL with Vercel OIDC
+
+The app can use short-lived IAM database authentication tokens instead of a
+stored PostgreSQL password. Enable `POSTGRES_IAM_AUTH_ENABLED = 1` and configure
+these server-side Vercel environment variables:
+
+- `AWS_ROLE_ARN`: IAM role trusted by your Vercel project through OIDC
+- `AWS_REGION`: the Aurora cluster's region (for example, `us-east-2`)
+- `PGHOST`: Aurora cluster endpoint
+- `PGPORT`: database port (usually `5432`)
+- `PGUSER`: PostgreSQL user granted the `rds_iam` role
+- `PGDATABASE`: database name (defaults to `postgres`)
+
+Enable IAM database authentication on the cluster and grant the Vercel IAM role
+`rds-db:connect` for only the intended database user. Restrict the role trust
+policy to the specific Vercel team, project, and environment. The [Vercel AWS
+integration](https://vercel.com/marketplace/aws) can configure OIDC and database
+connectivity; do not make an Aurora cluster publicly accessible to connect it
+from Vercel. For local development without Vercel OIDC, omit `AWS_ROLE_ARN` and
+use an AWS CLI profile or other AWS SDK default credentials. The local AWS
+principal still needs `rds-db:connect`, and the machine must have network access
+to the cluster. Do not store a generated IAM auth token in `POSTGRES_URL`;
+tokens expire after 15 minutes and are generated automatically for new pool
+connections.
 
 💬 &nbsp;&nbsp;I18N
 -

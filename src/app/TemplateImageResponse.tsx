@@ -4,6 +4,7 @@ import IconGrid from '@/components/icons/IconGrid';
 import ImagePhotoGrid from '../image-response/components/ImagePhotoGrid';
 import { NextImageSize } from '@/platforms/next-image';
 import { MAX_PHOTOS_TO_SHOW_TEMPLATE } from '@/image-response';
+import { SITE_DOMAIN_SHORT } from '@/app/config';
 
 export default function TemplateImageResponse({
   photos,
@@ -82,7 +83,7 @@ export default function TemplateImageResponse({
             justifyContent: 'flex-end',
             flexGrow: 1,
           }}>
-            photos.sambecker.com
+            {SITE_DOMAIN_SHORT}
           </div>
         </div>}
       <div style={{
