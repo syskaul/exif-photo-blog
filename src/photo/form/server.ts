@@ -28,7 +28,6 @@ export const convertExifToFormData = (
     exif.tags?.ImageDescription ||
     exifr?.ImageDescription ||
     exifr?.description?.value;
-  const tags: string[] | undefined = exifr?.subject;
 
   if (title && title !== description) {
     caption = description;
@@ -88,6 +87,5 @@ export const convertExifToFormData = (
     },
     ...title && { title },
     ...caption && { caption },
-    ...Array.isArray(tags) && { tags: tags.join(', ') },
   };
 };

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Photo } from '.';
 import { useDebounce } from 'use-debounce';
-import { getPhotosAction, searchPhotosPublicAction } from './actions';
+import { searchPhotosPublicAction } from './actions';
 
 const formatQuery = (query: string) =>
   query.trim().toLocaleLowerCase();
@@ -11,12 +11,10 @@ export default function usePhotoQuery({
   query,
   isEnabled = true,
   minimumQueryLength = 2,
-  isPrivate,
 }: {
   query: string
   isEnabled?: boolean
   minimumQueryLength?: number
-  isPrivate?: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,24 +41,17 @@ export default function usePhotoQuery({
   useEffect(() => {
     if (queryDebounced.length >= minimumQueryLength && isEnabled) {
       setIsLoading(true);
-      (isPrivate
-        ? getPhotosAction({ query: queryDebounced })
-          .then(photos => {
-            setPhotos(photos);
-            setCount(photos.length);
-          })
-        : searchPhotosPublicAction(queryDebounced)
-          .then(({ photos, count }) => {
-            setPhotos(photos);
-            setCount(count);
-          }))
+      searchPhotosPublicAction(queryDebounced)
+        .then(({ photos, count }) => {
+          setPhotos(photos);
+          setCount(count);
+        })
         .finally(() => setIsLoading(false));
     }
   }, [
     queryDebounced,
     minimumQueryLength,
     isEnabled,
-    isPrivate,
   ]);
 
   useEffect(() => {

@@ -6,7 +6,6 @@ import {
   getUniqueFilmsCached,
   getUniqueLensesCached,
   getUniqueRecipesCached,
-  getUniqueTagsCached,
 } from '@/photo/cache';
 import UploadPageClient from '@/photo/UploadPageClient';
 import {
@@ -36,7 +35,6 @@ export default async function UploadPage({ params, searchParams }: Params) {
     albums,
     uniqueRecipes,
     uniqueFilms,
-    uniqueTags,
     uniqueCameras,
     uniqueLenses, {
       blobId,
@@ -48,9 +46,8 @@ export default async function UploadPage({ params, searchParams }: Params) {
     getAlbumsWithMeta(),
     getUniqueRecipesCached(),
     getUniqueFilmsCached(),
-    getUniqueTagsCached(),
-    getUniqueCamerasCached(true),
-    getUniqueLensesCached(true),
+    getUniqueCamerasCached(),
+    getUniqueLensesCached(),
     extractImageDataFromBlobPath(uploadPath, {
       includeInitialPhotoFields: true,
       generateBlurData: BLUR_ENABLED,
@@ -81,7 +78,6 @@ export default async function UploadPage({ params, searchParams }: Params) {
     addAiTextToFormData({
       formData: _formDataFromExif,
       imageBase64: imageThumbnailBase64,
-      uniqueTags,
     }),
   ]);
 
@@ -102,7 +98,6 @@ export default async function UploadPage({ params, searchParams }: Params) {
         blobId,
         formDataFromExif,
         albums,
-        uniqueTags,
         uniqueRecipes,
         uniqueFilms,
         uniqueCameras,

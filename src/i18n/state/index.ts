@@ -16,8 +16,6 @@ export const generateAppTextState = (i18n: I18N) => {
         i18n.category.cameraTitle.replace('{{camera}}', camera),
       cameraShare: (camera: string) =>
         i18n.category.cameraShare.replace('{{camera}}', camera),
-      taggedPhrase: (tag: string) =>
-        i18n.category.taggedPhrase.replace('{{tag}}', tag),
       recipeShare: (recipe: string) =>
         i18n.category.recipeShare.replace('{{recipe}}', recipe),
       filmShare: (film: string) =>
@@ -55,14 +53,6 @@ export const generateAppTextState = (i18n: I18N) => {
         i18n.admin.setVisibilitySuccess.replace('{{quantity}}', quantity),
       photosSelected: (quantity: string) =>
         i18n.admin.photosSelected.replace('{{quantity}}', quantity),
-      tagPlaceholder: (quantity: string) =>
-        i18n.admin.tagPlaceholder.replace('{{quantity}}', quantity),
-      tagConfirm: (quantity: string) =>
-        i18n.admin.tagConfirm.replace('{{quantity}}', quantity),
-      tagSuccess: (quantity: string, tags: string) =>
-        i18n.admin.tagSuccess
-          .replace('{{quantity}}', quantity)
-          .replace('{{tags}}', tags),
       albumPlaceholder: (quantity: string) =>
         i18n.admin.albumPlaceholder.replace('{{quantity}}', quantity),
       albumConfirm: (quantity: string) =>
@@ -71,10 +61,6 @@ export const generateAppTextState = (i18n: I18N) => {
         i18n.admin.albumSuccess
           .replace('{{quantity}}', quantity)
           .replace('{{albums}}', albums),
-      favoriteConfirm: (quantity: string) =>
-        i18n.admin.favoriteConfirm.replace('{{quantity}}', quantity),
-      favoriteSuccess: (quantity: string) =>
-        i18n.admin.favoriteSuccess.replace('{{quantity}}', quantity),
       batchActionFailure: (quantity: string) =>
         i18n.admin.batchActionFailure.replace('{{quantity}}', quantity),
       deletePhotosConfirm: (quantity: string) =>

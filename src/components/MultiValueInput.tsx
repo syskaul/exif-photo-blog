@@ -1,4 +1,4 @@
-import { AnnotatedTag } from '@/photo/form';
+import { AnnotatedOption } from '@/photo/form';
 import { convertStringToArray, parameterize } from '@/utility/string';
 import { clsx } from 'clsx/lite';
 import {
@@ -14,10 +14,10 @@ import MaskedScroll from './MaskedScroll';
 const KEY_KEYDOWN = 'keydown';
 const CREATE_LABEL = 'Create';
 
-const ARIA_ID_TAG_CONTROL = 'tag-control';
-const ARIA_ID_TAG_OPTIONS = 'tag-options';
+const ARIA_ID_MULTI_VALUE_CONTROL = 'multi-value-control';
+const ARIA_ID_MULTI_VALUE_OPTIONS = 'multi-value-options';
 
-export default function TagInput({
+export default function MultiValueInput({
   id,
   name,
   value = '',
@@ -40,7 +40,7 @@ export default function TagInput({
   id?: string
   name: string
   value?: string
-  options?: AnnotatedTag[]
+  options?: AnnotatedOption[]
   labelForValueOverride?: (value: string) => string | undefined
   defaultIcon?: ReactNode
   defaultIconSelected?: ReactNode
@@ -120,7 +120,7 @@ export default function TagInput({
     isRevealingRawText,
   ]);
 
-  const optionsFiltered = useMemo<AnnotatedTag[]>(() => hasReachedLimit
+  const optionsFiltered = useMemo<AnnotatedOption[]>(() => hasReachedLimit
     ? [{ value: limitValidationMessage ?? `Limit reached (${limit})` }]
     : (isInputTextUnique && allowNewValues
       ? [{ value: `${CREATE_LABEL} "${inputTextFormatted}"` }]
@@ -350,7 +350,7 @@ export default function TagInput({
     limit,
   ]);
 
-  const renderTag = useCallback((value: string) => {
+  const renderSelectedOption = useCallback((value: string) => {
     const option = options.find(o => o.value === value);
     const icon = option?.icon ?? defaultIcon;
     return <>
@@ -402,18 +402,18 @@ export default function TagInput({
       }}
     >
       <div
-        id={ARIA_ID_TAG_CONTROL}
+        id={ARIA_ID_MULTI_VALUE_CONTROL}
         role="region"
         aria-live="polite"
         className="sr-only mb-3 text-dim"
       >
         {selectedOptions.length === 0
-          ? 'No tags selected'
+          ? 'No values selected'
           : selectedOptions.join(', ') +
-            ` tag${selectedOptions.length !== 1 ? 's' : ''} selected`}
+            ` value${selectedOptions.length !== 1 ? 's' : ''} selected`}
       </div>
       <div
-        aria-controls={ARIA_ID_TAG_CONTROL}
+        aria-controls={ARIA_ID_MULTI_VALUE_CONTROL}
         className={clsx(
           className,
           'w-full control px-2! py-2!',
@@ -431,7 +431,7 @@ export default function TagInput({
             <button
               key={option}
               type="button"
-              aria-label={`Remove tag "${option}"`}
+              aria-label={`Remove "${option}"`}
               className={clsx(
                 'inline-flex items-center gap-2 min-w-0',
                 'text-main',
@@ -446,7 +446,7 @@ export default function TagInput({
               onClick={() => removeOption(option)}
             >
               {defaultIconSelected}
-              {renderTag(labelForValueOverride?.(option) || option)}
+              {renderSelectedOption(labelForValueOverride?.(option) || option)}
             </button>)}
         <input
           id={id}
@@ -491,7 +491,9 @@ export default function TagInput({
           aria-autocomplete="list"
           aria-expanded={shouldShowMenu}
           aria-haspopup="true"
-          aria-controls={shouldShowMenu ? ARIA_ID_TAG_OPTIONS : undefined}
+          aria-controls={
+            shouldShowMenu ? ARIA_ID_MULTI_VALUE_OPTIONS : undefined
+          }
           role="combobox"
         />
         <input
@@ -518,7 +520,7 @@ export default function TagInput({
             )}
           >
             <MaskedScroll
-              id={ARIA_ID_TAG_OPTIONS}
+              id={ARIA_ID_MULTI_VALUE_OPTIONS}
               role="listbox"
               className="flex flex-col gap-y-1 text-xl"
               ref={optionsRef}
@@ -569,7 +571,7 @@ export default function TagInput({
                   onFocus={() => setSelectedOptionIndex(index)}
                 >
                   <span className="grow inline-flex items-center gap-2 min-w-0">
-                    {renderTag(value)}
+                    {renderSelectedOption(value)}
                   </span>
                   {annotation &&
                     <span

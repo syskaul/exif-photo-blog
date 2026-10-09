@@ -5,11 +5,9 @@ import {
   CAMERA_BRANDS,
   type CameraBrand as CameraBrandName,
 } from '@/camera/brand';
-import FieldsetTag from '@/tag/FieldsetTag';
 import AppGrid from '@/components/AppGrid';
 import FieldsetWithStatus from '@/components/FieldsetWithStatus';
 import IconHidden from '@/components/icons/IconHidden';
-import IconLock from '@/components/icons/IconLock';
 import SelectMenu from '@/components/SelectMenu';
 import StatusIcon from '@/components/StatusIcon';
 import clsx from 'clsx/lite';
@@ -42,13 +40,11 @@ export default function AdminComponentPageClient({
   photo,
   photos,
   photosCount,
-  photosFavs,
   photoFolders,
 }: {
   photo: Photo
   photos: Photo[]
   photosCount: number
-  photosFavs: Photo[]
   photoFolders: {
     photos: Photo[]
     caption: string
@@ -141,38 +137,20 @@ export default function AdminComponentPageClient({
             photo={photo}
             photos={photos}
             photosCount={photosCount}
-            photosFavs={photosFavs}
             value={valuePhoto}
             onChange={setValuePhoto}
-          />
-        </div>
-        <div className="z-12">
-          <FieldsetTag
-            tags="tag-1"
-            tagOptions={[{
-              tag: 'Tag 1',
-              count: 1,
-              lastModified: new Date(),
-            }, {
-              tag: 'Tag 2',
-              count: 1,
-              lastModified: new Date(),
-            }]}
-            onChange={() => {}}
-            onError={() => {}}
-            openOnLoad={false}
           />
         </div>
         <div className="z-11">
           <FieldsetWithStatus
             label="Select"
-            value="tag-1"
+            value="album-1"
             selectOptions={[{
-              value: 'tag-1',
-              label: 'Tag 1',
+              value: 'album-1',
+              label: 'Album 1',
             }, {
-              value: 'tag-2',
-              label: 'Tag 2',
+              value: 'album-2',
+              label: 'Album 2',
             }]}
             onChange={() => {}}
           />
@@ -189,39 +167,9 @@ export default function AdminComponentPageClient({
               accessoryEnd: '× 2',
               note: 'Exclude photo from core feeds',
             }, {
-              value: 'hidden',
+              value: 'exclude',
               accessoryStart: <IconHidden size={15} />,
-              label: 'Hide from feeds',
-              accessoryEnd: '× 2',
-              note: 'Exclude photo from core feeds',
-            }, {
-              value: 'private',
-              accessoryStart: <IconLock size={14} />,
-              label: 'Private',
-              accessoryEnd: '× 2',
-              note: 'Exclude photo from core feeds',
-            }, {
-              value: 'private1',
-              accessoryStart: <IconLock size={14} />,
-              label: 'Private',
-              accessoryEnd: '× 2',
-              note: 'Exclude photo from core feeds',
-            }, {
-              value: 'private4',
-              accessoryStart: <IconLock size={14} />,
-              label: 'Private',
-              accessoryEnd: '× 2',
-              note: 'Exclude photo from core feeds',
-            }, {
-              value: 'private2',
-              accessoryStart: <IconLock size={14} />,
-              label: 'Private',
-              accessoryEnd: '× 2',
-              note: 'Exclude photo from core feeds',
-            }, {
-              value: 'private3',
-              accessoryStart: <IconLock size={14} />,
-              label: 'Private',
+              label: 'Exclude from feeds',
               accessoryEnd: '× 2',
               note: 'Exclude photo from core feeds',
             }]}

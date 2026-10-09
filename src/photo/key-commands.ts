@@ -6,8 +6,6 @@ export const KEY_COMMANDS = {
   prev: ['ARROWLEFT'],
   next: ['ARROWRIGHT'],
   edit: 'E',
-  favorite: 'P',
-  unfavorite: 'X',
   download: 'D',
   sync: 'S',
   search: ['⌘', 'K'],

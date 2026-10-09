@@ -1,7 +1,4 @@
-import {
-  CATEGORY_VISIBILITY,
-  HIDE_TAGS_WITH_ONE_PHOTO,
-} from '@/app/config';
+import { CATEGORY_VISIBILITY } from '@/app/config';
 import {
   PREFIX_RECENTS,
   pathForAlbum,
@@ -10,7 +7,6 @@ import {
   pathForFocalLength,
   pathForLens,
   pathForRecipe,
-  pathForTag,
   pathForYear,
 } from '@/app/path';
 import { formatCameraText } from '@/camera';
@@ -27,31 +23,20 @@ import {
   PHOTO_FOLDER_PEEK_PHOTOS,
 } from '@/components/folder';
 import { formatRecipe } from '@/recipe';
-import {
-  formatTag,
-  limitTagsByCount,
-  TAG_FAVS,
-  TAG_PRIVATE,
-} from '@/tag';
 import { Library, LibrarySetFolder, LibrarySetFolderRow } from '.';
 import { getLibrary } from './query';
 import { getLibraryCached } from './cache';
 
 const getLibraryAvatar = (library?: Library) =>
   library?.photoIdAvatar
-    ? getPhotoCached(library?.photoIdAvatar ?? '', true)
+    ? getPhotoCached(library?.photoIdAvatar ?? '')
     : undefined;
 
 const getLibraryHero = (library?: Library) =>
   library?.photoIdHero
-    ? getPhotoCached(library?.photoIdHero ?? '', true)
-    // Fall back to favorite photos if no hero photo is set
-    : getPhotosCached({ tag: TAG_FAVS, limit: 1 })
-      .then(photos => photos.length > 0
-        ? photos[0]
-        // Fall back to oldest photo if no favorite photos exist
-        : getPhotosCached({ limit: 1, sortBy: 'takenAtAsc' })
-          .then(photos => photos[0]));
+    ? getPhotoCached(library?.photoIdHero ?? '')
+    : getPhotosCached({ limit: 1, sortBy: 'takenAtAsc' })
+      .then(photos => photos[0]);
 
 export const getLibraryData = ({
   includeHero = true,
@@ -126,20 +111,6 @@ const getFolderQueriesForCategory = (
           path: pathForAlbum(album),
           count,
         }));
-    case 'tags': {
-      const tags = HIDE_TAGS_WITH_ONE_PHOTO
-        ? limitTagsByCount(categories.tags, 2)
-        : categories.tags;
-      return tags
-        .filter(({ tag }) => tag !== TAG_PRIVATE)
-        .map(({ tag, count }) => ({
-          key: tag,
-          options: { tag },
-          caption: formatTag(tag),
-          path: pathForTag(tag),
-          count,
-        }));
-    }
     case 'recipes':
       return categories.recipes.map(({ recipe, count }) => ({
         key: recipe,

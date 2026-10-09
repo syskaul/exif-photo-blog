@@ -8,7 +8,6 @@ import { getPaperMono } from '@/app/font';
 import { getImageResponseCacheControlHeaders } from '@/image-response/cache';
 import { APP_OG_IMAGE_QUERY_OPTIONS } from '@/feed';
 import { ImageResponse } from 'next/og';
-import { TAG_FAVS } from '@/tag';
 
 export const dynamic = 'force-static';
 
@@ -21,16 +20,8 @@ export async function GET() {
     getPhotosCached({
       ...APP_OG_IMAGE_QUERY_OPTIONS,
       limit: MAX_PHOTOS_TO_SHOW_OG,
-      tag: TAG_FAVS,
     })
-      .catch(() => [])
-      .then(photos => photos.length >= MAX_PHOTOS_TO_SHOW_OG
-        ? photos
-        : getPhotosCached({
-          ...APP_OG_IMAGE_QUERY_OPTIONS,
-          limit: MAX_PHOTOS_TO_SHOW_OG,
-        })
-          .catch(() => [])),
+      .catch(() => []),
     getImageResponseCacheControlHeaders(),
     getPaperMono(),
   ]);

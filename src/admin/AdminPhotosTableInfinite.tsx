@@ -23,7 +23,6 @@ export default function AdminPhotosTableInfinite({
       itemsPerPage={itemsPerPage}
       useCachedPhotos={false}
       sortBy="createdAt"
-      includeHiddenPhotos
     >
       {({ key, photos, onLastPhotoVisible, revalidatePhoto }) =>
         <AdminPhotosTable

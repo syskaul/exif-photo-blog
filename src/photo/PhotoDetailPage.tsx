@@ -4,11 +4,8 @@ import { PhotoSetCategory } from '../category';
 import PhotoLarge from './PhotoLarge';
 import AppGrid from '@/components/AppGrid';
 import PhotoGrid from './PhotoGrid';
-import TagHeader from '@/tag/TagHeader';
 import CameraHeader from '@/camera/CameraHeader';
 import FilmHeader from '@/film/FilmHeader';
-import { TAG_PRIVATE } from '@/tag';
-import PrivateHeader from '@/tag/PrivateHeader';
 import FocalLengthHeader from '@/focal/FocalLengthHeader';
 import PhotoHeader from './PhotoHeader';
 import RecipeHeader from '@/recipe/RecipeHeader';
@@ -34,7 +31,6 @@ export default function PhotoDetailPage({
   camera,
   lens,
   album,
-  tag,
   film,
   recipe,
   focal,
@@ -42,7 +38,6 @@ export default function PhotoDetailPage({
   count,
   dateRange,
   shouldShare,
-  includeFavoriteInAdminMenu,
 }: {
   photo: Photo
   photos: Photo[]
@@ -51,7 +46,6 @@ export default function PhotoDetailPage({
   count?: number
   dateRange?: PhotoDateRangePostgres
   shouldShare?: boolean
-  includeFavoriteInAdminMenu?: boolean
 } & PhotoSetCategory) {
   let customHeader: ReactNode | undefined;
   const viewContext = query
@@ -66,15 +60,13 @@ export default function PhotoDetailPage({
             ? 'lens'
             : album
               ? 'album'
-              : tag
-                ? 'tag'
-                : film
-                  ? 'film'
-                  : recipe
-                    ? 'recipe'
-                    : focal !== undefined
-                      ? 'focal_length'
-                      : 'photo';
+              : film
+                ? 'film'
+                : recipe
+                  ? 'recipe'
+                  : focal !== undefined
+                    ? 'focal_length'
+                    : 'photo';
 
   if (query) {
     customHeader = <QueryHeader
@@ -129,23 +121,6 @@ export default function PhotoDetailPage({
       count={count}
       dateRange={dateRange}
     />;
-  } else if (tag) {
-    customHeader = tag === TAG_PRIVATE
-      ? <PrivateHeader
-        photos={photos}
-        selectedPhoto={photo}
-        indexNumber={indexNumber}
-        count={count ?? 0}
-      />
-      : <TagHeader
-        key={tag}
-        tag={tag}
-        photos={photos}
-        selectedPhoto={photo}
-        indexNumber={indexNumber}
-        count={count}
-        dateRange={dateRange}
-      />;
   } else if (film) {
     customHeader = <FilmHeader
       film={film}
@@ -176,12 +151,11 @@ export default function PhotoDetailPage({
 
   return (
     <div>
-      {tag !== TAG_PRIVATE &&
-        <PhotoDetailAnalytics
-          photoId={photo.id}
-          photoTitle={photo.title ?? ''}
-          viewContext={viewContext}
-        />}
+      <PhotoDetailAnalytics
+        photoId={photo.id}
+        photoTitle={photo.title ?? ''}
+        viewContext={viewContext}
+      />
       <AppGrid
         className="mt-1.5 mb-6"
         contentMain={customHeader ?? <PhotoHeader
@@ -199,7 +173,6 @@ export default function PhotoDetailPage({
             key={photo.id}
             photo={photo}
             album={album}
-            primaryTag={tag}
             priority
             prefetchRelatedLinks
             query={query}
@@ -218,11 +191,9 @@ export default function PhotoDetailPage({
             shouldShareCamera={camera !== undefined}
             shouldShareLens={lens !== undefined}
             shouldShareAlbum={album !== undefined}
-            shouldShareTag={tag !== undefined}
             shouldShareFilm={film !== undefined}
             shouldShareRecipe={recipe !== undefined}
             shouldShareFocalLength={focal !== undefined}
-            includeFavoriteInAdminMenu={includeFavoriteInAdminMenu}
             showAdminKeyCommands
             showStorageCheck={ADMIN_STORAGE_DEBUG_ENABLED}
           />,
@@ -232,7 +203,6 @@ export default function PhotoDetailPage({
         contentMain={<PhotoGrid
           photos={photosGrid ?? photos}
           query={query}
-          tag={tag}
           camera={camera}
           film={film}
           focal={focal}

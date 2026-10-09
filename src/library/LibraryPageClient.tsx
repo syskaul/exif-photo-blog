@@ -9,7 +9,6 @@ import PhotoFilm from '@/film/PhotoFilm';
 import PhotoLens from '@/lens/PhotoLens';
 import { Photo } from '@/photo';
 import PhotoRecipe from '@/recipe/PhotoRecipe';
-import PhotoTag from '@/tag/PhotoTag';
 import clsx from 'clsx/lite';
 import { formatDistanceToNowStrict } from 'date-fns';
 import AdminLibraryMenu from './AdminLibraryMenu';
@@ -39,7 +38,6 @@ export default function LibraryPageClient({
   lens,
   recipe,
   film,
-  tag,
   place,
   album,
   lastUpdated,
@@ -55,7 +53,6 @@ export default function LibraryPageClient({
   lens?: Lens
   recipe?: string
   film?: string
-  tag?: string
   place?: Place
   album?: Album
   lastUpdated?: Date
@@ -124,14 +121,6 @@ export default function LibraryPageClient({
         badged={false}
       />,
     ),
-    tag && renderItem(
-      appText.library.popularTag,
-      <PhotoTag
-        tag={tag}
-        type="text-only"
-        contrast="high"
-      />,
-    ),
     place && renderItem(
       appText.library.popularPlace,
       <PlaceEntity
@@ -159,7 +148,6 @@ export default function LibraryPageClient({
     film,
     album,
     place,
-    tag,
   ]);
 
   return (

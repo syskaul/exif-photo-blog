@@ -6,7 +6,6 @@ import {
   getPhotosCached,
   getPhotosMetaCached,
 } from '@/photo/cache';
-import { TAG_FAVS } from '@/tag';
 
 const PHOTO_CHOOSER_QUERY_OPTIONS = feedQueryOptions({
   isGrid: true,
@@ -21,7 +20,6 @@ export default async function LibraryEditPage() {
     },
     photos,
     photosCount,
-    photosFavs,
   ] = await Promise.all([
     getLibraryData()
       .catch(() => ({
@@ -34,8 +32,6 @@ export default async function LibraryEditPage() {
     getPhotosMetaCached(PHOTO_CHOOSER_QUERY_OPTIONS)
       .then(({ count }) => count)
       .catch(() => 0),
-    getPhotosCached({ tag: TAG_FAVS })
-      .catch(() => []),
   ]);
 
   return (
@@ -44,7 +40,6 @@ export default async function LibraryEditPage() {
       photoAvatar,
       photos,
       photosCount,
-      photosFavs,
       shouldResizeImages: !PRESERVE_ORIGINAL_UPLOADS,
     }} />
   );

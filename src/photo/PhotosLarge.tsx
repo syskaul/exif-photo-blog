@@ -17,7 +17,6 @@ export default function PhotosLarge({
   camera,
   lens,
   album,
-  tag,
   recipe,
   film,
   focal,
@@ -31,7 +30,7 @@ export default function PhotosLarge({
 } & PhotoSetCategory) {
   return (
     <AnimateItems
-      className="space-y-1"
+      className="space-y-2"
       type={animate ? 'scale' : 'none'}
       duration={0.7}
       staggerDelay={0.15}
@@ -46,7 +45,6 @@ export default function PhotosLarge({
           revalidatePhoto={revalidatePhoto}
           shouldZoomOnFKeydown={false}
           album={album}
-          primaryTag={tag}
           query={query}
           recent={recent}
           year={year}
@@ -61,7 +59,6 @@ export default function PhotosLarge({
           shouldShareCamera={camera !== undefined}
           shouldShareLens={lens !== undefined}
           shouldShareAlbum={album !== undefined}
-          shouldShareTag={tag !== undefined}
           shouldShareFilm={film !== undefined}
           shouldShareRecipe={recipe !== undefined}
           shouldShareFocalLength={focal !== undefined}

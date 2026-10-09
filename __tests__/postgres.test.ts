@@ -31,19 +31,19 @@ describe('Postgres', () => {
   it('Filters photos by focal length of 0', () => {
     expect(getWheresFromOptions({ focal: 0 }))
       .toEqual({
-        wheres: 'WHERE hidden IS NOT TRUE AND focal_length=$1',
+        wheres: 'WHERE focal_length=$1',
         wheresValues: [0],
         lastValuesIndex: 2,
       });
     expect(getWheresFromOptions({ focal: 90 }))
       .toEqual({
-        wheres: 'WHERE hidden IS NOT TRUE AND focal_length=$1',
+        wheres: 'WHERE focal_length=$1',
         wheresValues: [90],
         lastValuesIndex: 2,
       });
     expect(getWheresFromOptions({}))
       .toEqual({
-        wheres: 'WHERE hidden IS NOT TRUE',
+        wheres: '',
         wheresValues: [],
         lastValuesIndex: 1,
       });

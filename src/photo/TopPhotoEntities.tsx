@@ -2,8 +2,6 @@ import PhotoCamera from '@/camera/PhotoCamera';
 import { PhotoSetCategories } from '@/category';
 import MaskedScroll from '@/components/MaskedScroll';
 import PhotoAlbum from '@/album/PhotoAlbum';
-import PhotoTag from '@/tag/PhotoTag';
-import PhotoFavs from '@/tag/PhotoFavs';
 import clsx from 'clsx/lite';
 import { CATEGORY_VISIBILITY } from '@/app/config';
 import PhotoRecents from '@/recents/PhotoRecents';
@@ -37,10 +35,8 @@ export default function TopPhotoEntities({
   const { utility } = useAppText();
 
   const {
-    hasFavs,
     hasRecents,
     albums,
-    tags,
     camera,
     lens,
     recipe,
@@ -59,11 +55,6 @@ export default function TopPhotoEntities({
       )}
       fadeSize={50}
     >
-      {hasFavs &&
-        <PhotoFavs
-          {...ENTITY_LINK_PROPS}
-          badgeIconFirst
-        />}
       {hasRecents &&
         <PhotoRecents
           key="recents"
@@ -73,13 +64,6 @@ export default function TopPhotoEntities({
         <PhotoAlbum
           key={album.id}
           album={album}
-          {...ENTITY_LINK_PROPS}
-        />,
-      )}
-      {tags.map(({ tag }) =>
-        <PhotoTag
-          key={tag}
-          tag={tag}
           {...ENTITY_LINK_PROPS}
         />,
       )}

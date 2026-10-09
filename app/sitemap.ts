@@ -11,10 +11,8 @@ import {
   absolutePathForPhoto,
   absolutePathForRecents,
   absolutePathForRecipe,
-  absolutePathForTag,
   absolutePathForYear,
 } from '@/app/path';
-import { isTagFavs } from '@/tag';
 import { BASE_URL, GRID_HOMEPAGE_ENABLED } from '@/app/config';
 import { getAllPhotoIdsWithUpdatedAt } from '@/photo/query';
 import {
@@ -27,7 +25,6 @@ export const revalidate = 86_400;
 
 const PRIORITY_HOME             = 1;
 const PRIORITY_HOME_VIEW        = 0.9;
-const PRIORITY_CATEGORY_SPECIAL = 0.8;
 const PRIORITY_CATEGORY         = 0.7;
 const PRIORITY_PHOTO            = 0.5;
  
@@ -46,7 +43,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     cameras,
     lenses,
     albums,
-    tags,
     recipes,
     films,
     focalLengths,
@@ -98,14 +94,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...albums.map(({ album, lastModified }) => ({
       url: absolutePathForAlbum(album),
       priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
-    // Tags
-    ...tags.map(({ tag, lastModified }) => ({
-      url: absolutePathForTag(tag),
-      priority: isTagFavs(tag)
-        ? PRIORITY_CATEGORY_SPECIAL
-        : PRIORITY_CATEGORY,
       lastModified,
     })),
     // Recipes

@@ -16,7 +16,6 @@ import {
   PhotoDateRangePostgres,
 } from '@/photo';
 import { Cameras, createCameraKey } from '@/camera';
-import { Tags } from '@/tag';
 import { Films } from '@/film';
 import {
   AI_TEXT_AUTO_GENERATED_FIELDS,
@@ -54,7 +53,6 @@ export const createPhotosTable = () =>
       title VARCHAR(255),
       caption TEXT,
       semantic_description TEXT,
-      tags VARCHAR(255)[],
       make VARCHAR(255),
       model VARCHAR(255),
       focal_length SMALLINT,
@@ -78,7 +76,6 @@ export const createPhotosTable = () =>
       taken_at TIMESTAMP WITH TIME ZONE NOT NULL,
       taken_at_naive VARCHAR(255) NOT NULL,
       exclude_from_feeds BOOLEAN DEFAULT FALSE,
-      hidden BOOLEAN DEFAULT FALSE,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     )
@@ -98,7 +95,6 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       title,
       caption,
       semantic_description,
-      tags,
       make,
       model,
       focal_length,
@@ -120,7 +116,6 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       color_sort,
       priority_order,
       exclude_from_feeds,
-      hidden,
       taken_at,
       taken_at_naive
     ) VALUES (
@@ -134,7 +129,6 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       ${photo.title},
       ${photo.caption},
       ${photo.semanticDescription},
-      ${convertArrayToPostgresString(photo.tags)},
       ${photo.make},
       ${photo.model},
       ${photo.focalLength},
@@ -158,7 +152,6 @@ export const insertPhoto = (photo: PhotoDbInsert) =>
       ${photo.colorSort},
       ${photo.priorityOrder},
       ${photo.excludeFromFeeds},
-      ${photo.hidden},
       ${photo.takenAt},
       ${photo.takenAtNaive}
     )
@@ -176,7 +169,6 @@ export const updatePhoto = (photo: PhotoDbInsert) =>
       title=${photo.title},
       caption=${photo.caption},
       semantic_description=${photo.semanticDescription},
-      tags=${convertArrayToPostgresString(photo.tags)},
       make=${photo.make},
       model=${photo.model},
       focal_length=${photo.focalLength},
@@ -200,7 +192,6 @@ export const updatePhoto = (photo: PhotoDbInsert) =>
       color_sort=${photo.colorSort},
       priority_order=${photo.priorityOrder || null},
       exclude_from_feeds=${photo.excludeFromFeeds},
-      hidden=${photo.hidden},
       taken_at=${photo.takenAt},
       taken_at_naive=${photo.takenAtNaive},
       updated_at=${(new Date()).toISOString()}
@@ -234,52 +225,20 @@ export const updatePhotoTitleCaption = (
   `, values), 'updatePhotoTitleCaption');
 };
 
-export const deletePhotoTagGlobally = (tag: string) =>
-  safelyQuery(() => sql`
-    UPDATE photos
-    SET tags=ARRAY_REMOVE(tags, ${tag})
-    WHERE ${tag}=ANY(tags)
-  `, 'deletePhotoTagGlobally');
-
-export const renamePhotoTagGlobally = (tag: string, updatedTag: string) =>
-  safelyQuery(() => sql`
-    UPDATE photos
-    SET tags=ARRAY_REPLACE(tags, ${tag}, ${updatedTag})
-    WHERE ${tag}=ANY(tags)
-  `, 'renamePhotoTagGlobally');
-
 export const setPhotoVisibilityForIds = (
   photoIds: string[],
-  hidden: boolean,
   excludeFromFeeds: boolean,
 ) =>
   safelyQuery(() => query(`
     UPDATE photos SET
-      hidden = $1,
-      exclude_from_feeds = $2,
-      updated_at = $3
-    WHERE id = ANY($4)
+      exclude_from_feeds = $1,
+      updated_at = $2
+    WHERE id = ANY($3)
   `, [
-    hidden,
     excludeFromFeeds,
     (new Date()).toISOString(),
     convertArrayToPostgresString(photoIds),
   ]), 'setPhotoVisibilityForIds');
-
-export const addTagsToPhotos = (tags: string[], photoIds: string[]) =>
-  safelyQuery(() => query(`
-    UPDATE photos 
-    SET tags = (
-      SELECT array_agg(DISTINCT elem)
-      FROM unnest(
-        array_cat(tags, $1)
-      ) AS elem
-    )
-    WHERE id = ANY($2)
-  `, [
-    convertArrayToPostgresString(tags),
-    convertArrayToPostgresString(photoIds),
-  ]), 'addTagsToPhotos');
 
 export const deletePhotoRecipeGlobally = (recipe: string) =>
   safelyQuery(() => sql`
@@ -309,7 +268,7 @@ export const getPhotosMostRecentUpdate = async () =>
   `.then(({ rows }) => rows[0] ? rows[0].updated_at as Date : undefined)
   , 'getPhotosMostRecentUpdate');
 
-export const getUniqueCameras = async (includeHidden?: boolean) =>
+export const getUniqueCameras = async () =>
   safelyQuery(() => query(`
     SELECT
       MIN(make) AS make,
@@ -319,7 +278,6 @@ export const getUniqueCameras = async (includeHidden?: boolean) =>
     FROM photos
     WHERE trim(make) <> ''
     AND trim(model) <> ''
-    ${includeHidden ? '' : 'AND hidden IS NOT TRUE'}
     GROUP BY
       ${parameterizeForDb('make')},
       ${parameterizeForDb('model')}
@@ -334,7 +292,7 @@ export const getUniqueCameras = async (includeHidden?: boolean) =>
   })))
   , 'getUniqueCameras');
 
-export const getUniqueLenses = async (includeHidden?: boolean) =>
+export const getUniqueLenses = async () =>
   safelyQuery(() => query(`
     SELECT
       MIN(lens_make) AS lens_make,
@@ -343,7 +301,6 @@ export const getUniqueLenses = async (includeHidden?: boolean) =>
       MAX(updated_at) AS last_modified
     FROM photos
     WHERE trim(lens_model) <> ''
-    ${includeHidden ? '' : 'AND hidden IS NOT TRUE'}
     GROUP BY
       ${parameterizeForDb('lens_make')},
       ${parameterizeForDb('lens_model')}
@@ -357,29 +314,13 @@ export const getUniqueLenses = async (includeHidden?: boolean) =>
     })))
   , 'getUniqueLenses');
 
-export const getUniqueTags = async (includeHidden?: boolean) =>
-  safelyQuery(() => query(`
-    SELECT DISTINCT unnest(tags) as tag,
-      COUNT(*),
-      MAX(updated_at) as last_modified
-    FROM photos
-    ${includeHidden ? '' : 'WHERE hidden IS NOT TRUE'}
-    GROUP BY tag
-    ORDER BY tag ASC
-  `).then(({ rows }): Tags => rows.map(({ tag, count, last_modified }) => ({
-    tag,
-    count: parseInt(count, 10),
-    lastModified: last_modified as Date,
-  })))
-  , 'getUniqueTags');
-
 export const getUniqueRecipes = async () =>
   safelyQuery(() => sql`
     SELECT DISTINCT recipe_title,
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE AND recipe_title IS NOT NULL
+    WHERE recipe_title IS NOT NULL
     GROUP BY recipe_title
     ORDER BY recipe_title ASC
   `.then(({ rows }): Recipes => rows
@@ -397,7 +338,6 @@ export const getUniqueYears = async () =>
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE
     GROUP BY year
     ORDER BY year DESC
   `.then(({ rows }): Years => rows.map(({ year, count, last_modified }) => ({
@@ -413,7 +353,6 @@ export const getRecipeTitleForData = async (
   // Includes legacy check on pre-stringified JSON
   safelyQuery(() => sql`
     SELECT recipe_title FROM photos
-    WHERE hidden IS NOT TRUE
     AND recipe_data=${typeof data === 'string' ? data : JSON.stringify(data)}
     AND film=${film}
     LIMIT 1
@@ -424,7 +363,6 @@ export const getRecipeTitleForData = async (
 export const getRecipeDataForTitle = async (title: string) =>
   safelyQuery(() => sql`
     SELECT recipe_data FROM photos
-    WHERE hidden IS NOT TRUE
     AND recipe_title=${title}
     AND recipe_data IS NOT NULL
     AND recipe_data::text <> 'null'
@@ -470,7 +408,7 @@ export const getUniqueFilms = async () =>
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE AND film IS NOT NULL
+    WHERE film IS NOT NULL
     GROUP BY film
     ORDER BY film ASC
   `.then(({ rows }): Films => rows
@@ -487,7 +425,6 @@ export const getUniqueFocalLengths = async () =>
       COUNT(*),
       MAX(updated_at) as last_modified
     FROM photos
-    WHERE hidden IS NOT TRUE
     AND focal_length IS NOT NULL
     AND focal_length > 0
     GROUP BY focal_length
@@ -576,7 +513,7 @@ export const getPhotoUrls = async (options: PhotoQueryOptions = {}) =>
   safelyQuery(
     async () => _getPhotos(
       options,
-      ['id', 'title', 'url', 'hidden'],
+      ['id', 'title', 'url'],
       { shouldParse: false },
     )
       .then(({ photos }) =>
@@ -584,7 +521,6 @@ export const getPhotoUrls = async (options: PhotoQueryOptions = {}) =>
           id: string,
           title: string,
           url: string,
-          hidden?: boolean,
         }[]),
     'getPhotoUrls',
     // Seemingly necessary to pass `options` for expected cache behavior
@@ -681,29 +617,23 @@ export const getPhotosMeta = (options: PhotoQueryOptions = {}) =>
 
 export const getAllPublicPhotoIds = async ({ limit }: { limit?: number }) =>
   safelyQuery(() => (limit
-    ? sql`SELECT id FROM photos WHERE hidden IS NOT TRUE LIMIT ${limit}`
-    : sql`SELECT id FROM photos WHERE hidden IS NOT TRUE`)
+    ? sql`SELECT id FROM photos LIMIT ${limit}`
+    : sql`SELECT id FROM photos`)
     .then(({ rows }) => rows.map(({ id }) => id as string))
   , 'getPublicPhotoIds');
 
 export const getAllPhotoIdsWithUpdatedAt = async () =>
   safelyQuery(() =>
-    sql`SELECT id, updated_at FROM photos WHERE hidden IS NOT TRUE`
+    sql`SELECT id, updated_at FROM photos`
       .then(({ rows }) => rows.map(({ id, updated_at }) =>
         ({ id: id as string, updatedAt: updated_at as Date })))
   , 'getPhotoIdsAndUpdatedAt');
 
-export const getPhoto = async (
-  id: string,
-  includeHidden?: boolean,
-): Promise<Photo | undefined> =>
+export const getPhoto = async (id: string): Promise<Photo | undefined> =>
   safelyQuery(async () => {
     // Check for photo id forwarding and convert short ids to uuids
     const photoId = translatePhotoId(id);
-    return (includeHidden
-      ? sql<PhotoDb>`SELECT * FROM photos WHERE id=${photoId} LIMIT 1`
-      // eslint-disable-next-line @stylistic/max-len
-      : sql<PhotoDb>`SELECT * FROM photos WHERE id=${photoId} AND hidden IS NOT TRUE LIMIT 1`)
+    return sql<PhotoDb>`SELECT * FROM photos WHERE id=${photoId} LIMIT 1`
       .then(({ rows }) => rows.map(parsePhotoFromDb))
       .then(photos => photos.length > 0 ? photos[0] : undefined);
   }, 'getPhoto');
@@ -725,7 +655,6 @@ const needsAiTextWhereClauses =
         switch (field) {
           case 'title': return `(title <> '') IS NOT TRUE`;
           case 'caption': return `(caption <> '') IS NOT TRUE`;
-          case 'tags': return `(tags IS NULL OR array_length(tags, 1) = 0)`;
           case 'semantic': return `(semantic_description <> '') IS NOT TRUE`;
         }
       })

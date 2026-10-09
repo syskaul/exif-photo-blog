@@ -1,7 +1,6 @@
 'use client';
 
 import PhotoShareModal from '@/photo/PhotoShareModal';
-import TagShareModal from '@/tag/TagShareModal';
 import CameraShareModal from '@/camera/CameraShareModal';
 import FilmShareModal from '@/film/FilmShareModal';
 import FocalLengthShareModal from '@/focal/FocalLengthShareModal';
@@ -27,7 +26,6 @@ export default function ShareModals() {
     camera,
     lens,
     album,
-    tag,
     recipe,
     film,
     focal,
@@ -42,7 +40,6 @@ export default function ShareModals() {
       camera,
       lens,
       album,
-      tag,
       recipe,
       film,
       focal,
@@ -61,8 +58,6 @@ export default function ShareModals() {
       return <LensShareModal {...{ lens, ...attributes }} />;
     } else if (album) {
       return <AlbumShareModal {...{ album, ...attributes }} />;
-    } else if (tag) {
-      return <TagShareModal {...{ tag, ...attributes }} />;
     } else if (film) {
       return <FilmShareModal {...{ film, ...attributes }} />;
     } else if (recipe) {

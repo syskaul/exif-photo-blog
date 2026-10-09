@@ -8,7 +8,6 @@ import {
   convertPhotoToFormData,
 } from './form';
 import PhotoForm from './form/PhotoForm';
-import { Tags } from '@/tag';
 import AiButton from './ai/AiButton';
 import usePhotoFormParent from './form/usePhotoFormParent';
 import ExifCaptureButton from '@/admin/ExifCaptureButton';
@@ -25,7 +24,6 @@ export default function PhotoEditPageClient({
   photoStorageUrls,
   photoAlbumTitles,
   albums,
-  uniqueTags,
   uniqueRecipes,
   uniqueFilms,
   uniqueCameras,
@@ -39,7 +37,6 @@ export default function PhotoEditPageClient({
   photoStorageUrls?: StorageListResponse
   photoAlbumTitles: string[]
   albums: Albums
-  uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
   uniqueCameras: Cameras
@@ -98,7 +95,6 @@ export default function PhotoEditPageClient({
         updatedBlurData={blurData}
         photoAlbumTitles={photoAlbumTitles}
         albums={albums}
-        uniqueTags={uniqueTags}
         uniqueRecipes={uniqueRecipes}
         uniqueFilms={uniqueFilms}
         uniqueCameras={uniqueCameras}

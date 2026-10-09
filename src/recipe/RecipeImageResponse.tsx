@@ -3,7 +3,7 @@ import ImageCaption from '../image-response/components/ImageCaption';
 import ImagePhotoGrid from '../image-response/components/ImagePhotoGrid';
 import ImageContainer from '../image-response/components/ImageContainer';
 import type { NextImageSize } from '@/platforms/next-image';
-import { formatTag } from '@/tag';
+import { capitalizeWords } from '@/utility/string';
 import { generateRecipeLines, getRecipePropsFromPhotos } from '@/recipe';
 import PhotoFilmIcon from '@/film/PhotoFilmIcon';
 import {
@@ -67,7 +67,7 @@ export default function RecipeImageResponse({
             marginRight: height * .02,
           }}
         />,
-        title: formatTag(recipe).toLocaleUpperCase(),
+        title: capitalizeWords(recipe.replaceAll('-', ' ')).toLocaleUpperCase(),
       }}>
         {data &&
           <div

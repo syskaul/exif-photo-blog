@@ -4,11 +4,9 @@ import { TINT_FOLDERS } from '@/app/config';
 import CategoryIcon from '@/category/CategoryIcon';
 import type { CategoryKey } from '@/category';
 import PhotoFolder from '@/components/folder/PhotoFolder';
-import IconFavs from '@/components/icons/IconFavs';
 import IconRecents from '@/components/icons/IconRecents';
 import PhotoFilmIcon from '@/film/PhotoFilmIcon';
 import { isStringFujifilmSimulation } from '@/platforms/fujifilm/simulation';
-import { TAG_FAVS } from '@/tag';
 import clsx from 'clsx/lite';
 import { ReactNode, useState } from 'react';
 import { LuChevronRight } from 'react-icons/lu';
@@ -30,12 +28,6 @@ export default function LibrarySection({
 
   const getFolderCaptionIcon = (key: string): ReactNode => {
     switch (key) {
-      case TAG_FAVS:
-        return <IconFavs
-          size={10}
-          className="translate-y-[-0.5px]"
-          highlight
-        />;
       case 'recents':
         return <IconRecents size={10} solid />;
     }

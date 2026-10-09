@@ -1,6 +1,5 @@
 'use client';
 
-import IconLock from '@/components/icons/IconLock';
 import { Photo } from '..';
 import IconHidden from '@/components/icons/IconHidden';
 import Tooltip from '@/components/Tooltip';
@@ -13,13 +12,9 @@ export default function PhotoVisibilityIcon({
 }) {
   const appText = useAppText();
 
-  return photo.hidden
-    ? <Tooltip content={appText.admin.visibilityPrivateNote} supportMobile>
-      <IconLock size={13} />
+  return photo.excludeFromFeeds
+    ? <Tooltip content={appText.admin.visibilityExcludeNote} supportMobile>
+      <IconHidden size={16} className="translate-y-[0.5px]" />
     </Tooltip>
-    : photo.excludeFromFeeds
-      ? <Tooltip content={appText.admin.visibilityExcludeNote} supportMobile>
-        <IconHidden size={16} className="translate-y-[0.5px]" />
-      </Tooltip>
-      : null;
+    : null;
 }

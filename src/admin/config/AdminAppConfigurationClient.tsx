@@ -103,7 +103,6 @@ export default function AdminAppConfigurationClient({
   showCategoriesOnMobile,
   showCategoryImageHover,
   collapseSidebarCategories,
-  hideTagsWithOnePhoto,
   // Sort
   hasDefaultSortBy,
   defaultSortBy,
@@ -646,7 +645,7 @@ export default function AdminAppConfigurationClient({
             </>}
             Comma-separated fields to auto-generate when
             uploading photos. Accepted values: title, caption,
-            tags, description, all, or none
+            semantic, all, or none
             {' '}
             (default: {renderCommaSeparatedList(
               AI_AUTO_GENERATED_FIELDS_DEFAULT,
@@ -764,15 +763,6 @@ export default function AdminAppConfigurationClient({
             Set environment variable to {'"1"'} to always show
             expanded category content
             {renderEnvVars(['NEXT_PUBLIC_EXHAUSTIVE_SIDEBAR_CATEGORIES'])}
-          </ChecklistRow>
-          <ChecklistRow
-            title="Hide tags with only 1 photo"
-            status={hideTagsWithOnePhoto}
-            optional
-          >
-            Set environment variable to {'"1"'} to only show tags
-            with 2 or more photos
-            {renderEnvVars(['NEXT_PUBLIC_HIDE_TAGS_WITH_ONE_PHOTO'])}
           </ChecklistRow>
         </>;
       case 'Sorting':

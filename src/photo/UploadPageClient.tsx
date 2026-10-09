@@ -7,7 +7,6 @@ import {
   generateTakenAtFields,
 } from './form';
 import PhotoForm from './form/PhotoForm';
-import { Tags } from '@/tag';
 import usePhotoFormParent from './form/usePhotoFormParent';
 import AiButton from './ai/AiButton';
 import { useMemo } from 'react';
@@ -21,7 +20,6 @@ export default function UploadPageClient({
   blobId,
   formDataFromExif,
   albums,
-  uniqueTags,
   uniqueRecipes,
   uniqueFilms,
   uniqueCameras,
@@ -34,7 +32,6 @@ export default function UploadPageClient({
   blobId?: string
   formDataFromExif: Partial<PhotoFormData>
   albums: Albums
-  uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
   uniqueCameras: Cameras
@@ -82,7 +79,6 @@ export default function UploadPageClient({
       <PhotoForm
         initialPhotoForm={initialPhotoForm}
         albums={albums}
-        uniqueTags={uniqueTags}
         uniqueRecipes={uniqueRecipes}
         uniqueFilms={uniqueFilms}
         uniqueCameras={uniqueCameras}

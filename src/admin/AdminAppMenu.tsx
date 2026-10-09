@@ -7,7 +7,6 @@ import {
   PATH_ADMIN_PHOTOS,
   PATH_ADMIN_PHOTOS_UPDATES,
   PATH_ADMIN_RECIPES,
-  PATH_ADMIN_TAGS,
   PATH_ADMIN_UPLOADS,
 } from '@/app/path';
 import { useAppState } from '@/app/AppState';
@@ -20,7 +19,6 @@ import { useMemo } from 'react';
 import IconPhoto from '@/components/icons/IconPhoto';
 import IconUpload from '@/components/icons/IconUpload';
 import IconRecipe from '@/components/icons/IconRecipe';
-import IconTag from '@/components/icons/IconTag';
 import IconFolder from '@/components/icons/IconFolder';
 import IconSignOut from '@/components/icons/IconSignOut';
 import IconBroom from '@/components/icons/IconBroom';
@@ -61,7 +59,6 @@ export default function AdminAppMenu({
     photosCountNeedSync = 0,
     uploadsCount = 0,
     albumsCount = 0,
-    tagsCount = 0,
     recipesCount = 0,
     isLoadingAdminData,
     refreshAdminData,
@@ -153,17 +150,6 @@ export default function AdminAppMenu({
         href: PATH_ADMIN_ALBUMS,
       });
     }
-    if (tagsCount) {
-      items.push({
-        label: appText.admin.manageTags,
-        annotation: `${tagsCount}`,
-        icon: <IconTag
-          size={15}
-          className="translate-y-[1.5px]"
-        />,
-        href: PATH_ADMIN_TAGS,
-      });
-    }
     if (recipesCount) {
       items.push({
         label: appText.admin.manageRecipes,
@@ -239,7 +225,6 @@ export default function AdminAppMenu({
     photosCountTotal,
     recipesCount,
     albumsCount,
-    tagsCount,
     uploadsCount,
   ]);
 

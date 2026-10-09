@@ -10,8 +10,6 @@ import {
   isPathFocalLengthPhoto,
   isPathPhoto,
   isPathProtected,
-  isPathTag,
-  isPathTagPhoto,
   PATH_ADMIN,
   PATH_ADMIN_CONFIGURATION,
   PATH_ADMIN_LIBRARY_EDIT,
@@ -29,10 +27,8 @@ import {
   PREFIX_LENS,
   PREFIX_RECENTS,
   PREFIX_RECIPE,
-  PREFIX_TAG,
   PREFIX_YEAR,
 } from '@/app/path';
-import { TAG_PRIVATE } from '@/tag';
 
 const PHOTO_ID                      = 'UsKSGcbt';
 const YEAR                          = '2025';
@@ -43,7 +39,6 @@ const LENS_MAKE                     = 'fujifilm';
 const LENS_MODEL                    = 'xf90mmf2-r-lm-wr';
 const LENS_OBJECT                   = { make: LENS_MAKE, model: LENS_MODEL };
 const ALBUM                         = 'album-name';
-const TAG                           = 'tag-name';
 const RECIPE                        = 'nature-nurture';
 const FILM                          = 'acros';
 const FOCAL_LENGTH                  = 90;
@@ -66,12 +61,6 @@ const PATH_LENS_PHOTO               = `${PATH_LENS}/${PHOTO_ID}`;
 const PATH_ALBUM                    = `${PREFIX_ALBUM}/${ALBUM}`;
 const PATH_ALBUM_PHOTO              = `${PATH_ALBUM}/${PHOTO_ID}`;
 
-const PATH_TAG                      = `${PREFIX_TAG}/${TAG}`;
-const PATH_TAG_PHOTO                = `${PATH_TAG}/${PHOTO_ID}`;
-
-const PATH_TAG_PRIVATE              = `${PREFIX_TAG}/${TAG_PRIVATE}`;
-const PATH_TAG_PRIVATE_PHOTO        = `${PATH_TAG_PRIVATE}/${PHOTO_ID}`;
-
 const PATH_RECIPE                   = `${PREFIX_RECIPE}/${RECIPE}`;
 const PATH_RECIPE_PHOTO             = `${PATH_RECIPE}/${PHOTO_ID}`;
 
@@ -86,15 +75,11 @@ describe('Paths', () => {
     // Public
     expect(isPathProtected(PATH_ROOT)).toBe(false);
     expect(isPathProtected(PATH_PHOTO)).toBe(false);
-    expect(isPathProtected(PATH_TAG)).toBe(false);
-    expect(isPathProtected(PATH_TAG_PHOTO)).toBe(false);
     expect(isPathProtected(PATH_CAMERA)).toBe(false);
     expect(isPathProtected(PATH_FILM)).toBe(false);
     // Private
     expect(isPathProtected(PATH_ADMIN)).toBe(true);
     expect(isPathProtected(PATH_ADMIN_PHOTOS)).toBe(true);
-    expect(isPathProtected(PATH_TAG_PRIVATE)).toBe(true);
-    expect(isPathProtected(PATH_TAG_PRIVATE_PHOTO)).toBe(true);
     expect(isPathProtected(PATH_ADMIN_LIBRARY_EDIT)).toBe(true);
     expect(isPathProtected(PATH_OG)).toBe(true);
     expect(isPathProtected(PATH_OG_ALL)).toBe(true);
@@ -116,8 +101,6 @@ describe('Paths', () => {
     expect(isPathPhoto(PATH_PHOTO)).toBe(true);
     expect(isPathCamera(PATH_CAMERA)).toBe(true);
     expect(isPathCameraPhoto(PATH_CAMERA_PHOTO)).toBe(true);
-    expect(isPathTag(PATH_TAG)).toBe(true);
-    expect(isPathTagPhoto(PATH_TAG_PHOTO)).toBe(true);
     expect(isPathFilm(PATH_FILM)).toBe(true);
     expect(isPathFilmPhoto(PATH_FILM_PHOTO)).toBe(true);
     expect(isPathFocalLength(PATH_FOCAL_LENGTH)).toBe(true);
@@ -172,14 +155,6 @@ describe('Paths', () => {
       photoId: PHOTO_ID,
       album: ALBUM,
     });
-    // Tag
-    expect(getPathComponents(PATH_TAG)).toEqual({
-      tag: TAG,
-    });
-    expect(getPathComponents(PATH_TAG_PHOTO)).toEqual({
-      photoId: PHOTO_ID,
-      tag: TAG,
-    });
     // Recipe
     expect(getPathComponents(PATH_RECIPE)).toEqual({
       recipe: RECIPE,
@@ -228,9 +203,6 @@ describe('Paths', () => {
     // Album
     expect(getEscapePath(PATH_ALBUM)).toEqual(PATH_ROOT);
     expect(getEscapePath(PATH_ALBUM_PHOTO)).toEqual(PATH_ALBUM);
-    // Tag
-    expect(getEscapePath(PATH_TAG)).toEqual(PATH_ROOT);
-    expect(getEscapePath(PATH_TAG_PHOTO)).toEqual(PATH_TAG);
     // Recipe
     expect(getEscapePath(PATH_RECIPE)).toEqual(PATH_ROOT);
     expect(getEscapePath(PATH_RECIPE_PHOTO)).toEqual(PATH_RECIPE);

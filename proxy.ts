@@ -7,7 +7,6 @@ import {
   PATH_OG,
   PATH_OG_SAMPLE,
   PREFIX_PHOTO,
-  PREFIX_TAG,
 } from './src/app/path';
 
 export function proxy(req: NextRequest, res:NextResponse) {
@@ -22,13 +21,6 @@ export function proxy(req: NextRequest, res:NextResponse) {
     const matches = pathname.match(/^\/photos\/(.+)$/);
     return NextResponse.rewrite(new URL(
       `${PREFIX_PHOTO}/${matches?.[1]}`,
-      req.url,
-    ));
-  } else if (/^\/t\/(.)+$/.test(pathname)) {
-    // Accept /t/* paths, but serve /tag/*
-    const matches = pathname.match(/^\/t\/(.+)$/);
-    return NextResponse.rewrite(new URL(
-      `${PREFIX_TAG}/${matches?.[1]}`,
       req.url,
     ));
   }

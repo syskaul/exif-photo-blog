@@ -17,7 +17,7 @@ import {
   labelForNikonPictureControl,
 } from '@/platforms/nikon/simulation';
 import { deparameterize } from '@/utility/string';
-import { AnnotatedTag } from '@/photo/form';
+import { AnnotatedOption } from '@/photo/form';
 import PhotoFilmIcon from './PhotoFilmIcon';
 import { AppTextState } from '@/i18n/state';
 import { CategoryQueryMeta } from '@/category';
@@ -118,8 +118,8 @@ export const convertFilmsForForm = (
   includeAllFujifilmSimulations?: boolean,
   currentFilm?: string,
   make?: string,
-): AnnotatedTag[] => {
-  const filmOptions: AnnotatedTag[] = [];
+): AnnotatedOption[] => {
+  const filmOptions: AnnotatedOption[] = [];
 
   if (currentFilm && !films.some(f => f.film === currentFilm)) {
     films.push({ film: currentFilm } as FilmWithMeta);

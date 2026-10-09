@@ -5,16 +5,12 @@ import StickyBanner from '@/components/StickyBanner';
 import { clsx } from 'clsx/lite';
 import { IoCloseSharp } from 'react-icons/io5';
 import { useEffect, useRef } from 'react';
-import { Tags } from '@/tag';
-import FieldsetTag from '@/tag/FieldsetTag';
 import { batchPhotoAction } from '@/photo/actions';
 import { toastSuccess, toastWarning } from '@/toast';
 import DeletePhotosButton from '@/admin/DeletePhotosButton';
 import { photoQuantityText } from '@/photo';
 import { FaArrowDown, FaCheck } from 'react-icons/fa6';
 import ResponsiveText from '@/components/primitives/ResponsiveText';
-import IconFavs from '@/components/icons/IconFavs';
-import IconTag from '@/components/icons/IconTag';
 import { useAppText } from '@/i18n/state/client';
 import { useAppState } from '@/app/AppState';
 import { useSelectPhotosState } from './SelectPhotosState';
@@ -22,20 +18,18 @@ import { Albums } from '@/album';
 import FieldsetAlbum from '@/album/FieldsetAlbum';
 import IconAlbum from '@/components/icons/IconAlbum';
 import FieldsetWithStatus from '@/components/FieldsetWithStatus';
-import { convertStringToArray } from '@/utility/string';
 import {
   getVisibilityLabel,
   getVisibilityOptions,
   VisibilityValue,
 } from '@/photo/visibility';
 import IconHidden from '@/components/icons/IconHidden';
+import { convertStringToArray } from '@/utility/string';
 
 export default function AdminBatchEditPanelClient({
   uniqueAlbums,
-  uniqueTags,
 }: {
   uniqueAlbums: Albums
-  uniqueTags: Tags
 }) {
   const refNote = useRef<HTMLDivElement>(null);
 
@@ -53,10 +47,6 @@ export default function AdminBatchEditPanelClient({
     setIsPerformingSelectEdit,
     albumTitles,
     setAlbumTitles,
-    tags,
-    setTags,
-    tagErrorMessage,
-    setTagErrorMessage,
     visibility,
     setVisibility,
   } = useSelectPhotosState();
@@ -66,9 +56,8 @@ export default function AdminBatchEditPanelClient({
   const { invalidateSwr, registerAdminUpdate } = useAppState();
 
   const isInAlbumMode = albumTitles !== undefined;
-  const isInTagMode = tags !== undefined;
   const isInVisibilityMode = visibility !== undefined;
-  const isInEditMode = isInAlbumMode || isInTagMode || isInVisibilityMode;
+  const isInEditMode = isInAlbumMode || isInVisibilityMode;
 
   const visibilityLabel = getVisibilityLabel(appText, visibility);
 
@@ -94,11 +83,9 @@ export default function AdminBatchEditPanelClient({
       ? !Boolean(selectAllCount)
       : selectedPhotoIds?.length === 0);
 
-  const hasValidEditValue = isInTagMode
-    ? Boolean(tags) && !tagErrorMessage
-    : isInAlbumMode
-      ? Boolean(albumTitles)
-      : Boolean(visibility);
+  const hasValidEditValue = isInAlbumMode
+    ? Boolean(albumTitles)
+    : Boolean(visibility);
 
   const performBatchAction = (
     args: Parameters<typeof batchPhotoAction>[0],
@@ -119,8 +106,6 @@ export default function AdminBatchEditPanelClient({
 
   const exitEditMode = () => {
     setAlbumTitles?.(undefined);
-    setTags?.(undefined);
-    setTagErrorMessage?.('');
     setVisibility?.(undefined);
   };
 
@@ -153,30 +138,19 @@ export default function AdminBatchEditPanelClient({
       openOnLoad
       hideLabel
     />
-    : isInTagMode
-      ? <FieldsetTag
-        tags={tags}
-        tagOptions={uniqueTags}
-        placeholder={appText.admin.tagPlaceholder(photosText)}
-        onChange={tags => setTags?.(tags)}
-        onError={setTagErrorMessage}
-        readOnly={isPerformingSelectEdit}
-        openOnLoad
-        hideLabel
-      />
-      : <FieldsetWithStatus
-        id="batch-visibility"
-        label={appText.admin.setVisibility}
-        selectOptions={getVisibilityOptions(appText)}
-        selectOptionsDefaultLabel={
-          appText.admin.setVisibilityPlaceholder(photosText)
-        }
-        selectOpenOnLoad
-        value={visibility ?? ''}
-        onChange={value => setVisibility?.(value as VisibilityValue | '')}
-        readOnly={isPerformingSelectEdit}
-        hideLabel
-      />;
+    : <FieldsetWithStatus
+      id="batch-visibility"
+      label={appText.admin.setVisibility}
+      selectOptions={getVisibilityOptions(appText)}
+      selectOptionsDefaultLabel={
+        appText.admin.setVisibilityPlaceholder(photosText)
+      }
+      selectOpenOnLoad
+      value={visibility ?? ''}
+      onChange={value => setVisibility?.(value as VisibilityValue | '')}
+      readOnly={isPerformingSelectEdit}
+      hideLabel
+    />;
 
   const renderEditActions = <>
     <LoaderButton
@@ -191,27 +165,14 @@ export default function AdminBatchEditPanelClient({
     <LoaderButton
       className="min-h-[2.5rem]"
       icon={<FaCheck size={15} />}
-      confirmText={isInTagMode
-        ? appText.admin.tagConfirm(photosText)
-        : isInAlbumMode
-          ? appText.admin.albumConfirm(photosText)
-          : appText.admin.setVisibilityConfirm(
-            visibilityLabel ?? '',
-            photosText,
-          )}
+      confirmText={isInAlbumMode
+        ? appText.admin.albumConfirm(photosText)
+        : appText.admin.setVisibilityConfirm(
+          visibilityLabel ?? '',
+          photosText,
+        )}
       onClick={() => {
-        if (isInTagMode) {
-          const tagsArray = convertStringToArray(tags, false);
-          const tagsFormatted = tagsArray
-            .map(tag => `"${tag}"`)
-            .join(', ');
-          performBatchAction({
-            ...batchPhotoActionArguments,
-            tags: tagsArray,
-          }, () => toastSuccess(
-            appText.admin.tagSuccess(photosText, tagsFormatted),
-          ));
-        } else if (isInAlbumMode) {
+        if (isInAlbumMode) {
           const albumTitlesArray = convertStringToArray(albumTitles, false);
           const albumTitlesFormatted = albumTitlesArray
             .map(title => `"${title}"`)
@@ -252,27 +213,11 @@ export default function AdminBatchEditPanelClient({
       onFinish={() => setIsPerformingSelectEdit?.(false)}
     />
     <LoaderButton
-      icon={<IconFavs />}
-      disabled={isFormDisabled}
-      confirmText={appText.admin.favoriteConfirm(photosText)}
-      onClick={() => performBatchAction({
-        ...batchPhotoActionArguments,
-        action: 'favorite',
-      }, () => toastSuccess(appText.admin.favoriteSuccess(photosText)))}
-    />
-    <LoaderButton
       onClick={() => setAlbumTitles?.('')}
       disabled={isFormDisabled}
       icon={<IconAlbum size={15} className="translate-y-[1.5px]" />}
     >
       {appText.category.album}
-    </LoaderButton>
-    <LoaderButton
-      onClick={() => setTags?.('')}
-      disabled={isFormDisabled}
-      icon={<IconTag size={15} className="translate-y-[1.5px]" />}
-    >
-      {appText.category.tag}
     </LoaderButton>
     <LoaderButton
       onClick={() => setVisibility?.('')}
@@ -339,11 +284,7 @@ export default function AdminBatchEditPanelClient({
       </div>
       <div className="flex items-center gap-2 px-1.5 pb-1">
         <div className="grow flex items-center gap-2 min-w-0">
-          {tagErrorMessage
-            ? <span className="text-error truncate">
-              {tagErrorMessage}
-            </span>
-            : renderPhotoSelectionStatus}
+          {renderPhotoSelectionStatus}
         </div>
         {renderSelectAll}
       </div>

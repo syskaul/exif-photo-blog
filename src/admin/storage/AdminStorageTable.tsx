@@ -5,7 +5,7 @@ import { getPhotoUrls } from '@/photo/query';
 import { getStorageUrlsForPhoto } from '@/photo/storage';
 
 export default async function AdminStoragePage() {
-  const _urls = await getPhotoUrls({ limit: 1000, hidden: 'include' });
+  const _urls = await getPhotoUrls({ limit: 1000 });
 
   const urls = await Promise.all(_urls.map(async ({ url, ...partialPhoto }) => {
     const urlSet = await getStorageUrlsForPhoto({ url } as Photo);
@@ -35,12 +35,12 @@ export default async function AdminStoragePage() {
         <div>❌ {countMissing.toString().padStart(3, '0')} Missing</div>
       </div>
       <div>
-        {urls.map(({ id, title, hidden, status }) => (
+        {urls.map(({ id, title, status }) => (
           <div
             key={id}
           >
             <LinkWithStatus
-              href={pathForPhoto({ photo: { id, hidden } as Photo })}
+              href={pathForPhoto({ photo: id })}
               className="w-full inline-flex items-center gap-1"
             >
               <span className="w-[15rem] inline-block truncate">{title}</span>

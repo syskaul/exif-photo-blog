@@ -334,8 +334,6 @@ export const SHOW_LENSES =
   CATEGORY_VISIBILITY.includes('lenses');
 export const SHOW_ALBUMS =
   CATEGORY_VISIBILITY.includes('albums');
-export const SHOW_TAGS =
-  CATEGORY_VISIBILITY.includes('tags');
 export const SHOW_RECIPES =
   CATEGORY_VISIBILITY.includes('recipes');
 export const SHOW_FILMS =
@@ -348,8 +346,6 @@ export const SHOW_CATEGORY_IMAGE_HOVERS =
   process.env.NEXT_PUBLIC_HIDE_CATEGORY_IMAGE_HOVERS !== '1';
 export const COLLAPSE_SIDEBAR_CATEGORIES =
   process.env.NEXT_PUBLIC_EXHAUSTIVE_SIDEBAR_CATEGORIES !== '1';
-export const HIDE_TAGS_WITH_ONE_PHOTO =
-  process.env.NEXT_PUBLIC_HIDE_TAGS_WITH_ONE_PHOTO === '1';
 
 // SORT
 
@@ -540,7 +536,6 @@ export const APP_CONFIGURATION = {
   showCategoriesOnMobile: SHOW_CATEGORIES_ON_MOBILE,
   showCategoryImageHover: SHOW_CATEGORY_IMAGE_HOVERS,
   collapseSidebarCategories: COLLAPSE_SIDEBAR_CATEGORIES,
-  hideTagsWithOnePhoto: HIDE_TAGS_WITH_ONE_PHOTO,
   // Sort
   hasDefaultSortBy: Boolean(process.env.NEXT_PUBLIC_DEFAULT_SORT),
   defaultSortBy: USER_DEFAULT_SORT_BY,

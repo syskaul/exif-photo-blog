@@ -22,7 +22,6 @@ import {
   PATH_ADMIN_PHOTOS,
   PATH_ADMIN_RECIPES,
   PATH_ADMIN_ALBUMS,
-  PATH_ADMIN_TAGS,
   PATH_ADMIN_UPLOADS,
   PATH_FULL_INFERRED,
   PATH_GRID_INFERRED,
@@ -35,7 +34,6 @@ import {
   pathForPhoto,
   pathForQuery,
   pathForRecipe,
-  pathForTag,
   pathForYear,
   PREFIX_RECENTS,
   isPathFull,
@@ -61,13 +59,6 @@ import {
 } from '@/photo';
 import PhotoDate from '@/photo/PhotoDate';
 import PhotoSmall from '@/photo/PhotoSmall';
-import {
-  addPrivateToTags,
-  formatTag,
-  isTagFavs,
-  isTagPrivate,
-  limitTagsByCount,
-} from '@/tag';
 import { formatCount, formatCountDescriptive } from '@/utility/string';
 import CommandKItem from './CommandKItem';
 import {
@@ -75,7 +66,6 @@ import {
   COLOR_SORT_ENABLED,
   DARK_MODE_ENABLED,
   GRID_HOMEPAGE_ENABLED,
-  HIDE_TAGS_WITH_ONE_PHOTO,
 } from '@/app/config';
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
@@ -86,7 +76,6 @@ import { formatFocalLength } from '@/focal';
 import { formatRecipe } from '@/recipe';
 import IconLens from '../components/icons/IconLens';
 import { formatLensText } from '@/lens';
-import IconTag from '../components/icons/IconTag';
 import IconCamera from '../components/icons/IconCamera';
 import IconPhoto from '../components/icons/IconPhoto';
 import IconRecipe from '../components/icons/IconRecipe';
@@ -97,7 +86,6 @@ import IconYear from '../components/icons/IconYear';
 import useViewportHeight from '@/utility/useViewportHeight';
 import useMaskedScroll from '../components/useMaskedScroll';
 import { labelForFilm } from '@/film';
-import IconFavs from '@/components/icons/IconFavs';
 import { useAppText } from '@/i18n/state/client';
 import LoaderButton from '@/components/primitives/LoaderButton';
 import IconRecents from '@/components/icons/IconRecents';
@@ -162,7 +150,6 @@ export default function CommandKClient({
   cameras,
   lenses,
   albums,
-  tags: _tags,
   recipes,
   films,
   focalLengths,
@@ -183,10 +170,8 @@ export default function CommandKClient({
     nextCommandKQuery,
     invalidateSwr,
     photosCountTotal,
-    photosCountHidden = 0,
     uploadsCount,
     albumsCount,
-    tagsCount,
     recipesCount,
     insightsIndicatorStatus,
     isGridHighDensity,
@@ -381,15 +366,6 @@ export default function CommandKClient({
     _years.filter(({ year }) => queryFormatted && year.includes(queryFormatted))
   , [_years, queryFormatted]);
 
-  const tags = useMemo(() => {
-    const tagsIncludingPrivate = photosCountHidden > 0
-      ? addPrivateToTags(_tags, photosCountHidden)
-      : _tags;
-    return HIDE_TAGS_WITH_ONE_PHOTO
-      ? limitTagsByCount(tagsIncludingPrivate, 2, queryFormatted)
-      : tagsIncludingPrivate;
-  }, [_tags, photosCountHidden, queryFormatted]);
-
   const categorySections: CommandKSection[] = useMemo(() =>
     CATEGORY_VISIBILITY
       .map(category => {
@@ -448,33 +424,6 @@ export default function CommandKClient({
                 path: pathForAlbum(album),
               })),
           };
-          case 'tags': return {
-            heading,
-            accessory: <IconTag
-              size={13}
-              className="translate-x-[1px] translate-y-[0.75px]"
-            />,
-            items: tags.map(({ tag, count }) => ({
-              explicitKey: formatTag(tag),
-              label: <span className="flex items-center gap-[7px]">
-                {formatTag(tag)}
-                {isTagFavs(tag) &&
-                  <IconFavs
-                    size={13}
-                    className="translate-y-[-0.5px]"
-                    highlight
-                  />}
-                {isTagPrivate(tag) &&
-                  <IconLock
-                    size={12}
-                    className="text-dim translate-y-[-0.5px]"
-                  />}
-              </span>,
-              annotation: formatCount(count),
-              annotationAria: formatCountDescriptive(count),
-              path: pathForTag(tag),
-            })),
-          };
           case 'recipes': return {
             heading,
             accessory: <IconRecipe
@@ -518,7 +467,6 @@ export default function CommandKClient({
     cameras,
     lenses,
     albums,
-    tags,
     recipes,
     films,
     focalLengths,
@@ -699,13 +647,6 @@ export default function CommandKClient({
         label: `${appText.admin.manageAlbums} (${albumsCount})`,
         annotation: <IconLock narrow />,
         path: PATH_ADMIN_ALBUMS,
-      });
-    }
-    if (tagsCount) {
-      adminSection.items.push({
-        label: `${appText.admin.manageTags} (${tagsCount})`,
-        annotation: <IconLock narrow />,
-        path: PATH_ADMIN_TAGS,
       });
     }
     if (recipesCount) {

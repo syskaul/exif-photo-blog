@@ -18,10 +18,6 @@ export type SelectPhotosState = {
   setIsPerformingSelectEdit?: Dispatch<SetStateAction<boolean>>
   albumTitles?: string
   setAlbumTitles?: Dispatch<SetStateAction<string | undefined>>
-  tags?: string
-  setTags?: Dispatch<SetStateAction<string | undefined>>
-  tagErrorMessage?: string
-  setTagErrorMessage?: Dispatch<SetStateAction<string>>
   visibility?: VisibilityValue | ''
   setVisibility?: Dispatch<SetStateAction<VisibilityValue | '' | undefined>>
 };

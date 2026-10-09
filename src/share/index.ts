@@ -9,7 +9,6 @@ import {
   absolutePathForPhotoImage,
   absolutePathForQueryImage,
   absolutePathForRecipeImage,
-  absolutePathForTagImage,
   absolutePathForYearImage,
 } from '@/app/path';
 
@@ -28,7 +27,6 @@ export const getSharePathFromShareModalProps = ({
   query,
   camera,
   lens,
-  tag,
   recipe,
   film,
   focal,
@@ -42,8 +40,6 @@ export const getSharePathFromShareModalProps = ({
     return absolutePathForCameraImage(camera);
   } else if (lens) {
     return absolutePathForLensImage(lens);
-  } else if (tag) {
-    return absolutePathForTagImage(tag);
   } else if (recipe) {
     return absolutePathForRecipeImage(recipe);
   } else if (film) {

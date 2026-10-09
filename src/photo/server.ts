@@ -146,8 +146,6 @@ export const extractImageDataFromBlobPath = async (
   const formDataFromExif = dataExif
     ? {
       ...includeInitialPhotoFields && {
-        hidden: 'false',
-        favorite: 'false',
         extension,
         url,
       },

@@ -12,7 +12,6 @@ import { useAppState } from '@/app/AppState';
 import useVisibility from '@/utility/useVisibility';
 import { SortBy } from './sort';
 import { useAppText } from '@/i18n/state/client';
-import { isTagPrivate } from '@/tag';
 
 // Future reader:
 // Adding useIsHydrated check caused <PhotoLarge /> images
@@ -41,14 +40,12 @@ export default function InfinitePhotoScroll({
   camera,
   lens,
   album,
-  tag,
   recipe,
   film,
   focal,
   moreButtonClassName = 'mt-4',
   wrapMoreButtonInGrid,
   useCachedPhotos = true,
-  includeHiddenPhotos,
   children,
 }: {
   // Required for masonry grid:
@@ -63,7 +60,6 @@ export default function InfinitePhotoScroll({
   moreButtonClassName?: string
   wrapMoreButtonInGrid?: boolean
   useCachedPhotos?: boolean
-  includeHiddenPhotos?: boolean
   children: (props: {
     key: string
     photos: Photo[]
@@ -81,8 +77,6 @@ export default function InfinitePhotoScroll({
       : `${cacheKey}${SIZE_KEY_SEPARATOR}${size}`
     , [cacheKey]);
 
-  const isPrivateTag = isTagPrivate(tag);
-
   const fetcher = useCallback((
     keyWithSize: string,
     warmOnly?: boolean,
@@ -93,16 +87,12 @@ export default function InfinitePhotoScroll({
       sortWithPriority,
       excludeFromFeeds,
       limit: itemsPerPage,
-      hidden: isPrivateTag
-        ? 'only'
-        : includeHiddenPhotos ? 'include' : 'exclude',
       query,
       recent,
       year,
       camera,
       lens,
       album,
-      tag: isPrivateTag ? undefined : tag,
       recipe,
       film,
       focal,
@@ -114,15 +104,12 @@ export default function InfinitePhotoScroll({
     excludeFromFeeds,
     initialOffset,
     itemsPerPage,
-    includeHiddenPhotos,
-    isPrivateTag,
     query,
     recent,
     year,
     camera,
     lens,
     album,
-    tag,
     recipe,
     film,
     focal,

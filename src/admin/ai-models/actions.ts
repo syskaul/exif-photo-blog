@@ -28,7 +28,7 @@ export const generateAiTextForModelsAction = async (
       throw new Error('AI model debugging not enabled');
     }
 
-    const photo = await getPhoto(photoId, true);
+    const photo = await getPhoto(photoId);
 
     if (!photo) { throw new Error('Photo not found'); }
 

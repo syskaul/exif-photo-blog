@@ -1,7 +1,7 @@
 import { ComponentProps, useEffect, useRef } from 'react';
 import FieldsetWithStatus from '@/components/FieldsetWithStatus';
 import { Albums } from '.';
-import { convertAlbumsToAnnotatedTags } from './form';
+import { convertAlbumsToAnnotatedOptions } from './form';
 
 export default function FieldsetAlbum({
   albumOptions,
@@ -30,8 +30,8 @@ export default function FieldsetAlbum({
       <FieldsetWithStatus
         {...props}
         label={label ?? 'Albums'}
-        tagOptions={convertAlbumsToAnnotatedTags(albumOptions)}
-        tagOptionsShouldParameterize={false}
+        autocompleteOptions={convertAlbumsToAnnotatedOptions(albumOptions)}
+        autocompleteOptionsShouldParameterize={false}
       />
     </div>
   );

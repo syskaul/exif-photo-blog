@@ -1,6 +1,6 @@
 import { CategoryQueryMeta } from '@/category';
 import type { Photo } from '@/photo';
-import type { AnnotatedTag } from '@/photo/form';
+import type { AnnotatedOption } from '@/photo/form';
 import { isCameraMakeApple } from '@/platforms/apple';
 import { formatSonyModel, isMakeSony } from '@/platforms/sony';
 import {
@@ -99,7 +99,7 @@ export const formatCameraText = (
 const convertCameraFieldForForm = (
   cameras: Cameras = [],
   getValue: (camera: Camera) => string | undefined,
-): AnnotatedTag[] => {
+): AnnotatedOption[] => {
   const counts = new Map<string, number>();
   cameras.forEach(({ camera, count }) => {
     const value = getValue(camera);

@@ -34,12 +34,6 @@ export default function useAiImageQueries(
   ] = useAiImageQuery(imageBase64, 'caption');
 
   const [
-    requestTags,
-    tags,
-    isLoadingTags,
-  ] = useAiImageQuery(imageBase64, 'tags');
-
-  const [
     requestSemantic,
     semanticDescription,
     isLoadingSemantic,
@@ -53,7 +47,6 @@ export default function useAiImageQueries(
   const isLoading =
     isLoadingTitle ||
     isLoadingCaption ||
-    isLoadingTags ||
     isLoadingSemantic;
 
   const hasRunAllQueriesOnce = useRef(false);
@@ -84,13 +77,11 @@ export default function useAiImageQueries(
         requestCaption();
       }
     }
-    if (fields.includes('tags')) { requestTags(); }
     if (fields.includes('semantic')) { requestSemantic(); }
   }, [
     requestTitleCaption,
     requestTitle,
     requestCaption,
-    requestTags,
     requestSemantic,
     resetTitle,
     resetTitleSolo,
@@ -110,12 +101,10 @@ export default function useAiImageQueries(
     request,
     title,
     caption,
-    tags,
     semanticDescription,
     isLoading,
     isLoadingTitle,
     isLoadingCaption,
-    isLoadingTags,
     isLoadingSemantic,
   };
 }

@@ -4,7 +4,6 @@ import { PhotoSetCategory } from '@/category';
 import { getBaseUrl, GRID_HOMEPAGE_ENABLED } from './config';
 import { Camera } from '@/camera';
 import { parameterize } from '@/utility/string';
-import { TAG_PRIVATE } from '@/tag';
 import { Lens } from '@/lens';
 import { AlbumOrAlbumSlug } from '@/album';
 
@@ -54,7 +53,6 @@ export const PREFIX_YEAR                = '/year';
 export const PREFIX_CAMERA              = '/shot-on';
 export const PREFIX_LENS                = '/lens';
 export const PREFIX_ALBUM               = '/album';
-export const PREFIX_TAG                 = '/tag';
 export const PREFIX_RECIPE              = '/recipe';
 export const PREFIX_FILM                = '/film';
 export const PREFIX_FOCAL_LENGTH        = '/focal';
@@ -66,7 +64,6 @@ const PATH_YEAR_DYNAMIC                 = `${PREFIX_YEAR}/[year]`;
 const PATH_CAMERA_DYNAMIC               = `${PREFIX_CAMERA}/[make]/[model]`;
 const PATH_LENS_DYNAMIC                 = `${PREFIX_LENS}/[make]/[model]`;
 const PATH_ALBUM_DYNAMIC                = `${PREFIX_ALBUM}/[album]`;
-const PATH_TAG_DYNAMIC                  = `${PREFIX_TAG}/[tag]`;
 const PATH_FILM_DYNAMIC                 = `${PREFIX_FILM}/[film]`;
 const PATH_RECIPE_DYNAMIC               = `${PREFIX_RECIPE}/[recipe]`;
 const PATH_FOCAL_LENGTH_DYNAMIC         = `${PREFIX_FOCAL_LENGTH}/[focal]`;
@@ -77,7 +74,6 @@ export const PATH_ADMIN_PHOTOS_UPDATES  = `${PATH_ADMIN_PHOTOS}/updates`;
 export const PATH_ADMIN_UPLOADS         = `${PATH_ADMIN}/uploads`;
 export const PATH_ADMIN_ALBUMS          = `${PATH_ADMIN}/albums`;
 export const PATH_ADMIN_ALBUM_NEW       = `${PATH_ADMIN_ALBUMS}/new`;
-export const PATH_ADMIN_TAGS            = `${PATH_ADMIN}/tags`;
 export const PATH_ADMIN_RECIPES         = `${PATH_ADMIN}/recipes`;
 export const PATH_ADMIN_CONFIGURATION   = `${PATH_ADMIN}/configuration`;
 export const PATH_ADMIN_INSIGHTS        = `${PATH_ADMIN}/insights`;
@@ -111,7 +107,6 @@ export const PATHS_ADMIN = [
   PATH_ADMIN_PHOTOS_UPDATES,
   PATH_ADMIN_UPLOADS,
   PATH_ADMIN_ALBUMS,
-  PATH_ADMIN_TAGS,
   PATH_ADMIN_RECIPES,
   PATH_ADMIN_INSIGHTS,
   PATH_ADMIN_CONFIGURATION,
@@ -131,7 +126,6 @@ export const PATHS_TO_CACHE = [
   PATH_CAMERA_DYNAMIC,
   PATH_LENS_DYNAMIC,
   PATH_ALBUM_DYNAMIC,
-  PATH_TAG_DYNAMIC,
   PATH_FILM_DYNAMIC,
   PATH_FOCAL_LENGTH_DYNAMIC,
   PATH_RECIPE_DYNAMIC,
@@ -163,9 +157,6 @@ export const pathForAdminPhotoEdit = (photo: PhotoOrPhotoId) =>
 export const pathForAdminAlbumEdit = (album: AlbumOrAlbumSlug) =>
   `${PATH_ADMIN_ALBUMS}/${getAlbumSlug(album)}/${EDIT}`;
 
-export const pathForAdminTagEdit = (tag: string) =>
-  `${PATH_ADMIN_TAGS}/${tag}/${EDIT}`;
-
 export const pathForAdminRecipeEdit = (recipe: string) =>
   `${PATH_ADMIN_RECIPES}/${recipe}/${EDIT}`;
 
@@ -179,16 +170,13 @@ export const pathForPhoto = ({
   camera,
   lens,
   album,
-  tag,
   film,
   focal,
   recipe,
 }: PhotoPathParams) => {
   let prefix = PREFIX_PHOTO;
 
-  if (typeof photo !== 'string' && photo.hidden) {
-    prefix = pathForTag(TAG_PRIVATE);
-  } else if (query) {
+  if (query) {
     prefix = pathForQuery(query);
   } else if (recent) {
     prefix = PREFIX_RECENTS;
@@ -200,8 +188,6 @@ export const pathForPhoto = ({
     prefix = pathForLens(lens);
   } else if (album) {
     prefix = pathForAlbum(album);
-  } else if (tag) {
-    prefix = pathForTag(tag);
   } else if (recipe) {
     prefix = pathForRecipe(recipe);
   } else if (film) {
@@ -230,9 +216,6 @@ export const pathForLens = ({ make, model }: Lens) =>
 export const pathForAlbum = (album: AlbumOrAlbumSlug) =>
   `${PREFIX_ALBUM}/${getAlbumSlug(album)}`;
 
-export const pathForTag = (tag: string) =>
-  `${PREFIX_TAG}/${tag}`;
-
 export const pathForRecipe = (recipe: string) =>
   `${PREFIX_RECIPE}/${recipe}`;
 
@@ -260,9 +243,6 @@ export const pathForLensImage = (lens: Lens) =>
 
 export const pathForAlbumImage = (album: AlbumOrAlbumSlug) =>
   pathForImage(pathForAlbum(album));
-
-export const pathForTagImage = (tag: string) =>
-  pathForImage(pathForTag(tag));
 
 export const pathForRecipeImage = (recipe: string) =>
   pathForImage(pathForRecipe(recipe));
@@ -316,9 +296,6 @@ export const absolutePathForAlbum = (
 ) =>
   `${getBaseUrl(share)}${pathForAlbum(album)}`;
 
-export const absolutePathForTag = (tag: string, share?: boolean) =>
-  `${getBaseUrl(share)}${pathForTag(tag)}`;
-
 export const absolutePathForRecipe = (recipe: string, share?: boolean) =>
   `${getBaseUrl(share)}${pathForRecipe(recipe)}`;
 
@@ -348,9 +325,6 @@ export const absolutePathForLensImage= (lens: Lens) =>
 
 export const absolutePathForAlbumImage = (album: AlbumOrAlbumSlug) =>
   `${absolutePathForAlbum(album)}/${IMAGE}`;
-
-export const absolutePathForTagImage = (tag: string) =>
-  `${absolutePathForTag(tag)}/${IMAGE}`;
 
 export const absolutePathForRecipeImage = (recipe: string) =>
   `${absolutePathForRecipe(recipe)}/${IMAGE}`;
@@ -419,14 +393,6 @@ export const isPathAlbum = (pathname = '') =>
 export const isPathAlbumPhoto = (pathname = '') =>
   new RegExp(`^${PREFIX_ALBUM}/[^/]+/[^/]+/?$`).test(pathname);
 
-// tag/[tag]
-export const isPathTag = (pathname = '') =>
-  new RegExp(`^${PREFIX_TAG}/[^/]+/?$`).test(pathname);
-
-// tag/[tag]/[photoId]
-export const isPathTagPhoto = (pathname = '') =>
-  new RegExp(`^${PREFIX_TAG}/[^/]+/[^/]+/?$`).test(pathname);
-
 // recipe/[recipe]
 export const isPathRecipe = (pathname = '') =>
   new RegExp(`^${PREFIX_RECIPE}/[^/]+/?$`).test(pathname);
@@ -474,7 +440,6 @@ export const isPathPhotoSet = (pathname?: string) =>
   isPathCamera(pathname) ||
   isPathLens(pathname) ||
   isPathAlbum(pathname) ||
-  isPathTag(pathname) ||
   isPathRecipe(pathname) ||
   isPathFilm(pathname) ||
   isPathFocalLength(pathname);
@@ -521,7 +486,6 @@ export const isPathProtected = (pathname?: string) => {
 
   return (checkPathPrefix(pathname, PATH_ADMIN) &&
     !isDevelopmentConfigurationPage) ||
-  checkPathPrefix(pathname, pathForTag(TAG_PRIVATE)) ||
   checkPathPrefix(pathname, PATH_ADMIN_LIBRARY_EDIT) ||
   checkPathPrefix(pathname, PATH_OG);
 };
@@ -560,8 +524,6 @@ export const getPathComponents = (
     new RegExp(`^${PREFIX_LENS}/[^/]+/([^/]+)`))?.[1];
   const photoIdFromAlbum = pathname.match(
     new RegExp(`^${PREFIX_ALBUM}/[^/]+/([^/]+)`))?.[1];
-  const photoIdFromTag = pathname.match(
-    new RegExp(`^${PREFIX_TAG}/[^/]+/([^/]+)`))?.[1];
   const photoIdFromRecipe = pathname.match(
     new RegExp(`^${PREFIX_RECIPE}/[^/]+/([^/]+)`))?.[1];
   const photoIdFromFilm = pathname.match(
@@ -572,8 +534,6 @@ export const getPathComponents = (
     new RegExp(`^${PREFIX_YEAR}/[^/]+/([^/]+)`))?.[1];
   const album = pathname.match(
     new RegExp(`^${PREFIX_ALBUM}/([^/]+)`))?.[1];
-  const tag = pathname.match(
-    new RegExp(`^${PREFIX_TAG}/([^/]+)`))?.[1];
   const recipe = pathname.match(
     new RegExp(`^${PREFIX_RECIPE}/([^/]+)`))?.[1];
   const film = pathname.match(
@@ -600,7 +560,6 @@ export const getPathComponents = (
       photoIdFromCamera ||
       photoIdFromLens ||
       photoIdFromAlbum ||
-      photoIdFromTag ||
       photoIdFromRecipe ||
       photoIdFromFilm ||
       photoIdFromFocalLength
@@ -611,7 +570,6 @@ export const getPathComponents = (
     camera,
     lens,
     album,
-    tag,
     recipe,
     film,
     focal,
@@ -627,7 +585,6 @@ export const getEscapePath = (pathname?: string) => {
     camera,
     lens,
     album,
-    tag,
     recipe,
     film,
     focal,
@@ -641,7 +598,6 @@ export const getEscapePath = (pathname?: string) => {
     (camera && isPathCamera(pathname)) ||
     (lens && isPathLens(pathname)) ||
     (album && isPathAlbum(pathname)) ||
-    (tag && isPathTag(pathname)) ||
     (film && isPathFilm(pathname)) ||
     (focal && isPathFocalLength(pathname)) ||
     (recipe && isPathRecipe(pathname))
@@ -659,8 +615,6 @@ export const getEscapePath = (pathname?: string) => {
     return pathForLens(lens);
   } else if (album && isPathAlbumPhoto(pathname)) {
     return pathForAlbum(album);
-  } else if (tag && isPathTagPhoto(pathname)) {
-    return pathForTag(tag);
   } else if (recipe && isPathRecipePhoto(pathname)) {
     return pathForRecipe(recipe);
   } else if (film && isPathFilmPhoto(pathname)) {

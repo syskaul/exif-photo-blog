@@ -3,7 +3,6 @@ import { Camera, Cameras } from '@/camera';
 import { Films } from '@/film';
 import type { AppTextState } from '@/i18n/state';
 import { Lens, Lenses } from '@/lens';
-import { Tags } from '@/tag';
 import { FocalLengths } from '@/focal';
 import { Recipes } from '@/recipe';
 import { Recents } from '@/recents';
@@ -17,7 +16,6 @@ export const CATEGORY_KEYS = [
   'cameras',
   'lenses',
   'albums',
-  'tags',
   'recipes',
   'films',
   'focal-lengths',
@@ -37,7 +35,6 @@ export const getCategoryTitle = (
     case 'cameras': return appText.category.cameraPlural;
     case 'lenses': return appText.category.lensPlural;
     case 'albums': return appText.category.albumPlural;
-    case 'tags': return appText.category.tagPlural;
     case 'recipes': return appText.category.recipePlural;
     case 'films': return appText.category.filmPlural;
     case 'focal-lengths': return appText.category.focalLengthPlural;
@@ -47,7 +44,6 @@ export const getCategoryTitle = (
 export const DEFAULT_CATEGORY_KEYS: CategoryKeys = [
   'recents',
   'albums',
-  'tags',
   'cameras',
   'lenses',
   'recipes',
@@ -79,7 +75,6 @@ export interface PhotoSetCategory {
   camera?: Camera
   lens?: Lens
   album?: Album
-  tag?: string
   recipe?: string
   film?: string
   focal?: number
@@ -91,7 +86,6 @@ export interface PhotoSetCategories {
   cameras: Cameras
   lenses: Lenses
   albums: Albums
-  tags: Tags
   recipes: Recipes
   films: Films
   focalLengths: FocalLengths

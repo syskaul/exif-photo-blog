@@ -5,7 +5,6 @@ import FieldsetWithStatus from '@/components/FieldsetWithStatus';
 import Container from '@/components/Container';
 import { addUploadsAction } from '@/photo/actions';
 import { PATH_ADMIN_PHOTOS } from '@/app/path';
-import { Tags } from '@/tag';
 import {
   generateLocalNaivePostgresString,
   generateLocalPostgresString,
@@ -17,11 +16,9 @@ import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { BiCheckCircle } from 'react-icons/bi';
 import ProgressButton from '@/components/primitives/ProgressButton';
 import { UrlAddStatus } from './AdminUploadsClient';
-import FieldsetTag from '../tag/FieldsetTag';
 import DeleteUploadButton from './DeleteUploadButton';
 import { useAppState } from '@/app/AppState';
 import { pluralize } from '@/utility/string';
-import FieldsetFavs from '@/photo/form/FieldsetFavs';
 import IconAddUpload from '@/components/icons/IconAddUpload';
 import { PhotoFormData } from '@/photo/form';
 import FieldsetVisibility from '@/photo/visibility/FieldsetVisibility';
@@ -34,7 +31,6 @@ export default function AdminBatchUploadActions({
   uploadUrls,
   uploadTitles,
   uniqueAlbums,
-  uniqueTags,
   isAdding,
   setIsAdding,
   setUrlAddStatuses,
@@ -45,7 +41,6 @@ export default function AdminBatchUploadActions({
   uploadUrls: string[]
   uploadTitles: string[]
   uniqueAlbums: Albums
-  uniqueTags?: Tags
   isAdding: boolean
   setIsAdding: Dispatch<SetStateAction<boolean>>
   setUrlAddStatuses: Dispatch<SetStateAction<UrlAddStatus[]>>
@@ -56,7 +51,6 @@ export default function AdminBatchUploadActions({
   const { updateAdminData } = useAppState();
 
   const [showBulkSettings, setShowBulkSettings] = useState(false);
-  const [tagErrorMessage, setTagErrorMessage] = useState('');
   const [formData, setFormData] = useState<Partial<PhotoFormData>>({});
   const [albumTitles, setAlbumTitles] = useState<string>();
 
@@ -73,17 +67,14 @@ export default function AdminBatchUploadActions({
     titles: string[],
     isFinalBatch: boolean,
   ) => {
-    const { tags, favorite, excludeFromFeeds, hidden } = formData;
+    const { excludeFromFeeds } = formData;
     try {
       const stream = await addUploadsAction({
         uploadUrls: urls,
         uploadTitles: titles,
         ...showBulkSettings && {
           albumTitles: albumTitles?.split(','),
-          tags,
-          favorite,
           excludeFromFeeds,
-          hidden,
         },
         takenAtLocal: generateLocalPostgresString(),
         takenAtNaiveLocal: generateLocalNaivePostgresString(),
@@ -159,25 +150,9 @@ export default function AdminBatchUploadActions({
                 readOnly={isAdding}
                 className="relative z-11"
               />
-              <FieldsetTag
-                label="Tags"
-                tags={formData.tags ?? ''}
-                tagOptions={uniqueTags}
-                onChange={tags => setFormData(data => ({ ...data, tags }))}
-                onError={setTagErrorMessage}
-                readOnly={isAdding}
-                className="relative z-10"
-              />
               <FieldsetVisibility
                 formData={formData}
                 setFormData={setFormData}
-                readOnly={isAdding}
-              />
-              <FieldsetFavs
-                className="pt-2.5 pb-2"
-                value={formData.favorite ?? 'false'}
-                onChange={favorite =>
-                  setFormData(data => ({ ...data, favorite }))}
                 readOnly={isAdding}
               />
             </div>}
@@ -188,7 +163,6 @@ export default function AdminBatchUploadActions({
               progress={addingProgress}
               isLoading={isAdding}
               disabled={
-                Boolean(tagErrorMessage) ||
                 isAddingComplete ||
                 isDeleting
               }

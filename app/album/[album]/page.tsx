@@ -11,7 +11,6 @@ import { getPhotosAlbumDataCached } from '@/album/data';
 import {
   getAlbumFromSlugCached,
   getAlbumsWithMetaCached,
-  getTagsForAlbumCached,
 } from '@/album/cache';
 import { getPhotosCached } from '@/photo/cache';
 
@@ -86,13 +85,10 @@ export default async function AlbumPage({
 
   const photos = await getPhotosCached({ album });
 
-  const tags = await getTagsForAlbumCached(album.id);
-
   return (
     <AlbumOverview {...{
       album,
       photos,
-      tags,
       count: photos.length,
     }} />
   );

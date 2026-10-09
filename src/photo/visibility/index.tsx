@@ -1,11 +1,10 @@
 import IconHidden from '@/components/icons/IconHidden';
 import { PhotoFormData } from '../form';
-import IconLock from '@/components/icons/IconLock';
 import { SelectMenuOptionType } from '@/components/SelectMenuOption';
 import { Photo } from '..';
 import { AppTextState } from '@/i18n/state';
 
-export type VisibilityValue = 'default' | 'exclude' | 'private';
+export type VisibilityValue = 'default' | 'exclude';
 
 export const getVisibilityOptions = (
   appText: AppTextState,
@@ -22,12 +21,6 @@ export const getVisibilityOptions = (
     label: appText.admin.visibilityExclude,
     note: appText.admin.visibilityExcludeNote,
   },
-  {
-    value: 'private',
-    accessoryStart: <IconLock size={15} />,
-    label: appText.admin.visibilityPrivate,
-    note: appText.admin.visibilityPrivateNote,
-  },
 ];
 
 export const getVisibilityLabel = (
@@ -40,11 +33,7 @@ export const getVisibilityLabel = (
 export const getVisibilityValue = (
   formData: Partial<PhotoFormData>,
 ): VisibilityValue =>
-  formData.hidden === 'true'
-    ? 'private'
-    : formData.excludeFromFeeds === 'true'
-      ? 'exclude'
-      : 'default';
+  formData.excludeFromFeeds === 'true' ? 'exclude' : 'default';
 
 export const updateFormDataWithVisibility = (
   formData: Partial<PhotoFormData>,
@@ -52,11 +41,7 @@ export const updateFormDataWithVisibility = (
 ): Partial<PhotoFormData> => {
   return {
     ...formData,
-    ...value === 'private'
-      ? { hidden: 'true', excludeFromFeeds: 'false' }
-      : value === 'exclude'
-        ? { hidden: 'false', excludeFromFeeds: 'true' }
-        : { hidden: 'false', excludeFromFeeds: 'false' },
+    excludeFromFeeds: value === 'exclude' ? 'true' : 'false',
   };
 };
 
@@ -66,11 +51,7 @@ export const didVisibilityChange = (
 ) => getVisibilityValue(original) !== getVisibilityValue(current);
 
 export const getVisibilityFromPhoto = (photo: Photo): VisibilityValue =>
-  photo.hidden
-    ? 'private'
-    : photo.excludeFromFeeds
-      ? 'exclude'
-      : 'default';
+  photo.excludeFromFeeds ? 'exclude' : 'default';
 
 export const doesPhotoHaveDefaultVisibility = (photo: Photo) =>
   getVisibilityFromPhoto(photo) === 'default';

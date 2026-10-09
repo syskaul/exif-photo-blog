@@ -57,8 +57,6 @@ export default function SelectPhotosProvider({
     useState(false);
 
   const [albumTitles, setAlbumTitles] = useState<string>();
-  const [tags, setTags] = useState<string>();
-  const [tagErrorMessage, setTagErrorMessage] = useState('');
   const [visibility, setVisibility] =
     useState<VisibilityValue | ''>();
 
@@ -142,8 +140,6 @@ export default function SelectPhotosProvider({
       setSelectAllPhotoOptions(undefined);
       setSelectAllCount(undefined);
       setAlbumTitles(undefined);
-      setTags(undefined);
-      setTagErrorMessage('');
       setVisibility(undefined);
     }
   }, [isSelectingPhotos, getPhotoGridElements]);
@@ -165,10 +161,6 @@ export default function SelectPhotosProvider({
       setIsPerformingSelectEdit,
       albumTitles,
       setAlbumTitles,
-      tags,
-      setTags,
-      tagErrorMessage,
-      setTagErrorMessage,
       visibility,
       setVisibility,
     }}>

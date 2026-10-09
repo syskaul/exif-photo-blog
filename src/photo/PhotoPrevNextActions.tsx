@@ -19,9 +19,7 @@ import useNavigateOrRunActionWithToast
 import {
   deletePhotoAction,
   syncPhotoAction,
-  toggleFavoritePhotoAction,
 } from './actions';
-import { isPhotoFav } from '@/tag';
 import Tooltip from '@/components/Tooltip';
 import {
   ALLOW_PUBLIC_DOWNLOADS,
@@ -62,23 +60,9 @@ export default function PhotoPrevNextActions({
     ? downloadFileNameForPhoto(photo)
     : undefined;
 
-  const toggleFavorite = useCallback(() => {
-    if (photo?.id) { return toggleFavoritePhotoAction(photo.id); }
-  }, [photo]);
-
   const navigateToPhotoEdit = useNavigateOrRunActionWithToast({
     pathOrAction: photo ? pathForAdminPhotoEdit(photo) : undefined,
     toastMessage: `Editing ${photoTitle} ...`,
-  });
-
-  const favoritePhoto = useNavigateOrRunActionWithToast({
-    pathOrAction: toggleFavorite,
-    toastMessage: `Favoriting ${photoTitle} ...`,
-  });
-
-  const unfavoritePhoto = useNavigateOrRunActionWithToast({
-    pathOrAction: toggleFavorite,
-    toastMessage: `Unfavoriting ${photoTitle} ...`,
   });
 
   const syncPhoto = useNavigateOrRunActionWithToast({
@@ -141,16 +125,6 @@ export default function PhotoPrevNextActions({
             navigateToPhotoEdit();
           }
           break;
-        case KEY_COMMANDS.favorite:
-          if (isUserSignedIn && photo && !isPhotoFav(photo)) {
-            favoritePhoto();
-          }
-          break;
-        case KEY_COMMANDS.unfavorite:
-          if (isUserSignedIn && photo && isPhotoFav(photo)) {
-            unfavoritePhoto();
-          }
-          break;
         case KEY_COMMANDS.download:
           if (
             (isUserSignedIn || ALLOW_PUBLIC_DOWNLOADS) &&
@@ -178,8 +152,6 @@ export default function PhotoPrevNextActions({
     isUserSignedIn,
     navigateToPhotoEdit,
     photo,
-    favoritePhoto,
-    unfavoritePhoto,
     downloadUrl,
     downloadFileName,
     syncPhoto,

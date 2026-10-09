@@ -16,7 +16,6 @@ import {
   getPhotosInNeedOfUpdateCountCached,
   getPhotosMetaCached,
   getUniqueRecipesCached,
-  getUniqueTagsCached,
 } from '@/photo/cache';
 import { getAlbumsWithMetaCached } from '@/album/cache';
 import { revalidatePath } from 'next/cache';
@@ -33,18 +32,13 @@ export const getAdminDataAction = async () =>
   runAuthenticatedAdminServerAction(async () => {
     const [
       photosCount,
-      photosCountHidden,
       photosCountNeedSync,
       codeMeta,
       uploadsCount,
       albumsCount,
-      tagsCount,
       recipesCount,
     ] = await Promise.all([
       getPhotosMetaCached()
-        .then(({ count }) => count)
-        .catch(() => 0),
-      getPhotosMetaCached({ hidden: 'only' })
         .then(({ count }) => count)
         .catch(() => 0),
       getPhotosInNeedOfUpdateCountCached(),
@@ -58,9 +52,6 @@ export const getAdminDataAction = async () =>
       getAlbumsWithMetaCached()
         .then(albums => albums.length)
         .catch(() => 0),
-      getUniqueTagsCached()
-        .then(tags => tags.length)
-        .catch(() => 0),
       getUniqueRecipesCached()
         .then(recipes => recipes.length)
         .catch(() => 0),
@@ -71,21 +62,14 @@ export const getAdminDataAction = async () =>
       photosCountNeedSync,
     });
 
-    const photosCountTotal = (
-      photosCount !== undefined &&
-      photosCountHidden !== undefined
-    )
-      ? photosCount + photosCountHidden
-      : undefined;
+    const photosCountTotal = photosCount;
 
     return {
       photosCount,
-      photosCountHidden,
       photosCountNeedSync,
       photosCountTotal,
       uploadsCount,
       albumsCount,
-      tagsCount,
       recipesCount,
       insightsIndicatorStatus,
     } as const;

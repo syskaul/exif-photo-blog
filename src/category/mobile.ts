@@ -1,4 +1,3 @@
-import { getTopNonFavTags, tagsHaveFavs } from '@/tag';
 import { PhotoSetCategories } from '@/category';
 import {
   SHOW_ALBUMS,
@@ -8,14 +7,12 @@ import {
   SHOW_LENSES,
   SHOW_RECENTS,
   SHOW_RECIPES,
-  SHOW_TAGS,
 } from '@/app/config';
 
-const MAX_ALBUM_TAG_COUNT = 3;
+const MAX_ALBUM_COUNT = 3;
 const MINIMUM_TOP_ENTITIES = 3;
 
 export const getTopEntities = ({
-  tags,
   recents,
   albums,
   recipes,
@@ -24,10 +21,8 @@ export const getTopEntities = ({
   cameras,
   lenses,
 }: PhotoSetCategories) => ({
-  hasFavs: tagsHaveFavs(tags),
   hasRecents: SHOW_RECENTS && recents.length > 0,
-  albums: SHOW_ALBUMS ? albums.slice(0, MAX_ALBUM_TAG_COUNT) : [],
-  tags: SHOW_TAGS ? getTopNonFavTags(tags).slice(0, MAX_ALBUM_TAG_COUNT) : [],
+  albums: SHOW_ALBUMS ? albums.slice(0, MAX_ALBUM_COUNT) : [],
   recipe: SHOW_RECIPES ? recipes[0]?.recipe : undefined,
   film: SHOW_FILMS ? films[0]?.film : undefined,
   focal: SHOW_FOCAL_LENGTHS ? focalLengths[0]?.focal : undefined,

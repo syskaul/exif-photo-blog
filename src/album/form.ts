@@ -1,4 +1,4 @@
-import { AnnotatedTag, FieldSetType } from '@/photo/form';
+import { AnnotatedOption, FieldSetType } from '@/photo/form';
 import { Album, Albums } from '.';
 import { formatCount, formatCountDescriptive } from '@/utility/string';
 
@@ -28,9 +28,9 @@ export const convertFormDataToAlbum = (formData: FormData): Album => {
   };
 };
 
-export const convertAlbumsToAnnotatedTags = (
+export const convertAlbumsToAnnotatedOptions = (
   albums: Albums = [],
-): AnnotatedTag[] =>
+): AnnotatedOption[] =>
   albums
     .sort((a, b) => a.album.title.localeCompare(b.album.title))
     .map(({ album, count }) => ({

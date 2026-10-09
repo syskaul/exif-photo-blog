@@ -2,7 +2,7 @@ import { absolutePathForAlbum } from '@/app/path';
 import { PhotoSetAttributes } from '../category';
 import ShareModal from '@/share/ShareModal';
 import { useAppText } from '@/i18n/state/client';
-import AlbumOGTile from '@/tag/AlbumOGTile';
+import AlbumOGTile from './AlbumOGTile';
 import { Album, shareTextForAlbum } from '.';
 
 export default function AlbumShareModal({

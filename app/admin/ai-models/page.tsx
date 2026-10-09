@@ -20,7 +20,6 @@ const getRandomPhotos = async (count: number) => {
 
   return getPhotosNoStore({
     photoIds: shuffleArray(photoIds).slice(0, count),
-    hidden: 'include',
     limit: count,
   });
 };

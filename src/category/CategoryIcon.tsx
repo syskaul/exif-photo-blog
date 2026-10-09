@@ -5,7 +5,6 @@ import IconFocalLength from '@/components/icons/IconFocalLength';
 import IconLens from '@/components/icons/IconLens';
 import IconRecipe from '@/components/icons/IconRecipe';
 import IconRecents from '@/components/icons/IconRecents';
-import IconTag from '@/components/icons/IconTag';
 import IconYear from '@/components/icons/IconYear';
 import { CategoryKey } from '.';
 
@@ -28,10 +27,6 @@ export default function CategoryIcon({
     case 'albums': return <IconAlbum
       size={13.5}
       className="translate-x-[1.5px]"
-    />;
-    case 'tags': return <IconTag
-      size={13.5}
-      className="translate-x-[1.5px] translate-y-[1px]"
     />;
     case 'recipes': return <IconRecipe
       size={16}

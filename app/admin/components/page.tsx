@@ -19,11 +19,9 @@ import {
   getUniqueFocalLengthsCached,
   getUniqueLensesCached,
   getUniqueRecipesCached,
-  getUniqueTagsCached,
   getUniqueYearsCached,
 } from '@/photo/cache';
 import { formatRecipe } from '@/recipe';
-import { formatTag, sortTagsByCount, TAG_FAVS } from '@/tag';
 
 const FOLDER_LIMITS = [
   3,
@@ -50,8 +48,6 @@ export default async function ComponentsPage() {
   const [
     photos,
     photosCount,
-    photosFavs,
-    tags,
     cameras,
     lenses,
     albums,
@@ -65,8 +61,6 @@ export default async function ComponentsPage() {
     getPhotosMetaCached()
       .then(({ count }) => count)
       .catch(() => 0),
-    getPhotosCached({ tag: TAG_FAVS }),
-    getUniqueTagsCached().catch(() => []),
     getUniqueCamerasCached().catch(() => []),
     getUniqueLensesCached().catch(() => []),
     getAlbumsWithMetaCached().catch(() => []),
@@ -76,7 +70,6 @@ export default async function ComponentsPage() {
     getUniqueFocalLengthsCached().catch(() => []),
   ]);
 
-  const tagsByCount = sortTagsByCount(tags, TAG_FAVS);
   const camerasByCount = sortCategoriesByCount(cameras);
   const lensesByCount = sortCategoriesByCount(lenses);
   const filmsByCount = sortCategoriesByCount(films);
@@ -91,21 +84,10 @@ export default async function ComponentsPage() {
 
   const folderQueries: FolderQuery[] = [
     {
-      options: { tag: TAG_FAVS },
-      caption: formatTag(TAG_FAVS),
-      count: tagsByCount.find(({ tag }) => tag === TAG_FAVS)?.count ??
-        photosFavs.length,
-    },
-    {
       options: { recent: true },
       caption: 'Recents',
       count: photosCount,
     },
-    ...foldersFrom(tagsByCount, ({ tag, count }) => ({
-      options: { tag },
-      caption: formatTag(tag),
-      count,
-    })),
     ...foldersFrom(years, ({ year, count }) => ({
       options: { year },
       caption: year,
@@ -166,7 +148,6 @@ export default async function ComponentsPage() {
       photo={photos[0]}
       photos={photos}
       photosCount={photosCount}
-      photosFavs={photosFavs}
       photoFolders={photoFolders}
     />
   );

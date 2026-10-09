@@ -3,7 +3,6 @@
 import { StorageListItem, StorageListResponse } from '@/platforms/storage';
 import AdminBatchUploadActions from './AdminBatchUploadActions';
 import { useEffect, useMemo, useState } from 'react';
-import { Tags } from '@/tag';
 import AdminUploadsTable from './AdminUploadsTable';
 import { Albums } from '@/album';
 import AdminPageHeader from './AdminPageHeader';
@@ -22,12 +21,10 @@ export type UrlAddStatus = StorageListItem & {
 
 export default function AdminUploadsClient({
   urls,
-  uniqueTags,
   uniqueAlbums,
   shouldResize,
 }: {
   urls: StorageListResponse
-  uniqueTags: Tags
   uniqueAlbums: Albums
   shouldResize: boolean
 }) {
@@ -84,7 +81,6 @@ export default function AdminUploadsClient({
               uploadUrls,
               uploadTitles,
               uniqueAlbums,
-              uniqueTags,
               isAdding,
               setIsAdding,
               setUrlAddStatuses,

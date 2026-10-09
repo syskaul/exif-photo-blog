@@ -1,4 +1,8 @@
-import { migrateAboutTableToLibrary, migrationForError } from './migration';
+import {
+  migrateAboutTableToLibrary,
+  migrateLegacyPhotoColumns,
+  migrationForError,
+} from './migration';
 import { createPhotosTable } from '@/photo/query';
 import sleep from '@/utility/sleep';
 import { ADMIN_SQL_DEBUG_ENABLED, HAS_DATABASE } from '@/app/config';
@@ -115,6 +119,10 @@ export const safelyQuery = async <T>(
     } else {
       console.log(message);
     }
+  }
+
+  if (HAS_DATABASE) {
+    await migrateLegacyPhotoColumns();
   }
 
   return result;

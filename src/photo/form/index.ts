@@ -6,9 +6,8 @@ import {
   validationMessagePostgresDateString,
 } from '@/utility/date';
 import { roundToNumber } from '@/utility/number';
-import { convertStringToArray, parameterize } from '@/utility/string';
+import { parameterize } from '@/utility/string';
 import { generateNanoid } from '@/utility/nanoid';
-import { TAG_FAVS, getValidationMessageForTags } from '@/tag';
 import { MAKE_FUJIFILM } from '@/platforms/fujifilm';
 import { FujifilmRecipe } from '@/platforms/fujifilm/recipe';
 import { ReactNode } from 'react';
@@ -24,8 +23,6 @@ import { calculateColorSort } from '@/photo/color/sort';
 
 type VirtualFields =
   'albums' |
-  'visibility' |
-  'favorite' |
   'applyRecipeTitleGlobally' |
   'shouldStripGpsData' |
   'locationPlace' |
@@ -44,7 +41,7 @@ export type FieldSetType =
   'textarea' |
   'hidden';
 
-export type AnnotatedTag = {
+export type AnnotatedOption = {
   value: string,
   label?: string,
   icon?: ReactNode
@@ -74,11 +71,11 @@ export type FormMeta = {
   type?: FieldSetType
   selectOptions?: SelectMenuOptionType[]
   selectOptionsDefaultLabel?: string
-  tagOptions?: AnnotatedTag[]
-  tagOptionsLimit?: number
-  tagOptionsLimitValidationMessage?: string
-  tagOptionsShouldParameterize?: boolean
-  tagOptionsShouldRevealRawText?: boolean
+  autocompleteOptions?: AnnotatedOption[]
+  autocompleteOptionsLimit?: number
+  autocompleteOptionsLimitValidationMessage?: string
+  autocompleteOptionsShouldParameterize?: boolean
+  autocompleteOptionsShouldRevealRawText?: boolean
   isJson?: boolean
   staticValue?: string
 };
@@ -87,31 +84,30 @@ const STRING_MAX_LENGTH_SHORT = 255;
 const STRING_MAX_LENGTH_LONG  = 1000;
 
 // Omit options entirely (an empty array still renders the dropdown)
-const tagOptionsForAutocomplete = (
-  options?: AnnotatedTag[],
+const autocompleteOptionsForField = (
+  options?: AnnotatedOption[],
 ): Pick<
   FormMeta,
-  'tagOptions' |
-  'tagOptionsLimit' |
-  'tagOptionsShouldParameterize' |
-  'tagOptionsShouldRevealRawText'
+  'autocompleteOptions' |
+  'autocompleteOptionsLimit' |
+  'autocompleteOptionsShouldParameterize' |
+  'autocompleteOptionsShouldRevealRawText'
 > => options && options.length > 0
   ? {
-    tagOptions: options,
-    tagOptionsLimit: 1,
-    tagOptionsShouldParameterize: false,
-    tagOptionsShouldRevealRawText: true,
+    autocompleteOptions: options,
+    autocompleteOptionsLimit: 1,
+    autocompleteOptionsShouldParameterize: false,
+    autocompleteOptionsShouldRevealRawText: true,
   }
   : {};
 
 const FORM_METADATA = (
-  tagOptions?: AnnotatedTag[],
-  recipeOptions?: AnnotatedTag[],
-  filmOptions?: AnnotatedTag[],
-  cameraMakeOptions?: AnnotatedTag[],
-  cameraModelOptions?: AnnotatedTag[],
-  lensMakeOptions?: AnnotatedTag[],
-  lensModelOptions?: AnnotatedTag[],
+  recipeOptions?: AnnotatedOption[],
+  filmOptions?: AnnotatedOption[],
+  cameraMakeOptions?: AnnotatedOption[],
+  cameraModelOptions?: AnnotatedOption[],
+  lensMakeOptions?: AnnotatedOption[],
+  lensModelOptions?: AnnotatedOption[],
   hasAiContentGeneration?: boolean,
   shouldStripGpsData?: boolean,
   hasLocationServices?: boolean,
@@ -127,12 +123,6 @@ const FORM_METADATA = (
     label: 'caption',
     capitalize: true,
     validateStringMaxLength: STRING_MAX_LENGTH_LONG,
-  },
-  tags: {
-    section: 'text',
-    label: 'tags',
-    tagOptions,
-    validate: getValidationMessageForTags,
   },
   semanticDescription: {
     section: 'text',
@@ -151,11 +141,6 @@ const FORM_METADATA = (
       ? 'Invalid color'
       : undefined,
   },
-  visibility: {
-    section: 'text',
-    label: 'visibility',
-    excludeFromInsert: true,
-  },
   albums: {
     section: 'text',
     label: 'albums',
@@ -164,42 +149,31 @@ const FORM_METADATA = (
   excludeFromFeeds: {
     section: 'text',
     label: 'exclude from feeds',
-    type: 'hidden',
-  },
-  hidden: {
-    section: 'text',
-    label: 'hidden',
-    type: 'hidden',
-  },
-  favorite: {
-    section: 'text',
-    label: 'favorite',
     type: 'checkbox',
-    excludeFromInsert: true,
   },
   make: {
     section: 'exif',
     label: 'camera make',
-    ...tagOptionsForAutocomplete(cameraMakeOptions),
+    ...autocompleteOptionsForField(cameraMakeOptions),
   },
   model: {
     section: 'exif',
     label: 'camera model',
-    ...tagOptionsForAutocomplete(cameraModelOptions),
+    ...autocompleteOptionsForField(cameraModelOptions),
   },
   film: {
     section: 'exif',
     label: 'film',
     note: 'Intended for Fujifilm / Nikon / analog scans',
     noteShort: 'Fujifilm / Nikon / analog scans',
-    tagOptions: filmOptions,
-    tagOptionsLimit: 1,
+    autocompleteOptions: filmOptions,
+    autocompleteOptionsLimit: 1,
   },
   recipeTitle: {
     section: 'exif',
     label: 'recipe title',
-    tagOptions: recipeOptions,
-    tagOptionsLimit: 1,
+    autocompleteOptions: recipeOptions,
+    autocompleteOptionsLimit: 1,
     spellCheck: false,
     capitalize: false,
     shouldHide: ({ make }) => make !== MAKE_FUJIFILM,
@@ -249,12 +223,12 @@ const FORM_METADATA = (
   lensMake: {
     section: 'exif',
     label: 'lens make',
-    ...tagOptionsForAutocomplete(lensMakeOptions),
+    ...autocompleteOptionsForField(lensMakeOptions),
   },
   lensModel: {
     section: 'exif',
     label: 'lens model',
-    ...tagOptionsForAutocomplete(lensModelOptions),
+    ...autocompleteOptionsForField(lensModelOptions),
   },
   fNumber: { section: 'exif', label: 'aperture' },
   iso: { section: 'exif', label: 'ISO' },
@@ -460,24 +434,17 @@ export const isFormValid = (formData: Partial<PhotoFormData>) =>
 export const formHasExistingAiTextContent = ({
   title,
   caption,
-  tags,
   semanticDescription,
 }: Partial<PhotoFormData> = {}) =>
-  Boolean(title || caption || tags || semanticDescription);
+  Boolean(title || caption || semanticDescription);
 
 // CREATE FORM DATA: FROM PHOTO
 
 export const convertPhotoToFormData = (photo: Photo): PhotoFormData => {
   const valueForKey = (key: keyof Photo, value: any) => {
     switch (key) {
-      case 'tags':
-        return (value ?? [])
-          .filter((tag: string) => tag !== TAG_FAVS)
-          .join(', ');
       case 'takenAt':
         return value?.toISOString ? value.toISOString() : value;
-      case 'hidden':
-        return value ? 'true' : 'false';
       case 'recipeData':
         return JSON.stringify(value);
       case 'colorData':
@@ -494,7 +461,6 @@ export const convertPhotoToFormData = (photo: Photo): PhotoFormData => {
     ...photoForm,
     [key]: valueForKey(key as keyof Photo, value),
   }), {
-    favorite: photo.tags.includes(TAG_FAVS) ? 'true' : 'false',
     locationDisplayName:
       photo.location?.nameFormatted ?? photo.location?.name ?? '',
     keyColor: convertOklchToJsonString(photo.colorData?.ai),
@@ -510,11 +476,6 @@ export const convertFormDataToPhotoDbInsert = (
     ? Object.fromEntries(formData) as PhotoFormData
     : formData;
 
-  // Capture tags before 'favorite' is excluded from insert
-  const tags = convertStringToArray(photoForm.tags);
-  if (photoForm.favorite === 'true') {
-    tags.push(TAG_FAVS);
-  }
   const locationDisplayName = photoForm.locationDisplayName;
   const keyColor = photoForm.keyColor;
   const hasKeyColorField = typeof keyColor === 'string' && keyColor.length > 0;
@@ -554,8 +515,6 @@ export const convertFormDataToPhotoDbInsert = (
       recipeData?: FujifilmRecipe
     }),
     ...!photoForm.id && { id: generateNanoid() },
-    // Delete array field when empty
-    tags: tags.length > 0 ? tags : undefined,
     ...photoForm.recipeTitle && {
       recipeTitle: parameterize(photoForm.recipeTitle),
     },
@@ -604,7 +563,6 @@ export const convertFormDataToPhotoDbInsert = (
       ? parseFloat(photoForm.priorityOrder)
       : undefined,
     excludeFromFeeds: photoForm.excludeFromFeeds === 'true',
-    hidden: photoForm.hidden === 'true',
     ...generateTakenAtFields(photoForm),
   };
 };

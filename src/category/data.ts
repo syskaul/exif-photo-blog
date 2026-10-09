@@ -4,13 +4,11 @@ import {
   SHOW_LENSES,
   SHOW_RECIPES,
   SHOW_CAMERAS,
-  SHOW_TAGS,
   SHOW_YEARS,
   SHOW_RECENTS,
   SHOW_ALBUMS,
 } from '@/app/config';
 import { createLensKey } from '@/lens';
-import { sortTagsByCount } from '@/tag';
 import { PhotoSetCategories, sortCategoriesByCount } from '@/category';
 import { sortFocalLengths } from '@/focal';
 import {
@@ -20,7 +18,6 @@ import {
   getUniqueFocalLengthsCached,
   getUniqueLensesCached,
   getUniqueRecipesCached,
-  getUniqueTagsCached,
   getUniqueYearsCached,
 } from '@/photo/cache';
 import { getAlbumsWithMetaCached } from '@/album/cache';
@@ -32,7 +29,6 @@ export const NULL_CATEGORY_DATA: CategoryData = {
   years: [],
   cameras: [],
   lenses: [],
-  tags: [],
   recipes: [],
   films: [],
   focalLengths: [],
@@ -63,11 +59,6 @@ export const getDataForCategories = () => Promise.all([
       .then(sortCategoriesByCount)
       .catch(() => [])
     : undefined,
-  SHOW_TAGS
-    ? getUniqueTagsCached()
-      .then(sortTagsByCount)
-      .catch(() => [])
-    : undefined,
   SHOW_RECIPES
     ? getUniqueRecipesCached()
       .then(sortCategoriesByCount)
@@ -92,7 +83,6 @@ export const getDataForCategories = () => Promise.all([
   years = [],
   cameras = [],
   lenses = [],
-  tags = [],
   recipes = [],
   films = [],
   focalLengths = [],
@@ -102,7 +92,6 @@ export const getDataForCategories = () => Promise.all([
   years,
   cameras,
   lenses,
-  tags,
   recipes,
   films,
   focalLengths,
@@ -116,7 +105,6 @@ export const getCountsForCategories = async () => {
     cameras,
     lenses,
     albums,
-    tags,
     recipes,
     films,
     focalLengths,
@@ -142,10 +130,6 @@ export const getCountsForCategories = async () => {
       acc[createLensKey(lens.lens)] = lens.count;
       return acc;
     }, {} as Record<string, number>),
-    tags: tags.reduce((acc, tag) => {
-      acc[tag.tag] = tag.count;
-      return acc;
-    }, {} as Record<string, number>),
     recipes: recipes.reduce((acc, recipe) => {
       acc[recipe.recipe] = recipe.count;
       return acc;
@@ -168,7 +152,6 @@ export const getLastModifiedForCategories = (
     cameras,
     lenses,
     albums,
-    tags,
     recipes,
     films,
     focalLengths,
@@ -180,7 +163,6 @@ export const getLastModifiedForCategories = (
   ...cameras.map(({ lastModified }) => lastModified),
   ...lenses.map(({ lastModified }) => lastModified),
   ...albums.map(({ lastModified }) => lastModified),
-  ...tags.map(({ lastModified }) => lastModified),
   ...recipes.map(({ lastModified }) => lastModified),
   ...films.map(({ lastModified }) => lastModified),
   ...focalLengths.map(({ lastModified }) => lastModified),

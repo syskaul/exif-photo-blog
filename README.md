@@ -6,7 +6,7 @@ Personal photography website for Eshaan Kaul.
 -
 - Built-in auth
 - Photo uploads with camera metadata
-- Organize photos by tag
+- Organize photos by album and camera metadata
 - Infinite scroll
 - Light mode
 - Automatic OG image generation
@@ -115,8 +115,8 @@ Mixpanel Live View.
 
 - `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTOS = 1` enables static optimization for photo pages (`p/[photoId]`), i.e., renders pages at build time
 - `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_OG_IMAGES = 1` enables static optimization for OG images, i.e., renders images at build time
-- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORIES = 1` enables static optimization for photo categories (`tag/[tag]`, `shot-on/[make]/[model]`, etc.), i.e., renders pages at build time
-- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORY_OG_IMAGES = 1` enables static optimization for photo category (`tag/[tag]`, `shot-on/[make]/[model]`, etc.) OG images, i.e., renders images at build time
+- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORIES = 1` enables static optimization for photo categories (`shot-on/[make]/[model]`, etc.), i.e., renders pages at build time
+- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORY_OG_IMAGES = 1` enables static optimization for photo category (`shot-on/[make]/[model]`, etc.) OG images, i.e., renders images at build time
 - `NEXT_PUBLIC_PRESERVE_ORIGINAL_UPLOADS = 1` prevents photo uploads being compressed before storing
 - `NEXT_PUBLIC_IMAGE_QUALITY = 1-100` controls the quality of large photos
 - `NEXT_PUBLIC_DISABLE_BLUR = 1` prevents image blur data being stored and displayed (potentially useful for limiting Postgres usage)
@@ -137,7 +137,6 @@ To enable AI-powered color analysis and text descriptions of photos, configure a
      - `all`
      - `title` (default)
      - `caption`
-     - `tags` (default)
      - `semantic` (default)
      - `none`
 
@@ -176,11 +175,10 @@ Create an Upstash Redis store from the Vercel dashboard and link it to your proj
 
 ### Categories
 - `NEXT_PUBLIC_CATEGORY_VISIBILITY`
-  - Comma-separated value controlling which photo sets appear in grid sidebar and CMD-K menu, and in what order. For example, you could move cameras above tags, and hide film simulations, by updating to `cameras,tags,lenses,recipes`.
+  - Comma-separated value controlling which photo sets appear in grid sidebar and CMD-K menu, and in what order. For example, you could move cameras above films by updating to `cameras,lenses,recipes`.
   - Accepted values:
      - `recents` (default)
      - `years`
-     - `tags` (default)
      - `cameras` (default)
      - `lenses` (default)
      - `recipes` (default)
@@ -189,7 +187,6 @@ Create an Upstash Redis store from the Vercel dashboard and link it to your proj
 - `NEXT_PUBLIC_HIDE_CATEGORIES_ON_MOBILE = 1` prevents categories displaying on mobile grid view
 - `NEXT_PUBLIC_HIDE_CATEGORY_IMAGE_HOVERS = 1` prevents images displaying when hovering over category links
 - `NEXT_PUBLIC_EXHAUSTIVE_SIDEBAR_CATEGORIES = 1` always shows expanded sidebar content
-- `NEXT_PUBLIC_HIDE_TAGS_WITH_ONE_PHOTO = 1` to only show tags with 2 or more photos
 
 ### Sorting
 - `NEXT_PUBLIC_DEFAULT_SORT`
@@ -378,7 +375,7 @@ Only one storage adapter—Vercel Blob, Cloudflare R2, AWS S3, or MinIO—can be
      - `NEXT_PUBLIC_AWS_S3_BUCKET`
      - `NEXT_PUBLIC_AWS_S3_REGION`
    - For local development, use an AWS CLI profile/SSO where possible; otherwise set the same two key variables in the ignored `.env.local` file. Never commit credentials.
-   - Public-read bucket policies make every uploaded object retrievable by anyone who knows its URL. Do not store private photos or other sensitive content in this bucket.
+   - Public-read bucket policies make every uploaded object retrievable by anyone who knows its URL. Do not store sensitive or confidential content in this bucket.
    - For observability, enable S3 server access logging to a separate encrypted bucket, CloudTrail data events for this bucket, and CloudWatch request metrics. These may incur log storage, CloudTrail data-event, and CloudWatch custom-metric charges; see [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
 
 ### MinIO
@@ -529,7 +526,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > For repository updates, push the changes to the connected Git repository and redeploy from the Vercel project.
 
 #### How do I edit multiple photos?
-> In the admin menu, select "Batch edit ..." From there, you can perform bulk tag, favorite, and delete actions.
+> In the admin menu, select "Batch edit ..." From there, you can perform bulk album, visibility, and delete actions.
 
 #### Why don't my photo changes show up immediately?
 > This template statically optimizes core views such as `/` and `/grid` to minimize visitor load times. Consequently, when photos are added, edited, or removed, it might take several minutes for those changes to propagate. If it seems like a change is not taking effect, try navigating to `/admin/configuration` and clicking "Clear Cache."
@@ -547,10 +544,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > By default, all photos are shown full-width, regardless of orientation. Enable matting to showcase horizontal and vertical photos at similar scales by setting `NEXT_PUBLIC_MATTE_PHOTOS = 1`.
 
 #### Why are my grid thumbnails so small?
-> Thumbnail grid density (seen on `/grid`, tag overviews, and other photo sets) is dependent on aspect ratio configuration (ratios of 1 or less have more photos per row). This can be overridden by setting `NEXT_PUBLIC_SHOW_LARGE_THUMBNAILS = 1`.
-
-#### How secure are photos marked “private?”
-> While all private paths (`/tag/private/*`) require authentication, raw links to individual photo assets remain publicly accessible. Randomly generated urls from storage providers are only secure via obscurity. Use with caution.
+> Thumbnail grid density (seen on `/grid`, category overviews, and other photo sets) is dependent on aspect ratio configuration (ratios of 1 or less have more photos per row). This can be overridden by setting `NEXT_PUBLIC_SHOW_LARGE_THUMBNAILS = 1`.
 
 #### My images/content have fallen out of sync with my database and/or my production site no longer matches local development. What do I do?
 > Navigate to `/admin/configuration` and click "Clear Cache."
@@ -571,7 +565,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > If you don't see a recipe, first try syncing your photo from the ••• menu, or from `/admin/photos`. If the data looks incorrect, open an issue with the file in question attached in order for it to be investigated. Fujifilm file specifications have evolved over time and recipe parsing may need to be adjusted based on camera model/vintage.
 
 #### How do I hide Fujifilm content such as a recipes and film simulations?
-> This can be accomplished by setting `NEXT_PUBLIC_CATEGORY_VISIBILITY` (which has a default value of `tags,cameras,lenses,recipes,films`) to `tags,cameras,lenses`.
+> This can be accomplished by setting `NEXT_PUBLIC_CATEGORY_VISIBILITY` (which has a default value of `recents,albums,cameras,lenses,recipes,films`) to `cameras,lenses`.
 
 #### Why do my images appear flipped/rotated incorrectly?
 > Image orientations 1, 3, 6, and 8 are supported. Orientations 2, 4, 5, and 7—which use mirroring—are not supported.

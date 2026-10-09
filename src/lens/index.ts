@@ -1,5 +1,5 @@
 import { Photo } from '@/photo';
-import type { AnnotatedTag } from '@/photo/form';
+import type { AnnotatedOption } from '@/photo/form';
 import {
   MakeModelTextLength,
   formatCount,
@@ -126,7 +126,7 @@ export const formatLensText = (
 const convertLensFieldForForm = (
   lenses: Lenses = [],
   getValue: (lens: Lens) => string | undefined,
-): AnnotatedTag[] => {
+): AnnotatedOption[] => {
   const counts = new Map<string, number>();
   lenses.forEach(({ lens, count }) => {
     const value = getValue(lens);

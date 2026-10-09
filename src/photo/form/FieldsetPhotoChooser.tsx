@@ -21,13 +21,12 @@ import {
 import usePhotoQuery from '../usePhotoQuery';
 import { BiChevronRight } from 'react-icons/bi';
 import SegmentMenu from '@/components/SegmentMenu';
-import IconFavs from '@/components/icons/IconFavs';
 import InfinitePhotoScroll from '../InfinitePhotoScroll';
 import EmptyState from '@/components/EmptyState';
 import { TbPhotoSearch } from 'react-icons/tb';
 import { MdOutlineNoPhotography } from 'react-icons/md';
 
-type Mode = 'all' | 'favs' | 'search';
+type Mode = 'all' | 'search';
 
 const CLASSNAME_GRID = 'grid grid-cols-3 gap-0.5';
 
@@ -46,13 +45,11 @@ export default function FieldsetPhotoChooser({
   photo: _photo,
   photos = [],
   photosCount,
-  photosFavs,
   ...props
 }: {
   photo?: Photo
   photos: Photo[]
   photosCount: number
-  photosFavs: Photo[]
 } & ComponentProps<typeof FieldsetWithStatus>) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -71,7 +68,7 @@ export default function FieldsetPhotoChooser({
     isLoading: isLoadingPhotoQuery,
     reset: resetPhotoQuery,
     resultsNotFound,
-  } = usePhotoQuery({ query, isPrivate: true });
+  } = usePhotoQuery({ query });
 
   const reset = useCallback((resetMenu?: boolean) => {
     resetPhotoQuery();
@@ -106,13 +103,11 @@ export default function FieldsetPhotoChooser({
 
   const photosToShow = showQuery && query
     ? photosQuery
-    : mode === 'favs'
-      ? photosFavs : photos;
+    : photos;
 
   const shouldPaginate =
     !(showQuery && query) &&
-    photosCount > photos.length &&
-    mode !== 'favs';
+    photosCount > photos.length;
 
   return (
     <>
@@ -180,10 +175,6 @@ export default function FieldsetPhotoChooser({
               <SegmentMenu
                 items={[{
                   value: 'all',
-                }, {
-                  value: 'favs',
-                  icon: <IconFavs size={16} />,
-                  iconSelected: <IconFavs size={16} highlight />,
                 }, {
                   value: 'search',
                   icon: <IoSearch size={16} />,

@@ -6,7 +6,6 @@ import { APP_DEFAULT_SORT_BY, SortBy } from '@/photo/sort';
 import { Album } from '@/album';
 import { getPathComponents } from '@/app/path';
 import { getAlbumFromSlug } from '@/album/query';
-import { isTagPrivate } from '@/tag';
 import { getPhotoCount } from '@/photo/query';
 
 export const GENERATE_STATIC_PARAMS_LIMIT = 1000;
@@ -36,16 +35,12 @@ export type PhotoQueryOptions = {
   takenAfterInclusive?: Date
   updatedBefore?: Date
   excludeFromFeeds?: boolean
-  hidden?: 'exclude' | 'include' | 'only'
 } & Omit<PhotoSetCategory, 'camera' | 'lens' | 'album'> & {
   camera?: Partial<Camera>
   lens?: Partial<Lens>
   album?: Album
   photoIds?: string[]
 };
-
-export const areOptionsSensitive = (options: PhotoQueryOptions) =>
-  options.hidden === 'include' || options.hidden === 'only';
 
 export const getJoinsFromOptions = (options: PhotoQueryOptions) =>
   options.album
@@ -57,7 +52,6 @@ export const getWheresFromOptions = (
   initialValuesIndex = 1,
 ) => {
   const {
-    hidden = 'exclude',
     excludeFromFeeds,
     takenBefore,
     takenAfterInclusive,
@@ -67,7 +61,6 @@ export const getWheresFromOptions = (
     recent,
     year,
     album,
-    tag,
     camera,
     lens,
     film,
@@ -79,15 +72,6 @@ export const getWheresFromOptions = (
   const wheres = [] as string[];
   const wheresValues = [] as (string | number)[];
   let valuesIndex = initialValuesIndex;
-
-  switch (hidden) {
-    case 'exclude':
-      wheres.push('hidden IS NOT TRUE');
-      break;
-    case 'only':
-      wheres.push('hidden IS TRUE');
-      break;
-  }
 
   if (excludeFromFeeds) {
     wheres.push('exclude_from_feeds IS NOT TRUE');
@@ -146,10 +130,6 @@ export const getWheresFromOptions = (
   if (album) {
     wheres.push(`album_id=$${valuesIndex++}`);
     wheresValues.push(album.id);
-  }
-  if (tag) {
-    wheres.push(`$${valuesIndex++}=ANY(tags)`);
-    wheresValues.push(tag);
   }
   if (film) {
     wheres.push(`film=$${valuesIndex++}`);
@@ -273,7 +253,7 @@ export const generateManyToManyValues = (idsA: string[], idsB: string[]) => {
 export const getPhotoOptionsCountForPath = async (
   path: string,
 ): Promise<{ options: PhotoQueryOptions, count: number }> => {
-  const { album: albumSlug, tag, ...components } = getPathComponents(path);
+  const { album: albumSlug, ...components } = getPathComponents(path);
 
   let album: Album | undefined;
   if (albumSlug) {
@@ -282,7 +262,6 @@ export const getPhotoOptionsCountForPath = async (
 
   const options: PhotoQueryOptions = {
     album,
-    ...isTagPrivate(tag) ? { hidden: 'only' } : { tag },
     ...components,
   };
 

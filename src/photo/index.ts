@@ -74,7 +74,6 @@ export interface PhotoExif {
   // Photo meta potentially located in EXIF/XMP data
   title?: string
   caption?: string
-  tags?: string[]
 }
 
 // Raw db insert
@@ -85,7 +84,6 @@ export interface PhotoDbInsert extends PhotoExif {
   blurData?: string
   caption?: string
   semanticDescription?: string
-  tags?: string[]
   recipeTitle?: string
   locationName?: string
   location?: Place
@@ -93,18 +91,16 @@ export interface PhotoDbInsert extends PhotoExif {
   colorSort?: number
   priorityOrder?: number
   excludeFromFeeds?: boolean
-  hidden?: boolean
   takenAt: string
   takenAtNaive: string
 }
 
 // Raw db response
 export interface PhotoDb extends
-  Omit<PhotoDbInsert, 'takenAt' | 'tags'> {
+  Omit<PhotoDbInsert, 'takenAt'> {
   updatedAt: Date
   createdAt: Date
   takenAt: Date
-  tags: string[] | null
 }
 
 // Parsed db response
@@ -116,7 +112,6 @@ export interface Photo extends Omit<PhotoDb, 'recipeData' | 'colorData'> {
   exposureTimeFormatted?: string
   exposureCompensationFormatted?: string
   takenAtNaiveFormatted: string
-  tags: string[]
   recipeData?: FujifilmRecipe
   colorData?: PhotoColorData
   updateStatus?: PhotoUpdateStatus
@@ -128,7 +123,6 @@ export const parsePhotoFromDb = (photoDbRaw: PhotoDb): Photo => {
   ) as unknown as PhotoDb;
   return {
     ...photoDb,
-    tags: photoDb.tags ?? [],
     focalLengthFormatted:
       photoDb.focalLength
         ? formatFocalLength(photoDb.focalLength)

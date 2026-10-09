@@ -9,22 +9,20 @@ describe('set', () => {
       .toStrictEqual(DEFAULT_CATEGORY_KEYS);
     
     expect(parseOrderedCategoriesFromString(
-      'cameras,recipes,tags,films,focal-lengths,lenses',
+      'cameras,recipes,films,focal-lengths,lenses',
     )).toStrictEqual([
       'cameras',
       'recipes',
-      'tags',
       'films',
       'focal-lengths',
       'lenses',
     ]);
     
     expect(parseOrderedCategoriesFromString(
-      'cameras, recipes, tags, films',
+      'cameras, recipes, films',
     )).toStrictEqual([
       'cameras',
       'recipes',
-      'tags',
       'films',
     ]);
     

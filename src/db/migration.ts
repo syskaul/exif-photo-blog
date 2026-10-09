@@ -148,6 +148,33 @@ export const migrateAboutTableToLibrary = () =>
     END $$;
   `);
 
+let legacyPhotoColumnsMigration: Promise<void> | undefined;
+
+export const migrateLegacyPhotoColumns = () => {
+  legacyPhotoColumnsMigration ??= query(`
+    DO $$
+    BEGIN
+      IF EXISTS(
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = current_schema()
+        AND table_name = 'photos'
+      )
+      THEN
+        ALTER TABLE photos
+        DROP COLUMN IF EXISTS tags,
+        DROP COLUMN IF EXISTS hidden;
+      END IF;
+    END $$;
+  `)
+    .then(() => undefined)
+    .catch(error => {
+      legacyPhotoColumnsMigration = undefined;
+      throw error;
+    });
+  return legacyPhotoColumnsMigration;
+};
+
 export const migrationForError = (e: any) =>
   MIGRATIONS.find(({ fields, table = 'photos' }) =>
     fields.some(field =>(

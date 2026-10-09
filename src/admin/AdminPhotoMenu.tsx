@@ -1,11 +1,10 @@
 'use client';
 
-import { ComponentProps, useCallback, useMemo, useRef } from 'react';
+import { ComponentProps, useMemo, useRef } from 'react';
 import {
   getPathComponents,
   PARAM_REDIRECT,
   pathForAdminPhotoEdit,
-  pathForPhoto,
 } from '@/app/path';
 import {
   deletePhotoAction,
@@ -13,7 +12,6 @@ import {
   setPhotoVisibilityAction,
   storeColorDataForPhotoAction,
   syncPhotoAction,
-  toggleFavoritePhotoAction,
 } from '@/photo/actions';
 import {
   Photo,
@@ -21,7 +19,6 @@ import {
   downloadFileNameForPhoto,
   titleForPhoto,
 } from '@/photo';
-import { isPathFavs, isPhotoFav } from '@/tag';
 import { usePathname, useRouter } from 'next/navigation';
 import MoreMenu, { MoreMenuSection } from '@/components/more/MoreMenu';
 import { renderMenuItemCheck } from '@/components/more/MoreMenuItem';
@@ -35,7 +32,6 @@ import { toastSuccess } from '@/toast';
 import ColorDot from '@/photo/color/ColorDot';
 import { getKeyColorFromPhoto } from '@/photo/color/client';
 import InsightsIndicatorDot from './insights/InsightsIndicatorDot';
-import IconFavs from '@/components/icons/IconFavs';
 import IconEdit from '@/components/icons/IconEdit';
 import { photoNeedsToBeUpdated } from '@/photo/update';
 import { KEY_COMMANDS } from '@/photo/key-commands';
@@ -49,20 +45,17 @@ import IconWarning from '@/components/icons/IconWarning';
 import {
   getVisibilityFromPhoto,
   getVisibilityOptions,
-  VisibilityValue,
 } from '@/photo/visibility';
 
 export default function AdminPhotoMenu({
   photo,
   revalidatePhoto,
-  includeFavorite = true,
   showKeyCommands,
   alwaysVisible,
   ...props
 }: Omit<ComponentProps<typeof MoreMenu>, 'sections' | 'ariaLabel'> & {
   photo: Photo
   revalidatePhoto?: RevalidatePhoto
-  includeFavorite?: boolean
   showKeyCommands?: boolean
   alwaysVisible?: boolean
 }) {
@@ -78,19 +71,8 @@ export default function AdminPhotoMenu({
   const path = usePathname();
   const pathComponents = getPathComponents(path);
   const isOnPhotoDetail = pathComponents.photoId === photo.id;
-  const isFav = isPhotoFav(photo);
-  const shouldRedirectFav = isPathFavs(path) && isFav;
   const shouldRedirectDelete = isOnPhotoDetail;
   const visibility = getVisibilityFromPhoto(photo);
-  // Only leave the photo detail page when privacy itself changes, following
-  // the photo to its new url: private photos are only reachable beneath the
-  // private tag, public photos only outside it
-  const redirectPathForVisibility = useCallback((value: VisibilityValue) => {
-    const willBePrivate = value === 'private';
-    return isOnPhotoDetail && willBePrivate !== Boolean(photo.hidden)
-      ? pathForPhoto({ photo: { ...photo, hidden: willBePrivate } })
-      : undefined;
-  }, [isOnPhotoDetail, photo]);
 
   const sectionMain = useMemo(() => {
     const items: MoreMenuSection['items'] = [{
@@ -100,25 +82,6 @@ export default function AdminPhotoMenu({
         `?${PARAM_REDIRECT}=${encodeURIComponent(path)}`,
       ...showKeyCommands && { keyCommand: KEY_COMMANDS.edit },
     }];
-    if (includeFavorite) {
-      items.push({
-        label: isFav ? appText.admin.unfavorite : appText.admin.favorite,
-        icon: <IconFavs
-          size={14}
-          className="translate-x-[-1px] translate-y-[0.5px]"
-          highlight={isFav}
-        />,
-        action: () => toggleFavoritePhotoAction(
-          photo.id,
-          shouldRedirectFav,
-        ).then(() => revalidatePhoto?.(photo.id)),
-        ...showKeyCommands && {
-          keyCommand: isFav
-            ? KEY_COMMANDS.unfavorite
-            : KEY_COMMANDS.favorite,
-        },
-      });
-    }
     items.push({
       label: appText.admin.download,
       icon: <MdOutlineFileDownload
@@ -144,7 +107,6 @@ export default function AdminPhotoMenu({
         action: () => setPhotoVisibilityAction(
           photo.id,
           value,
-          redirectPathForVisibility(value),
         )
           .then(() => {
             // Photos leaving a feed shift every subsequent page
@@ -246,11 +208,7 @@ export default function AdminPhotoMenu({
     appText,
     photo,
     showKeyCommands,
-    includeFavorite,
-    isFav,
-    shouldRedirectFav,
     visibility,
-    redirectPathForVisibility,
     revalidatePhoto,
     router,
   ]);

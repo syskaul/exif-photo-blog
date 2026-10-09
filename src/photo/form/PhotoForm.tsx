@@ -41,7 +41,6 @@ import {
 import { toastSuccess, toastWarning } from '@/toast';
 import { getDimensionsFromSize } from '@/utility/size';
 import ImageWithFallback from '@/components/image/ImageWithFallback';
-import { Tags, convertTagsForForm } from '@/tag';
 import { AiContent } from '../ai/useAiImageQueries';
 import AiButton from '../ai/AiButton';
 import { HiSparkles } from 'react-icons/hi';
@@ -71,11 +70,7 @@ import {
 } from '@/lens';
 import { isMakeFujifilm } from '@/platforms/fujifilm';
 import PhotoFilmIcon from '@/film/PhotoFilmIcon';
-import FieldsetFavs from './FieldsetFavs';
-import { useAppText } from '@/i18n/state/client';
 import IconAddUpload from '@/components/icons/IconAddUpload';
-import { didVisibilityChange } from '../visibility';
-import FieldsetVisibility from '../visibility/FieldsetVisibility';
 import PhotoColors from '../color/PhotoColors';
 import ColorDot from '../color/ColorDot';
 import {
@@ -111,7 +106,6 @@ export default function PhotoForm({
   updatedBlurData,
   photoAlbumTitles = [],
   albums,
-  uniqueTags,
   uniqueRecipes,
   uniqueFilms,
   uniqueCameras,
@@ -130,7 +124,6 @@ export default function PhotoForm({
   updatedBlurData?: string
   photoAlbumTitles?: string[]
   albums: Albums
-  uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
   uniqueCameras?: Cameras
@@ -166,8 +159,6 @@ export default function PhotoForm({
   const { hash } = useHash();
 
   const { invalidateSwr, shouldDebugImageFallbacks } = useAppState();
-
-  const appText = useAppText();
 
   const changedFormKeys = useMemo(() =>
     getChangedFormFields(initialPhotoForm, formData),
@@ -284,12 +275,6 @@ export default function PhotoForm({
   [aiContent?.caption]);
 
   useEffect(() =>
-    setFormData(data => aiContent?.tags
-      ? { ...data, tags: aiContent?.tags }
-      : data),
-  [aiContent?.tags]);
-
-  useEffect(() =>
     setFormData(data => aiContent?.semanticDescription
       ? { ...data, semanticDescription: aiContent?.semanticDescription }
       : data),
@@ -305,8 +290,6 @@ export default function PhotoForm({
         return aiContent?.isLoadingTitle;
       case 'caption':
         return aiContent?.isLoadingCaption;
-      case 'tags':
-        return aiContent?.isLoadingTags;
       case 'semanticDescription':
         return aiContent?.isLoadingSemantic;
       case 'keyColor':
@@ -333,14 +316,6 @@ export default function PhotoForm({
             aiContent={aiContent}
             requestFields={['caption']}
             shouldConfirm={Boolean(formData.caption)}
-            className="h-full"
-          />;
-        case 'tags':
-          return <AiButton
-            tabIndex={-1}
-            aiContent={aiContent}
-            requestFields={['tags']}
-            shouldConfirm={Boolean(formData.tags)}
             className="h-full"
           />;
         case 'semanticDescription':
@@ -491,7 +466,6 @@ export default function PhotoForm({
 
   const formContent = useMemo(() =>
     FORM_METADATA_ENTRIES_BY_SECTION(
-      convertTagsForForm(uniqueTags, appText),
       convertRecipesForForm(uniqueRecipes),
       convertFilmsForForm(
         uniqueFilms,
@@ -507,8 +481,6 @@ export default function PhotoForm({
       shouldStripGpsData,
       hasLocationServices,
     ), [
-    uniqueTags,
-    appText,
     uniqueRecipes,
     uniqueFilms,
     uniqueCameras,
@@ -646,11 +618,11 @@ export default function PhotoForm({
                   required,
                   selectOptions,
                   selectOptionsDefaultLabel,
-                  tagOptions,
-                  tagOptionsLimit,
-                  tagOptionsLimitValidationMessage,
-                  tagOptionsShouldParameterize,
-                  tagOptionsShouldRevealRawText,
+                  autocompleteOptions,
+                  autocompleteOptionsLimit,
+                  autocompleteOptionsLimitValidationMessage,
+                  autocompleteOptionsShouldParameterize,
+                  autocompleteOptionsShouldRevealRawText,
                   readOnly,
                   hideModificationStatus,
                   validate,
@@ -702,11 +674,11 @@ export default function PhotoForm({
                       },
                       selectOptions,
                       selectOptionsDefaultLabel: selectOptionsDefaultLabel,
-                      tagOptions,
-                      tagOptionsLimit,
-                      tagOptionsLimitValidationMessage,
-                      tagOptionsShouldParameterize,
-                      tagOptionsShouldRevealRawText,
+                      autocompleteOptions,
+                      autocompleteOptionsLimit,
+                      autocompleteOptionsLimitValidationMessage,
+                      autocompleteOptionsShouldParameterize,
+                      autocompleteOptionsShouldRevealRawText,
                       required,
                       readOnly,
                       spellCheck,
@@ -763,7 +735,7 @@ export default function PhotoForm({
                         return <FieldsetWithStatus
                           key={key}
                           {...fieldProps}
-                          tagOptionsDefaultIcon={<span
+                          autocompleteOptionsDefaultIcon={<span
                             className="w-4 overflow-hidden"
                           >
                             <PhotoFilmIcon />
@@ -836,12 +808,6 @@ export default function PhotoForm({
                           }}
                         />;
                       }
-                      case 'tags':
-                        return <FieldsetWithStatus
-                          key={key}
-                          {...fieldProps}
-                          className="relative z-3"
-                        />;
                       case 'albums':
                         return <FieldsetAlbum
                           key={key}
@@ -854,18 +820,6 @@ export default function PhotoForm({
                             fieldProps.className,
                             'relative z-1',
                           )}
-                        />;
-                      case 'visibility':
-                        return <FieldsetVisibility
-                          key={key}
-                          {...fieldProps}
-                          formData={formData}
-                          setFormData={setFormData}
-                          isModified={didVisibilityChange(
-                            initialPhotoForm,
-                            formData,
-                          )}
-                          className="relative z-2"
                         />;
                       case 'takenAt':
                         return <FieldsetWithStatus
@@ -888,11 +842,6 @@ export default function PhotoForm({
                             type="naive"
                             readOnly={fieldProps.readOnly}
                           />}
-                        />;
-                      case 'favorite':
-                        return <FieldsetFavs
-                          key={key}
-                          {...fieldProps}
                         />;
                       default:
                         return <FieldsetWithStatus

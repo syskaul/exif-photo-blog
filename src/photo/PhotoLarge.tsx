@@ -15,13 +15,11 @@ import ImageLarge from '@/components/image/ImageLarge';
 import { clsx } from 'clsx/lite';
 import Link from 'next/link';
 import { pathForFocalLength, pathForPhoto } from '@/app/path';
-import PhotoTags from '@/tag/PhotoTags';
 import ShareButton from '@/share/ShareButton';
 import DownloadButton from '@/components/DownloadButton';
 import PhotoCamera from '../camera/PhotoCamera';
 import { cameraFromPhoto } from '@/camera';
 import PhotoFilm from '@/film/PhotoFilm';
-import { sortTagsArray } from '@/tag';
 import DivDebugBaselineGrid from '@/components/DivDebugBaselineGrid';
 import PhotoLink from './PhotoLink';
 import {
@@ -64,7 +62,6 @@ export default function PhotoLarge({
   photo,
   className,
   album,
-  primaryTag,
   priority,
   prefetch = SHOULD_PREFETCH_ALL_LINKS,
   prefetchRelatedLinks = SHOULD_PREFETCH_ALL_LINKS,
@@ -87,11 +84,9 @@ export default function PhotoLarge({
   shouldShareCamera,
   shouldShareLens,
   shouldShareAlbum,
-  shouldShareTag,
   shouldShareFilm,
   shouldShareRecipe,
   shouldShareFocalLength,
-  includeFavoriteInAdminMenu,
   onVisible,
   showAdminKeyCommands,
   showStorageCheck,
@@ -99,7 +94,6 @@ export default function PhotoLarge({
   photo: Photo
   className?: string
   album?: Album
-  primaryTag?: string
   priority?: boolean
   prefetch?: boolean
   prefetchRelatedLinks?: boolean
@@ -122,11 +116,9 @@ export default function PhotoLarge({
   shouldShareCamera?: boolean
   shouldShareLens?: boolean
   shouldShareAlbum?: boolean
-  shouldShareTag?: boolean
   shouldShareFilm?: boolean
   shouldShareRecipe?: boolean
   shouldShareFocalLength?: boolean
-  includeFavoriteInAdminMenu?: boolean
   onVisible?: () => void
   showAdminKeyCommands?: boolean
   showStorageCheck?: boolean
@@ -183,8 +175,6 @@ export default function PhotoLarge({
     refTriggers,
   });
 
-  const tags = sortTagsArray(photo.tags, primaryTag);
-
   const camera = cameraFromPhoto(photo);
   const lens = lensFromPhoto(photo);
   const { recipeTitle } = photo;
@@ -193,7 +183,6 @@ export default function PhotoLarge({
 
   const showCameraContent = showCamera && shouldShowCameraDataForPhoto(photo);
   const showLensContent = showLens && shouldShowLensDataForPhoto(photo);
-  const showTagsContent = tags.length > 0;
   const showRecipeContent = showRecipe && shouldShowRecipeDataForPhoto(photo);
   const showFilmContent = showFilm && shouldShowFilmDataForPhoto(photo);
   const showPlaceContent =
@@ -214,7 +203,6 @@ export default function PhotoLarge({
   const hasMetaContent =
     showCameraContent ||
     showLensContent ||
-    showTagsContent ||
     showRecipeContent ||
     showFilmContent ||
     showPlaceContent ||
@@ -297,7 +285,6 @@ export default function PhotoLarge({
     <AdminPhotoMenu {...{
       photo,
       revalidatePhoto,
-      includeFavorite: includeFavoriteInAdminMenu,
       showKeyCommands: showAdminKeyCommands,
     }} />;
 
@@ -391,8 +378,7 @@ export default function PhotoLarge({
                     showCameraContent ||
                     showLensContent ||
                     showRecipeContent ||
-                    showPlaceContent ||
-                    showTagsContent
+                    showPlaceContent
                   ) &&
                     <div>
                       {(showCameraContent || showLensContent) &&
@@ -418,12 +404,6 @@ export default function PhotoLarge({
                           prefetch={prefetchRelatedLinks}
                           toggleRecipeOverlay={toggleRecipeOverlay}
                           isShowingRecipeOverlay={isShowingRecipeOverlay}
-                        />}
-                      {showTagsContent &&
-                        <PhotoTags
-                          tags={tags}
-                          contrast="medium"
-                          prefetch={prefetchRelatedLinks}
                         />}
                     </div>}
                 </div>
@@ -545,9 +525,6 @@ export default function PhotoLarge({
                           : undefined}
                         album={shouldShareAlbum
                           ? album
-                          : undefined}
-                        tag={shouldShareTag
-                          ? primaryTag
                           : undefined}
                         camera={shouldShareCamera
                           ? camera

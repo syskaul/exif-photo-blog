@@ -2,22 +2,11 @@
 
 import PhotoCamera from '@/camera/PhotoCamera';
 import HeaderList from '@/components/HeaderList';
-import PhotoTag from '@/tag/PhotoTag';
 import { photoQuantityText } from '.';
-import {
-  TAG_FAVS,
-  TAG_PRIVATE,
-  addPrivateToTags,
-  limitTagsByCount,
-} from '@/tag';
 import PhotoFilm from '@/film/PhotoFilm';
-import PhotoFavs from '../tag/PhotoFavs';
-import { useAppState } from '@/app/AppState';
 import { useMemo, useRef } from 'react';
-import PhotoPrivate from '@/tag/PhotoPrivate';
 import {
   CATEGORY_VISIBILITY,
-  HIDE_TAGS_WITH_ONE_PHOTO,
 } from '@/app/config';
 import { clsx } from 'clsx/lite';
 import PhotoRecipe from '@/recipe/PhotoRecipe';
@@ -56,9 +45,6 @@ export default function PhotoGridSidebar({
   const categories = useMemo(() => ({
     ..._categories,
     albums: _categories.albums.filter(({ count }) => count > 0),
-    ...HIDE_TAGS_WITH_ONE_PHOTO && {
-      tags: limitTagsByCount(_categories.tags, 2),
-    },
   }), [_categories]);
 
   const {
@@ -67,7 +53,6 @@ export default function PhotoGridSidebar({
     cameras,
     lenses,
     albums,
-    tags,
     films,
     recipes,
     focalLengths,
@@ -95,12 +80,6 @@ export default function PhotoGridSidebar({
       2,
     )
     : undefined;
-
-  const { photosCountHidden } = useAppState();
-
-  const tagsIncludingHidden = useMemo(() =>
-    addPrivateToTags(tags, photosCountHidden)
-  , [tags, photosCountHidden]);
 
   const recentsContent = recents.length > 0
     ? <HeaderList
@@ -202,47 +181,6 @@ export default function PhotoGridSidebar({
     />
     : null;
 
-  const tagsContent = tags.length > 0
-    ? <HeaderList
-      key="tags"
-      title={getCategoryTitle('tags', appText)}
-      icon={<CategoryIcon category="tags" />}
-      maxItems={maxItemsPerCategory}
-      items={tagsIncludingHidden
-        .map(({ tag, count }) => {
-          switch (tag) {
-            case TAG_FAVS:
-              return <PhotoFavs
-                key={TAG_FAVS}
-                hoverCount={count}
-                type="icon-last"
-                prefetch={false}
-                contrast="low"
-                badged
-              />;
-            case TAG_PRIVATE:
-              return <PhotoPrivate
-                key={TAG_PRIVATE}
-                type="icon-last"
-                prefetch={false}
-                contrast="low"
-                badged
-              />;
-            default:
-              return <PhotoTag
-                key={tag}
-                tag={tag}
-                hoverCount={count}
-                type="text-only"
-                prefetch={false}
-                contrast="low"
-                badged
-              />;
-          }
-        })}
-    />
-    : null;
-
   const recipesContent = recipes.length > 0
     ? <HeaderList
       key="recipes"
@@ -328,7 +266,6 @@ export default function PhotoGridSidebar({
           case 'cameras': return camerasContent;
           case 'lenses': return lensesContent;
           case 'albums': return albumsContent;
-          case 'tags': return tagsContent;
           case 'recipes': return recipesContent;
           case 'films': return filmsContent;
           case 'focal-lengths': return focalLengthsContent;

@@ -17,7 +17,6 @@ interface FeedPhotoJson {
   url: string
   make?: string
   model?: string
-  tags?: string[]
   takenAtNaive: string
   src: Record<'small' | 'medium' | 'large', FeedMedia>
 }
@@ -27,7 +26,6 @@ const formatPhotoForFeedJson = (photo: Photo): FeedPhotoJson => ({
   url: absolutePathForPhoto({ photo }),
   ...photo.make && { make: photo.make },
   ...photo.model && { model: photo.model },
-  ...photo.tags.length > 0 && { tags: photo.tags },
   takenAtNaive: formatDateFromPostgresString(photo.takenAtNaive),
   src: {
     small: generateFeedMedia(photo, FEED_PHOTO_WIDTH_SMALL),

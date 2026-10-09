@@ -7,7 +7,6 @@ import {
   PATH_ADMIN_ALBUMS,
   PATH_ADMIN_PHOTOS,
   PATH_ADMIN_RECIPES,
-  PATH_ADMIN_TAGS,
   PATH_ADMIN_UPLOADS,
 } from '@/app/path';
 import AdminNavClient from './AdminNavClient';
@@ -25,7 +24,7 @@ export default async function AdminNav() {
       countRecipes,
       mostRecentPhotoUpdateTime,
     ] = await Promise.all([
-      getPhotosMetaCached({ hidden: 'include' })
+      getPhotosMetaCached()
         .then(({ count }) => count)
         .catch(() => 0),
       getUniqueRecipesCached().then(recipes => recipes.length)
@@ -54,12 +53,6 @@ export default async function AdminNav() {
   items.push({
     label: appText.category.albumPlural,
     href: PATH_ADMIN_ALBUMS,
-  });
-
-  // Tags
-  items.push({
-    label: appText.category.tagPlural,
-    href: PATH_ADMIN_TAGS,
   });
 
   // Recipes

@@ -91,7 +91,6 @@ export default function AdminPhotosTable({
                 </span>}
               <span className={clsx(
                 'truncate',
-                photo.hidden && 'text-dim',
               )}>
                 <PhotoLink
                   photo={photo}
@@ -108,7 +107,6 @@ export default function AdminPhotosTable({
               {!doesPhotoHaveDefaultVisibility(photo) &&
                 <span className={clsx(
                   'inline-flex items-center',
-                  photo.hidden && 'text-dim',
                 )}>
                   <PhotoVisibilityIcon photo={photo} />
                 </span>}

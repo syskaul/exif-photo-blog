@@ -43,7 +43,6 @@ import IconCamera from '@/components/icons/IconCamera';
 import IconRecipe from '@/components/icons/IconRecipe';
 import IconFilm from '@/components/icons/IconFilm';
 import IconFocalLength from '@/components/icons/IconFocalLength';
-import IconTag from '@/components/icons/IconTag';
 import IconPhoto from '@/components/icons/IconPhoto';
 import { HiOutlineDocumentText } from 'react-icons/hi';
 import { ReactNode } from 'react';
@@ -126,11 +125,9 @@ export default function AdminAppInsightsClient({
   usedDeprecatedEnvVars,
   photoStats: {
     photosCount,
-    photosCountHidden,
     photosCountNeedSync,
     camerasCount,
     lensesCount,
-    tagsCount,
     recipesCount,
     filmsCount,
     focalLengthsCount,
@@ -456,7 +453,7 @@ export default function AdminAppInsightsClient({
                     '1',
                   )}
                   {renderLabeledEnvVar(
-                    'Category pages (tags, cameras, etc.)',
+                    'Category pages (albums, cameras, etc.)',
                     'NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORIES',
                     '1',
                   )}
@@ -561,7 +558,6 @@ export default function AdminAppInsightsClient({
           />}
           content={<>
             {pluralize(photosCount, 'photo')}
-            {photosCountHidden > 0 && ` (${photosCountHidden} hidden)`}
           </>}
         />
         {CATEGORY_VISIBILITY.map(category => {
@@ -583,15 +579,6 @@ export default function AdminAppInsightsClient({
                   className="translate-y-[0.5px]"
                 />}
                 content={pluralize(lensesCount, 'lens', 'lenses')}
-              />;
-            case 'tags':
-              return <ScoreCardRow
-                key={category}
-                icon={<IconTag
-                  size={15}
-                  className="translate-x-[1px] translate-y-[1px]"
-                />}
-                content={pluralize(tagsCount, 'tag')}
               />;
             case 'recipes':
               return recipesCount > 0

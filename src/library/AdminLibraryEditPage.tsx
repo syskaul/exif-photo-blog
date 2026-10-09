@@ -18,13 +18,11 @@ export default function AdminLibraryEditPage({
   photoAvatar,
   photos,
   photosCount,
-  photosFavs,
 }: {
   library?: Library
   photoAvatar?: Photo
   photos: Photo[]
   photosCount: number
-  photosFavs: Photo[]
   shouldResizeImages?: boolean
 }) {
   const appText = useAppText();
@@ -57,7 +55,6 @@ export default function AdminLibraryEditPage({
             photo={photoAvatar}
             photos={photos}
             photosCount={photosCount}
-            photosFavs={photosFavs}
           />
           <FieldsetWithStatus
             label="Title"

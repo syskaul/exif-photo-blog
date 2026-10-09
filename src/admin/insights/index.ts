@@ -57,11 +57,9 @@ export const hasTemplateRecommendations = (insights: AdminAppInsights) =>
 
 export interface PhotoStats {
   photosCount: number
-  photosCountHidden: number
   photosCountNeedSync: number
   camerasCount: number
   lensesCount: number
-  tagsCount: number
   recipesCount: number
   filmsCount: number
   focalLengthsCount: number

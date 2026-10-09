@@ -8,7 +8,6 @@ import {
   getPhoto,
   getPhotos,
   getUniqueCameras,
-  getUniqueTags,
   getUniqueFilms,
   getPhotosNearId,
   getPhotosMostRecentUpdate,
@@ -32,7 +31,6 @@ import {
   PREFIX_FOCAL_LENGTH,
   PREFIX_LENS,
   PREFIX_RECIPE,
-  PREFIX_TAG,
   pathForPhoto,
   PREFIX_YEAR,
   PREFIX_ALBUM,
@@ -43,7 +41,6 @@ import {
   KEY_PHOTO,
   KEY_CAMERAS,
   KEY_LENSES,
-  KEY_TAGS,
   KEY_FILMS,
   KEY_RECIPES,
   KEY_FOCAL_LENGTHS,
@@ -54,7 +51,6 @@ import {
   revalidateCamerasKey,
   revalidateLensesKey,
   revalidateAlbumsKey,
-  revalidateTagsKey,
   revalidateFilmsKey,
   revalidateRecipesKey,
   revalidateFocalLengthsKey,
@@ -112,7 +108,6 @@ export const revalidatePhoto = (photoId: string) => {
   revalidateCamerasKey();
   revalidateLensesKey();
   revalidateAlbumsKey();
-  revalidateTagsKey();
   revalidateFilmsKey();
   revalidateRecipesKey();
   revalidateFocalLengthsKey();
@@ -124,7 +119,6 @@ export const revalidatePhoto = (photoId: string) => {
   revalidatePath(PREFIX_CAMERA, 'layout');
   revalidatePath(PREFIX_LENS, 'layout');
   revalidatePath(PREFIX_ALBUM, 'layout');
-  revalidatePath(PREFIX_TAG, 'layout');
   revalidatePath(PREFIX_FILM, 'layout');
   revalidatePath(PREFIX_RECIPE, 'layout');
   revalidatePath(PREFIX_FOCAL_LENGTH, 'layout');
@@ -186,12 +180,6 @@ export const getPhotosInNeedOfUpdateCountCached =
     [KEY_PHOTOS, KEY_COUNT],
   );
   
-export const getUniqueTagsCached =
-  unstable_cache(
-    getUniqueTags,
-    [KEY_PHOTOS, KEY_TAGS],
-  );
-
 export const getUniqueCamerasCached =
   unstable_cache(
     getUniqueCameras,

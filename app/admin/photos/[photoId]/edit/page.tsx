@@ -5,7 +5,6 @@ import {
   getUniqueFilmsCached,
   getUniqueLensesCached,
   getUniqueRecipesCached,
-  getUniqueTagsCached,
 } from '@/photo/cache';
 import {
   getAlbumTitlesForPhotoCached,
@@ -36,20 +35,18 @@ export default async function PhotoEditPage({
     photo,
     photoAlbumTitles,
     albums,
-    uniqueTags,
     uniqueRecipes,
     uniqueFilms,
     uniqueCameras,
     uniqueLenses,
   ] = await Promise.all([
-    getPhotoNoStore(photoId, true),
+    getPhotoNoStore(photoId),
     getAlbumTitlesForPhotoCached(photoId),
     getAlbumsWithMetaCached(),
-    getUniqueTagsCached(),
     getUniqueRecipesCached(),
     getUniqueFilmsCached(),
-    getUniqueCamerasCached(true),
-    getUniqueLensesCached(true),
+    getUniqueCamerasCached(),
+    getUniqueLensesCached(),
   ]);
 
   if (!photo) { redirect(PATH_ADMIN); }
@@ -77,7 +74,6 @@ export default async function PhotoEditPage({
       photoStorageUrls,
       photoAlbumTitles,
       albums,
-      uniqueTags,
       uniqueRecipes,
       uniqueFilms,
       uniqueCameras,

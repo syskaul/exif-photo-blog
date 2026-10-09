@@ -11,7 +11,6 @@ import { getAppText } from '@/i18n/state/server';
 import { getPhotosMetaCached } from '@/photo/cache';
 import PhotosEmptyState from '@/photo/PhotosEmptyState';
 import { getAllPhotoIdsWithUpdatedAt } from '@/photo/query';
-import { TAG_FAVS } from '@/tag';
 import { safelyParseFormattedHtml } from '@/utility/html';
 import { max } from 'date-fns';
 
@@ -54,7 +53,6 @@ export default async function LibraryPage() {
     cameras,
     lenses,
     albums,
-    tags,
     recipes,
     films,
   } = categories;
@@ -85,7 +83,6 @@ export default async function LibraryPage() {
         lens={lenses[0]?.lens}
         recipe={recipes[0]?.recipe}
         film={films[0]?.film}
-        tag={tags.filter(({ tag }) => tag !== TAG_FAVS)[0]?.tag}
         album={albums[0]?.album}
         lastUpdated={lastModifiedSite}
         folderRows={folderRows}

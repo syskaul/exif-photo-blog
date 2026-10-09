@@ -4,8 +4,8 @@ import { InputHTMLAttributes, useRef, RefObject, ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 import Spinner from './Spinner';
 import { clsx } from 'clsx/lite';
-import { FieldSetType, AnnotatedTag } from '@/photo/form';
-import TagInput from './TagInput';
+import { FieldSetType, AnnotatedOption } from '@/photo/form';
+import MultiValueInput from './MultiValueInput';
 import { parameterize } from '@/utility/string';
 import Checkbox from './Checkbox';
 import ResponsiveText from './primitives/ResponsiveText';
@@ -29,17 +29,17 @@ export default function FieldsetWithStatus({
   selectOptions,
   selectOptionsDefaultLabel,
   selectOpenOnLoad,
-  tagOptions,
-  tagOptionsLimit,
-  tagOptionsLimitValidationMessage,
-  tagOptionsShouldParameterize,
-  tagOptionsShouldRevealRawText,
-  tagOptionsDefaultIcon,
-  tagOptionsDefaultIconSelected,
-  tagOptionsLabelOverride,
-  tagOptionsAllowNewValues,
-  tagOptionsAccessory,
-  tagOptionsOnInputTextChange,
+  autocompleteOptions,
+  autocompleteOptionsLimit,
+  autocompleteOptionsLimitValidationMessage,
+  autocompleteOptionsShouldParameterize,
+  autocompleteOptionsShouldRevealRawText,
+  autocompleteOptionsDefaultIcon,
+  autocompleteOptionsDefaultIconSelected,
+  autocompleteOptionsLabelOverride,
+  autocompleteOptionsAllowNewValues,
+  autocompleteOptionsAccessory,
+  autocompleteOptionsOnInputTextChange,
   placeholder,
   loading,
   required,
@@ -68,17 +68,17 @@ export default function FieldsetWithStatus({
   selectOptions?: SelectMenuOptionType[]
   selectOptionsDefaultLabel?: string
   selectOpenOnLoad?: boolean
-  tagOptions?: AnnotatedTag[]
-  tagOptionsLimit?: number
-  tagOptionsLimitValidationMessage?: string
-  tagOptionsShouldParameterize?: boolean
-  tagOptionsShouldRevealRawText?: boolean
-  tagOptionsDefaultIcon?: ReactNode
-  tagOptionsDefaultIconSelected?: ReactNode
-  tagOptionsLabelOverride?: (value: string) => string | undefined
-  tagOptionsAllowNewValues?: boolean
-  tagOptionsAccessory?: ReactNode
-  tagOptionsOnInputTextChange?: (value: string) => void
+  autocompleteOptions?: AnnotatedOption[]
+  autocompleteOptionsLimit?: number
+  autocompleteOptionsLimitValidationMessage?: string
+  autocompleteOptionsShouldParameterize?: boolean
+  autocompleteOptionsShouldRevealRawText?: boolean
+  autocompleteOptionsDefaultIcon?: ReactNode
+  autocompleteOptionsDefaultIconSelected?: ReactNode
+  autocompleteOptionsLabelOverride?: (value: string) => string | undefined
+  autocompleteOptionsAllowNewValues?: boolean
+  autocompleteOptionsAccessory?: ReactNode
+  autocompleteOptionsOnInputTextChange?: (value: string) => void
   placeholder?: string
   loading?: boolean
   required?: boolean
@@ -227,26 +227,28 @@ export default function FieldsetWithStatus({
               error={error}
               readOnly={readOnly}
             />
-            : tagOptions
-              ? <TagInput
+            : autocompleteOptions
+              ? <MultiValueInput
                 id={id}
                 name={id}
                 value={value}
-                options={tagOptions}
-                labelForValueOverride={tagOptionsLabelOverride}
-                defaultIcon={tagOptionsDefaultIcon}
-                defaultIconSelected={tagOptionsDefaultIconSelected}
-                accessory={tagOptionsAccessory}
+                options={autocompleteOptions}
+                labelForValueOverride={autocompleteOptionsLabelOverride}
+                defaultIcon={autocompleteOptionsDefaultIcon}
+                defaultIconSelected={autocompleteOptionsDefaultIconSelected}
+                accessory={autocompleteOptionsAccessory}
                 onChange={onChange}
-                onInputTextChange={tagOptionsOnInputTextChange}
+                onInputTextChange={autocompleteOptionsOnInputTextChange}
                 className={clsx(Boolean(error) && 'error')}
                 readOnly={readOnly}
                 placeholder={placeholder}
-                limit={tagOptionsLimit}
-                limitValidationMessage={tagOptionsLimitValidationMessage}
-                allowNewValues={tagOptionsAllowNewValues}
-                shouldParameterize={tagOptionsShouldParameterize}
-                shouldRevealRawText={tagOptionsShouldRevealRawText}
+                limit={autocompleteOptionsLimit}
+                limitValidationMessage={
+                  autocompleteOptionsLimitValidationMessage
+                }
+                allowNewValues={autocompleteOptionsAllowNewValues}
+                shouldParameterize={autocompleteOptionsShouldParameterize}
+                shouldRevealRawText={autocompleteOptionsShouldRevealRawText}
               />
               : type === 'textarea'
                 ? <textarea

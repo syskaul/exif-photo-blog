@@ -25,7 +25,9 @@ export default function PlaceInput({
   const [isLoadingPlaces, setIsLoadingPlaces] = useState(false);
   const [inputText, setInputText] = useState('');
   const [placeOptions, setPlaceOptions] =
-    useState<ComponentProps<typeof FieldsetWithStatus>['tagOptions']>([]);
+    useState<
+      ComponentProps<typeof FieldsetWithStatus>['autocompleteOptions']
+    >([]);
 
   const [inputTextDebounced] = useDebounce(inputText, 500);
 
@@ -57,7 +59,7 @@ export default function PlaceInput({
       label="Location"
       className={className}
       isModified={placeId !== (initialPlace?.id ?? '')}
-      tagOptions={placeOptions}
+      autocompleteOptions={placeOptions}
       value={placeId}
       onChange={id => {
         setPlaceId(id);
@@ -70,23 +72,24 @@ export default function PlaceInput({
           setPlace?.(undefined);
         }
       }}
-      tagOptionsLabelOverride={(placeId) => places.current[placeId]?.text}
-      tagOptionsDefaultIconSelected={<IconPlace
+      autocompleteOptionsLabelOverride={(placeId) =>
+        places.current[placeId]?.text}
+      autocompleteOptionsDefaultIconSelected={<IconPlace
         size={11}
         className="text-main translate-x-0.5"
       />}
-      tagOptionsOnInputTextChange={text => {
+      autocompleteOptionsOnInputTextChange={text => {
         setInputText(text);
         // Clear autocomplete immediately when there's no input text
         if (!text) {
           setPlaceOptions([]);
         }
       }}
-      tagOptionsLimit={1}
-      tagOptionsAllowNewValues={false}
-      tagOptionsAccessory={isLoadingPlaces &&
+      autocompleteOptionsLimit={1}
+      autocompleteOptionsAllowNewValues={false}
+      autocompleteOptionsAccessory={isLoadingPlaces &&
         <Spinner size={16} className="mr-1 shrink-0" />}
-      tagOptionsShouldParameterize={false}
+      autocompleteOptionsShouldParameterize={false}
     />
   );
 }
